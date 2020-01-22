@@ -19,10 +19,12 @@ class MTAbstractResource implements MTResource {
   private String name;
   private String path;
   private MTResourceType resourceType;
+  private String filename;
 
-  MTAbstractResource(String resourceName, String resourcePath, MTResourceType type) {
+  MTAbstractResource(String resourceName, String resourcePath, String fname,  MTResourceType type) {
     name = resourceName;
     path = resourcePath;
+    filename = fname;
     resourceType = type;
   }
 
@@ -44,6 +46,11 @@ class MTAbstractResource implements MTResource {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getFilename() {
+    return filename;
   }
 
   @Override

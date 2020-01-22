@@ -24,5 +24,7 @@ public interface MTResource {
 
   String getName();
 
+  String getFilename();
+
   String getPath();
 }
