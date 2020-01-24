@@ -14,9 +14,10 @@
  */
 package net.rptools.maptool.mtresource;
 
+import java.beans.PropertyChangeListener;
 import java.util.Optional;
 
-public interface MTResourceBundle {
+public interface MTResourceBundle extends Comparable<MTResourceBundle> {
 
   String getName();
 
@@ -33,4 +34,9 @@ public interface MTResourceBundle {
   Optional<MTResource> getResource(String path);
 
   void putResource(String path, MTResource res);
+
+  void addPropertyChangeListener(PropertyChangeListener pcl);
+
+  void removePropertyChangeListener(PropertyChangeListener pcl);
+
 }

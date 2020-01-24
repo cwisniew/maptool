@@ -117,6 +117,7 @@ import net.rptools.maptool.client.swing.ZoomStatusBar;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
+import net.rptools.maptool.client.ui.campaignres.CampaignResourcesPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
@@ -180,6 +181,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+
+  private final CampaignResourcesPanel campaignResourcesPanel;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -461,6 +464,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
+    campaignResourcesPanel = new CampaignResourcesPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -634,7 +638,8 @@ public class MapToolFrame extends DefaultDockableHolder
     CAMPAIGN("Campaign"),
     GM("Gm"),
     SELECTION("Selected"),
-    IMPERSONATED("Impersonate");
+    IMPERSONATED("Impersonate"),
+    CAMPAIGN_RESOURCES("CampaignResources");
     // @formatter:on
 
     private String displayName;
@@ -678,6 +683,10 @@ public class MapToolFrame extends DefaultDockableHolder
     getDockingManager().addFrame(getFrame(MTFrame.GM));
     getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
     getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
+    getDockingManager().addFrame(getFrame(MTFrame.CAMPAIGN_RESOURCES));
+
+
+    getFrame(MTFrame.CAMPAIGN_RESOURCES).setTitle(I18N.getText("panel.CampaignResources.name"));
 
     try {
       getDockingManager()
@@ -737,6 +746,11 @@ public class MapToolFrame extends DefaultDockableHolder
         MTFrame.INITIATIVE,
         createDockingFrame(
             MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+    frameMap.put(
+        MTFrame.CAMPAIGN_RESOURCES,
+        createDockingFrame(
+            MTFrame.CAMPAIGN_RESOURCES, campaignResourcesPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
+
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);

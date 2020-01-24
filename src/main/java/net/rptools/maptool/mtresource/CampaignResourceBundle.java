@@ -14,9 +14,12 @@
  */
 package net.rptools.maptool.mtresource;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import org.jetbrains.annotations.NotNull;
 
 public class CampaignResourceBundle implements MTResourceBundle {
 
@@ -25,6 +28,8 @@ public class CampaignResourceBundle implements MTResourceBundle {
   private Map<String, MTResource> resources = new TreeMap<>();
   private String version;
 
+  private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
   @Override
   public String getName() {
     return name;
@@ -32,6 +37,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public void setName(String bundleName) {
+    propertyChangeSupport.firePropertyChange("name", name, bundleName);
     name = bundleName;
   }
 
@@ -42,6 +48,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public void setVersion(String versionString) {
+    propertyChangeSupport.firePropertyChange("version", version, versionString);
     version = versionString;
   }
 
@@ -52,6 +59,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public void setQualifiedName(String qname) {
+    propertyChangeSupport.firePropertyChange("version", qualifiedName, qname);
     qualifiedName = qname;
   }
 
@@ -63,5 +71,30 @@ public class CampaignResourceBundle implements MTResourceBundle {
   @Override
   public void putResource(String path, MTResource res) {
     resources.put(path, res);
+    propertyChangeSupport.firePropertyChange("putResource", null, res);
+  }
+
+  @Override
+  public void addPropertyChangeListener(PropertyChangeListener pcl) {
+    propertyChangeSupport.addPropertyChangeListener(pcl);
+  }
+
+  @Override
+  public void removePropertyChangeListener(PropertyChangeListener pcl) {
+    propertyChangeSupport.removePropertyChangeListener(pcl);
+  }
+
+  @Override
+  public int compareTo(@NotNull MTResourceBundle o) {
+    int compare = name.compareTo(o.getName());
+    if (compare != 0) {
+      return compare;
+    }
+    compare = qualifiedName.compareTo(o.getQualifiedName());
+    if (compare != 0) {
+      return compare;
+    }
+
+    return compare = version.compareTo(o.getVersion());
   }
 }
