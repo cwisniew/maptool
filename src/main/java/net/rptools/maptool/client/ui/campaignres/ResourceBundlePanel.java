@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.ui.campaignres;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
@@ -21,15 +23,20 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import net.rptools.maptool.mtresource.CampaignResourceLibrary;
+import net.rptools.maptool.mtresource.MTResourceLibrary;
 import net.rptools.maptool.mtresource.ResourceBundleTableModel;
 
 public class ResourceBundlePanel extends JPanel {
 
-  private JTable resourceBundlesTable;
+  private final MTResourceLibrary resourceLibrary;
+  private final JTable resourceBundlesTable;
 
-  ResourceBundlePanel() {
-    resourceBundlesTable = new JTable(new ResourceBundleTableModel(new CampaignResourceLibrary()));
+  public ResourceBundlePanel(MTResourceLibrary lib) {
+    resourceLibrary = lib;
+
+    ResourceBundleTableModel tableModel = new ResourceBundleTableModel(resourceLibrary);
+    resourceBundlesTable = new JTable(tableModel);
+
     resourceBundlesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     JScrollPane scrollPane = new JScrollPane(resourceBundlesTable);
     scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -40,6 +47,7 @@ public class ResourceBundlePanel extends JPanel {
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
     buttonPanel.add(new JButton("New"));
+    buttonPanel.add(new JButton("Edit"));
     buttonPanel.add(new JButton("Delete"));
 
     add(buttonPanel, BorderLayout.PAGE_END);
