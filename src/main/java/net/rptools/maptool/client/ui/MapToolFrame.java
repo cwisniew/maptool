@@ -685,7 +685,6 @@ public class MapToolFrame extends DefaultDockableHolder
     getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
     getDockingManager().addFrame(getFrame(MTFrame.CAMPAIGN_RESOURCES));
 
-
     getFrame(MTFrame.CAMPAIGN_RESOURCES).setTitle(I18N.getText("panel.CampaignResources.name"));
 
     try {
@@ -749,8 +748,9 @@ public class MapToolFrame extends DefaultDockableHolder
     frameMap.put(
         MTFrame.CAMPAIGN_RESOURCES,
         createDockingFrame(
-            MTFrame.CAMPAIGN_RESOURCES, campaignResourcesPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
-
+            MTFrame.CAMPAIGN_RESOURCES,
+            campaignResourcesPanel,
+            new ImageIcon(AppStyle.resourceLibraryImage)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);

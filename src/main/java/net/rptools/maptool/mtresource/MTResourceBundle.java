@@ -38,5 +38,4 @@ public interface MTResourceBundle extends Comparable<MTResourceBundle> {
   void addPropertyChangeListener(PropertyChangeListener pcl);
 
   void removePropertyChangeListener(PropertyChangeListener pcl);
-
 }

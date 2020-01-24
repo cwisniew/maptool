@@ -21,7 +21,7 @@ class MTAbstractResource implements MTResource {
   private MTResourceType resourceType;
   private String filename;
 
-  MTAbstractResource(String resourceName, String resourcePath, String fname,  MTResourceType type) {
+  MTAbstractResource(String resourceName, String resourcePath, String fname, MTResourceType type) {
     name = resourceName;
     path = resourcePath;
     filename = fname;

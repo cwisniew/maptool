@@ -29,7 +29,8 @@ public class TextResource extends MTAbstractResource {
     text = txt;
   }
 
-  TextResource(String resourceName, String resourcePath, String filename, InputStream in) throws IOException {
+  TextResource(String resourceName, String resourcePath, String filename, InputStream in)
+      throws IOException {
     super(resourceName, resourcePath, filename, MTResourceType.TEXT);
     StringWriter writer = new StringWriter();
     IOUtils.copy(in, writer, Charset.defaultCharset());
