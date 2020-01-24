@@ -15,22 +15,24 @@
 package net.rptools.maptool.client.ui.campaignres;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 
-public class CampaignResourcesPanel extends JPanel {
+public class ResourceListPanel extends JPanel {
 
-  public CampaignResourcesPanel() {
-    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    splitPane.setContinuousLayout(true);
-    ResourceBundlePanel resourceBundlePanel = new ResourceBundlePanel();
-    Dimension minTopDimension = new Dimension(100, 200);
-    resourceBundlePanel.setMinimumSize(minTopDimension);
-    splitPane.setTopComponent(resourceBundlePanel);
-    splitPane.setBottomComponent(new ResourceListPanel());
-    splitPane.setDividerLocation(200);
+  private JTree resourcesJTree;
+  TreeNode root = new DefaultMutableTreeNode("Test!");
+  private TreeModel resourcesTree = new DefaultTreeModel(root);
+
+  public ResourceListPanel() {
     setLayout(new BorderLayout());
-    add(splitPane, BorderLayout.CENTER);
+    resourcesJTree = new JTree(resourcesTree);
+    JScrollPane scrollPane = new JScrollPane(resourcesJTree);
+    add(scrollPane, BorderLayout.CENTER);
   }
 }

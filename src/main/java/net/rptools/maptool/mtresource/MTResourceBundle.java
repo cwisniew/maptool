@@ -35,6 +35,8 @@ public interface MTResourceBundle extends Comparable<MTResourceBundle> {
 
   void putResource(String path, MTResource res);
 
+  int getNumberOfResources();
+
   void addPropertyChangeListener(PropertyChangeListener pcl);
 
   void removePropertyChangeListener(PropertyChangeListener pcl);

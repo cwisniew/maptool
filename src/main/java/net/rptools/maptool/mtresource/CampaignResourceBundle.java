@@ -75,6 +75,11 @@ public class CampaignResourceBundle implements MTResourceBundle {
   }
 
   @Override
+  public int getNumberOfResources() {
+    return resources.size();
+  }
+
+  @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
     propertyChangeSupport.addPropertyChangeListener(pcl);
   }
