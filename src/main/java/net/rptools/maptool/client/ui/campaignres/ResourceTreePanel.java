@@ -22,17 +22,32 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
+import net.rptools.maptool.mtresource.MTResourceBundle;
+import net.rptools.maptool.mtresource.tree.ResourceTreeConverter;
 
-public class ResourceListPanel extends JPanel {
+public class ResourceTreePanel extends JPanel {
 
   private JTree resourcesJTree;
-  TreeNode root = new DefaultMutableTreeNode("Test!");
+  private TreeNode root = new DefaultMutableTreeNode(""); // TODO: CDW:
   private TreeModel resourcesTree = new DefaultTreeModel(root);
 
-  public ResourceListPanel() {
+  public ResourceTreePanel() {
     setLayout(new BorderLayout());
     resourcesJTree = new JTree(resourcesTree);
     JScrollPane scrollPane = new JScrollPane(resourcesJTree);
     add(scrollPane, BorderLayout.CENTER);
+  }
+
+  public void setResourceBundle(MTResourceBundle resourceBundle) {
+
+    // TODO: CDW
+    ResourceTreeConverter converter = new ResourceTreeConverter();
+    root = resourceBundle.getResourceTree();
+    resourcesTree = new DefaultTreeModel(root);
+    resourcesJTree.setModel(resourcesTree);
+    resourcesJTree.setShowsRootHandles(false);
+    resourcesJTree.setCellRenderer(new ResourceTreeCellRenderer());
+
+    System.out.println(resourceBundle);
   }
 }

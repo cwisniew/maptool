@@ -98,6 +98,8 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.mtresource.CampaignResourceLibrary;
+import net.rptools.maptool.mtresource.MTResourceLibrary;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -203,6 +205,9 @@ public class MapTool {
   private static int windowX = -1;
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
+
+
+  private static final MTResourceLibrary campaignResourceLibrary = new CampaignResourceLibrary();
 
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
@@ -685,7 +690,7 @@ public class MapTool {
 
     handler = new ClientMethodHandler();
 
-    setClientFrame(new MapToolFrame(menuBar));
+    setClientFrame(new MapToolFrame(menuBar, campaignResourceLibrary));
 
     serverCommand = new ServerCommandClientImpl();
 
@@ -1518,6 +1523,15 @@ public class MapTool {
     }
 
     return "NOT_CONFIGURED";
+  }
+
+  /**
+   * Returns the resource library for the campaign.
+   *
+   * @return the resource library for the campaign.
+   */
+  public static MTResourceLibrary getCampaignResourceLibrary() {
+    return campaignResourceLibrary;
   }
 
   public static void main(String[] args) {

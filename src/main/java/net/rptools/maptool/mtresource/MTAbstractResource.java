@@ -14,19 +14,32 @@
  */
 package net.rptools.maptool.mtresource;
 
+import java.util.UUID;
+
 class MTAbstractResource implements MTResource {
 
-  private String name;
-  private String path;
-  private MTResourceType resourceType;
-  private String filename;
+  private final UUID id;
+  private final String name;
+  private final String path;
+  private final MTResourceType resourceType;
+  private final String filename;
 
-  MTAbstractResource(String resourceName, String resourcePath, String fname, MTResourceType type) {
+  MTAbstractResource(UUID resourceId, String resourceName, String resourcePath, String fname, MTResourceType type) {
+    id = resourceId;
     name = resourceName;
     path = resourcePath;
     filename = fname;
     resourceType = type;
   }
+  MTAbstractResource(String resourceName, String resourcePath, String fname, MTResourceType type) {
+    this(UUID.randomUUID(), resourceName, resourcePath, fname, type);
+  }
+
+  @Override
+  public UUID getId() {
+    return id;
+  }
+
 
   @Override
   public MTResourceType getResourceType() {
@@ -36,6 +49,11 @@ class MTAbstractResource implements MTResource {
   @Override
   public boolean isText() {
     return MTResourceType.TEXT.equals(getResourceType());
+  }
+
+  @Override
+  public boolean isDirectory() {
+    return MTResourceType.DIRECTORY.equals(getResourceType());
   }
 
   @Override
@@ -56,5 +74,23 @@ class MTAbstractResource implements MTResource {
   @Override
   public String getPath() {
     return path;
+  }
+
+  @Override
+  public String getFullPath() {
+    return getPath() + getName();
+  }
+
+
+  @Override
+  public String toString() {
+    return "{ " +
+        "id = " + getId().toString() + ", " +
+        "resourceType = " + getResourceType().toString() + ", " +
+        "name = " + getName() + ", " +
+        "path = " + getPath() + ", " +
+        "filename = " + getFilename() + ", " +
+        "}";
+
   }
 }

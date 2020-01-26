@@ -14,15 +14,16 @@
  */
 package net.rptools.maptool.client.ui.campaignres;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.function.Consumer;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.mtresource.MTResourceBundle;
 import net.rptools.maptool.mtresource.MTResourceLibrary;
 import net.rptools.maptool.mtresource.ResourceBundleTableModel;
 
@@ -30,12 +31,20 @@ public class ResourceBundlePanel extends JPanel {
 
   private final MTResourceLibrary resourceLibrary;
   private final JTable resourceBundlesTable;
+  private final ResourceBundleTableModel tableModel;
 
-  public ResourceBundlePanel(MTResourceLibrary lib) {
+  public ResourceBundlePanel(MTResourceLibrary lib, Consumer<MTResourceBundle> bundleSelected) {
     resourceLibrary = lib;
 
-    ResourceBundleTableModel tableModel = new ResourceBundleTableModel(resourceLibrary);
+    tableModel = new ResourceBundleTableModel(resourceLibrary);
     resourceBundlesTable = new JTable(tableModel);
+    //TODO CDW: resourceBundlesTable.getSelectionModel().addListSelectionListener(l -> { if (!l.getValueIsAdjusting()) System.out.println(resourceBundlesTable.getSelectedRow()); });
+    resourceBundlesTable.getSelectionModel().addListSelectionListener(l -> {
+      if (!l.getValueIsAdjusting()) {
+        int index = resourceBundlesTable.getSelectedRow();
+        bundleSelected.accept(tableModel.getResourceBundle(index));
+      }
+    });
 
     resourceBundlesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     JScrollPane scrollPane = new JScrollPane(resourceBundlesTable);
@@ -46,9 +55,9 @@ public class ResourceBundlePanel extends JPanel {
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    buttonPanel.add(new JButton("New"));
-    buttonPanel.add(new JButton("Edit"));
-    buttonPanel.add(new JButton("Delete"));
+    buttonPanel.add(new JButton(I18N.getText("panel.CampaignResources.bundle.button.new")));
+    buttonPanel.add(new JButton(I18N.getText("panel.CampaignResources.bundle.button.edit")));
+    buttonPanel.add(new JButton(I18N.getText("panel.CampaignResources.bundle.button.delete")));
 
     add(buttonPanel, BorderLayout.PAGE_END);
   }

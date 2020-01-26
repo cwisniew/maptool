@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 
 public class TextResource extends MTAbstractResource {
@@ -32,6 +33,19 @@ public class TextResource extends MTAbstractResource {
   TextResource(String resourceName, String resourcePath, String filename, InputStream in)
       throws IOException {
     super(resourceName, resourcePath, filename, MTResourceType.TEXT);
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(in, writer, Charset.defaultCharset());
+  }
+
+
+  TextResource(UUID id, String resourceName, String resourcePath, String filename, String txt) {
+    super(id, resourceName, resourcePath, filename, MTResourceType.TEXT);
+    text = txt;
+  }
+
+  TextResource(UUID id, String resourceName, String resourcePath, String filename, InputStream in)
+      throws IOException {
+    super(id, resourceName, resourcePath, filename, MTResourceType.TEXT);
     StringWriter writer = new StringWriter();
     IOUtils.copy(in, writer, Charset.defaultCharset());
   }

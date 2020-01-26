@@ -14,25 +14,25 @@
  */
 package net.rptools.maptool.client.ui.campaignres;
 
-import com.google.inject.Provider;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import javax.inject.Inject;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import net.rptools.maptool.mtresource.MTResourceLibrary;
 
 public class CampaignResourcesPanel extends JPanel {
 
 
-  @Inject
-  public CampaignResourcesPanel(Provider<ResourceBundlePanel> provider) {
+  public CampaignResourcesPanel(MTResourceLibrary resourceLibrary)  {
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     splitPane.setContinuousLayout(true);
-    ResourceBundlePanel resourceBundlePanel = provider.get();
+
+    ResourceTreePanel resourceListPanel = new ResourceTreePanel();
+    ResourceBundlePanel resourceBundlePanel = new ResourceBundlePanel(resourceLibrary, resourceListPanel::setResourceBundle);
     Dimension minTopDimension = new Dimension(100, 200);
     resourceBundlePanel.setMinimumSize(minTopDimension);
     splitPane.setTopComponent(resourceBundlePanel);
-    splitPane.setBottomComponent(new ResourceListPanel());
+    splitPane.setBottomComponent(resourceListPanel);
     splitPane.setDividerLocation(200);
     setLayout(new BorderLayout());
     add(splitPane, BorderLayout.CENTER);

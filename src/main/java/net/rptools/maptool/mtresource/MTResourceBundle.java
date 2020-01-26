@@ -16,8 +16,12 @@ package net.rptools.maptool.mtresource;
 
 import java.beans.PropertyChangeListener;
 import java.util.Optional;
+import java.util.UUID;
+import javax.swing.tree.TreeNode;
 
 public interface MTResourceBundle extends Comparable<MTResourceBundle> {
+
+  UUID getId();
 
   String getName();
 
@@ -31,7 +35,9 @@ public interface MTResourceBundle extends Comparable<MTResourceBundle> {
 
   void setQualifiedName(String qname);
 
-  Optional<MTResource> getResource(String path);
+  Optional<MTResource> getResource(String fullpath);
+
+  Optional<MTResource> getResource(String path, String name);
 
   void putResource(String path, MTResource res);
 
@@ -40,4 +46,6 @@ public interface MTResourceBundle extends Comparable<MTResourceBundle> {
   void addPropertyChangeListener(PropertyChangeListener pcl);
 
   void removePropertyChangeListener(PropertyChangeListener pcl);
+
+  TreeNode getResourceTree();
 }

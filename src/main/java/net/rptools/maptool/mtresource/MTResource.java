@@ -14,11 +14,17 @@
  */
 package net.rptools.maptool.mtresource;
 
+import java.util.UUID;
+
 public interface MTResource {
+
+  UUID getId();
 
   MTResourceType getResourceType();
 
   boolean isText();
+
+  boolean isDirectory();
 
   String getText();
 
@@ -27,4 +33,6 @@ public interface MTResource {
   String getFilename();
 
   String getPath();
+
+  String getFullPath();
 }

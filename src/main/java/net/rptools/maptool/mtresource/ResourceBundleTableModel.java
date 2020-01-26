@@ -16,39 +16,45 @@ package net.rptools.maptool.mtresource;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ResourceBundle;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import net.rptools.maptool.language.I18N;
 
 public class ResourceBundleTableModel extends AbstractTableModel implements PropertyChangeListener {
 
+  private static final int NUMBER_COLUMNS = 3;
+
   private final MTResourceLibrary resourceLibrary;
 
-  private ResourceBundle[] resourceBundles;
-
-  private String[][] bogusTestData = {
-    {"test", "maptool.test", "1.2.3"},
-    {"test2", "maptool.test2", "2.2.3"},
-    {"test3", "maptool.test3", "3.2.3"}
-  };
+  private final List<MTResourceBundle> resourceBundles = new ArrayList<>();
 
   public ResourceBundleTableModel(MTResourceLibrary lib) {
     resourceLibrary = lib;
+    resourceBundles.addAll(resourceLibrary.getResourceBundles());
   }
 
   @Override
   public int getRowCount() {
-    return bogusTestData.length;
-    // TODO: return resourceLibrary.getResourceBundles().size();
+    return resourceLibrary.getResourceBundles().size();
   }
 
   @Override
   public int getColumnCount() {
-    return 3;
+    return NUMBER_COLUMNS;
   }
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    return bogusTestData[rowIndex][columnIndex];
+    switch (columnIndex) {
+      case 0:
+        return getResourceBundle(rowIndex).getName();
+      case 1:
+        return getResourceBundle(rowIndex).getQualifiedName();
+      case 2:
+        return getResourceBundle(rowIndex).getVersion();
+    }
+    throw new IllegalArgumentException("Column out of range.");
   }
 
   @Override
@@ -58,13 +64,17 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
   public String getColumnName(int column) {
     switch (column) {
       case 0:
-        return "Name";
+        return I18N.getText("panel.CampaignResources.bundle.table.name");
       case 1:
-        return "Qualified Name";
+        return I18N.getText("panel.CampaignResources.bundle.table.qname");
       case 2:
-        return "Version";
+        return I18N.getText("panel.CampaignResources.bundle.table.version");
     }
 
     return null;
+  }
+
+  public MTResourceBundle getResourceBundle(int index) {
+    return resourceBundles.get(index);
   }
 }

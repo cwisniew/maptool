@@ -146,6 +146,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.mtresource.MTResourceLibrary;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -256,6 +257,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
+
+
+
 
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
@@ -436,7 +440,13 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public MapToolFrame(JMenuBar menuBar) {
+  /**
+   * Creates a new <code>MapToolFrame</code> object.
+   *
+   * @param menuBar The menu bar to use for the frame.
+   * @param campaignResourceLibrary The campaign resource library object to use.
+   */
+  public MapToolFrame(JMenuBar menuBar, MTResourceLibrary campaignResourceLibrary) {
     // Set up the frame
     super(AppConstants.APP_NAME);
 
@@ -464,7 +474,8 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
-    campaignResourcesPanel = new CampaignResourcesPanel();
+
+    campaignResourcesPanel = new CampaignResourcesPanel(campaignResourceLibrary);
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
