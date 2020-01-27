@@ -28,10 +28,6 @@ public interface MTResourceBundle extends Comparable<MTResourceBundle> {
 
   void setName(String bundleName);
 
-  String getVersion();
-
-  void setVersion(String versionString);
-
   String getQualifiedName();
 
   void setQualifiedName(String qname);
@@ -47,6 +43,14 @@ public interface MTResourceBundle extends Comparable<MTResourceBundle> {
   void addPropertyChangeListener(PropertyChangeListener pcl);
 
   void removePropertyChangeListener(PropertyChangeListener pcl);
+
+  String getShortDescription();
+
+  void setShortDescription(String desc);
+
+  String getLongDescription();
+
+  void setLongDescription(String desc);
 
   TreeNode getResourceTree();
 }

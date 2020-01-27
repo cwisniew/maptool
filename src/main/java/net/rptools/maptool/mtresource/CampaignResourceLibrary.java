@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.swing.table.TableModel;
 import net.rptools.maptool.mtresource.resource.MTResource;
 import net.rptools.maptool.mtresource.resource.MTResourceFactory;
 
@@ -32,30 +31,27 @@ public class CampaignResourceLibrary implements MTResourceLibrary {
   public CampaignResourceLibrary() {
     // Add some bogus data for testing while developing
     MTResourceFactory resourceFactory = new MTResourceFactory();
-    CampaignResourceBundle bundle = new CampaignResourceBundle();
+    CampaignResourceBundle bundle =
+        new CampaignResourceBundle("Test 1", "maptool.test1", "A test", "This is a test");
     bundle.setName("Test 1");
     bundle.setQualifiedName("maptool.test1");
-    bundle.setVersion("1.0.1");
     MTResource res = resourceFactory.resourceFor("res1", "/test", "res1.js", "var test = 1");
     bundle.putResource("/test", res);
     res = resourceFactory.resourceFor("res2", "/test/val1", "res2.html", "var test = 2");
     bundle.putResource("/test/val1", res);
     resourceBundles.add(bundle);
 
-    bundle = new CampaignResourceBundle();
-    bundle.setName("Test 2");
-    bundle.setQualifiedName("maptool.test2");
-    bundle.setVersion("1.0.2");
+    bundle =
+        new CampaignResourceBundle("Test 2", "maptool.test2", "Test No 2", "This is another test");
     resourceBundles.add(bundle);
     res = resourceFactory.resourceFor("res1_1", "/test/", "res1_1.js", "var test = 3");
     bundle.putResource("/test/", res);
     res = resourceFactory.resourceFor("res2_2", "/test2/", "res2_1.css", "var test = 2");
     bundle.putResource("/test2/", res);
 
-    bundle = new CampaignResourceBundle();
-    bundle.setName("Test 3");
-    bundle.setQualifiedName("maptool.test3");
-    bundle.setVersion("1.0.3");
+    bundle =
+        new CampaignResourceBundle(
+            "Test 3", "maptool.test3", "Test No 3", "This is yet another test");
     res = resourceFactory.resourceFor("res3_1", "/", "res1_3.js", "var test = 3");
     bundle.putResource("/", res);
     res = resourceFactory.resourceFor("res3_2", "/test4", "res2_3.txt", "var test = 3");
@@ -70,25 +66,21 @@ public class CampaignResourceLibrary implements MTResourceLibrary {
     resourceBundles.add(bundle);
   }
 
-  @Override
-  public void addResourceBundle(MTResourceBundle resourceBundle) {
+  private void addResourceBundle(MTResourceBundle resourceBundle) {
     resourceBundles.add(resourceBundle);
     propertyChangeSupport.firePropertyChange("addResourceBundle", null, resourceBundle);
   }
 
   @Override
+  public void addResourceBundle(
+      String name, String qualifiedName, String shortDescription, String longDescription) {
+    addResourceBundle(
+        new CampaignResourceBundle(name, qualifiedName, shortDescription, longDescription));
+  }
+
+  @Override
   public Collection<MTResourceBundle> getResourceBundles() {
     return Collections.unmodifiableCollection(resourceBundles);
-  }
-
-  @Override
-  public TableModel getTableModel() {
-    return null;
-  }
-
-  @Override
-  public int getResourceBundleCount() {
-    return resourceBundles.size();
   }
 
   @Override

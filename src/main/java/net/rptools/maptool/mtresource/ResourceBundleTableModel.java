@@ -32,6 +32,8 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
   public ResourceBundleTableModel(MTResourceLibrary lib) {
     resourceLibrary = lib;
     resourceBundles.addAll(resourceLibrary.getResourceBundles());
+
+    resourceLibrary.addPropertyChangeListener(pcl -> resourceBundleChange(pcl));
   }
 
   @Override
@@ -52,7 +54,7 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
       case 1:
         return getResourceBundle(rowIndex).getQualifiedName();
       case 2:
-        return getResourceBundle(rowIndex).getVersion();
+        return getResourceBundle(rowIndex).getShortDescription();
     }
     throw new IllegalArgumentException("Column out of range.");
   }
@@ -76,5 +78,11 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
 
   public MTResourceBundle getResourceBundle(int index) {
     return resourceBundles.get(index);
+  }
+
+  private void resourceBundleChange(PropertyChangeEvent pcl) {
+    resourceBundles.clear();
+    resourceBundles.addAll(resourceLibrary.getResourceBundles());
+    fireTableDataChanged();
   }
 }

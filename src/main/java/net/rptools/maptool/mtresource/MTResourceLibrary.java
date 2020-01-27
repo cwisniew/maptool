@@ -16,17 +16,13 @@ package net.rptools.maptool.mtresource;
 
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
-import javax.swing.table.TableModel;
 
 public interface MTResourceLibrary {
 
-  void addResourceBundle(MTResourceBundle resourceBundle);
+  void addResourceBundle(
+      String name, String qualifiedName, String shortDescription, String longDescription);
 
   Collection<MTResourceBundle> getResourceBundles();
-
-  TableModel getTableModel();
-
-  int getResourceBundleCount();
 
   void addPropertyChangeListener(PropertyChangeListener pcl);
 

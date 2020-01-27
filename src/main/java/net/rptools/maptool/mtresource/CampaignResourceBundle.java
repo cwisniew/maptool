@@ -32,13 +32,22 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   private String name;
   private String qualifiedName;
-  private String version;
+  private String shortDescription;
+  private String longDescription;
 
   private final ResourceTreeNode resourceTree = new ResourceTreeNode("/");
 
   private final Map<UUID, MTResource> resourceIdMap = new HashMap<>();
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+  public CampaignResourceBundle(
+      String bundleName, String qname, String shortDesc, String longDesc) {
+    name = bundleName;
+    qualifiedName = qname;
+    shortDescription = shortDesc;
+    longDescription = longDesc;
+  }
 
   @Override
   public UUID getId() {
@@ -54,17 +63,6 @@ public class CampaignResourceBundle implements MTResourceBundle {
   public void setName(String bundleName) {
     propertyChangeSupport.firePropertyChange("name", name, bundleName);
     name = bundleName;
-  }
-
-  @Override
-  public String getVersion() {
-    return version;
-  }
-
-  @Override
-  public void setVersion(String versionString) {
-    propertyChangeSupport.firePropertyChange("version", version, versionString);
-    version = versionString;
   }
 
   @Override
@@ -131,6 +129,26 @@ public class CampaignResourceBundle implements MTResourceBundle {
   }
 
   @Override
+  public String getShortDescription() {
+    return shortDescription;
+  }
+
+  @Override
+  public void setShortDescription(String desc) {
+    shortDescription = desc;
+  }
+
+  @Override
+  public String getLongDescription() {
+    return longDescription;
+  }
+
+  @Override
+  public void setLongDescription(String desc) {
+    longDescription = desc;
+  }
+
+  @Override
   public TreeNode getResourceTree() {
     ResourceTreeConverter converter = new ResourceTreeConverter();
     return converter.convert(resourceTree);
@@ -142,12 +160,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
     if (compare != 0) {
       return compare;
     }
-    compare = qualifiedName.compareTo(o.getQualifiedName());
-    if (compare != 0) {
-      return compare;
-    }
-
-    return compare = version.compareTo(o.getVersion());
+    return qualifiedName.compareTo(o.getQualifiedName());
   }
 
   private ResourceTreeNode getPath(ResourceTreeNode parent, List<String> path, boolean create) {
@@ -182,26 +195,5 @@ public class CampaignResourceBundle implements MTResourceBundle {
     } else {
       return Arrays.asList(trimmedPath.split("/"));
     }
-  }
-
-  @Override
-  public String toString() {
-    return "CampaignResourceBundle{"
-        + "name='"
-        + name
-        + '\''
-        + ", qualifiedName='"
-        + qualifiedName
-        + '\''
-        + ", version='"
-        + version
-        + '\''
-        + ", resourceTree="
-        + resourceTree
-        + ", resourceIdMap="
-        + resourceIdMap
-        + ", propertyChangeSupport="
-        + propertyChangeSupport
-        + '}';
   }
 }

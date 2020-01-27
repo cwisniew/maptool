@@ -59,9 +59,20 @@ public class ResourceBundlePanel extends JPanel {
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    buttonPanel.add(new JButton(I18N.getText("panel.CampaignResources.bundle.button.new")));
-    buttonPanel.add(new JButton(I18N.getText("panel.CampaignResources.bundle.button.edit")));
-    buttonPanel.add(new JButton(I18N.getText("panel.CampaignResources.bundle.button.delete")));
+    JButton newButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.new"));
+    newButton.addActionListener(
+        l -> {
+          ResourceBundleDialog dialog = new ResourceBundleDialog();
+          dialog.showDialog();
+        });
+    buttonPanel.add(newButton);
+
+    JButton editButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.edit"));
+    buttonPanel.add(editButton);
+
+    JButton deleteButton =
+        new JButton(I18N.getText("panel.CampaignResources.bundle.button.delete"));
+    buttonPanel.add(deleteButton);
 
     add(buttonPanel, BorderLayout.PAGE_END);
   }
