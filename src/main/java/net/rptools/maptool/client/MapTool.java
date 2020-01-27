@@ -206,7 +206,6 @@ public class MapTool {
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
 
-
   private static final MTResourceLibrary campaignResourceLibrary = new CampaignResourceLibrary();
 
   public static Dimension getThumbnailSize() {

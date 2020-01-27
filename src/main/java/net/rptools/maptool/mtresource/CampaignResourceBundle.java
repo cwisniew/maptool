@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.swing.tree.TreeNode;
+import net.rptools.maptool.mtresource.resource.MTResource;
 import net.rptools.maptool.mtresource.tree.ResourceTreeConverter;
 import net.rptools.maptool.mtresource.tree.ResourceTreeNode;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,6 @@ public class CampaignResourceBundle implements MTResourceBundle {
   private final ResourceTreeNode resourceTree = new ResourceTreeNode("/");
 
   private final Map<UUID, MTResource> resourceIdMap = new HashMap<>();
-
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
@@ -113,7 +113,6 @@ public class CampaignResourceBundle implements MTResourceBundle {
     parent.addChild(res);
 
     resourceIdMap.put(res.getId(), res);
-
   }
 
   @Override
@@ -161,12 +160,12 @@ public class CampaignResourceBundle implements MTResourceBundle {
     List<String> remainingPath = path.subList(1, path.size());
 
     for (ResourceTreeNode child : parent.getChildren()) {
-      if (child.isDirectory()  && child.getDirectoryName().equals(name)) {
+      if (child.isDirectory() && child.getDirectoryName().equals(name)) {
         return getPath(child, remainingPath, create);
       }
     }
 
-      // If it gets here there is no matching path.
+    // If it gets here there is no matching path.
     if (create) {
       ResourceTreeNode newNode = new ResourceTreeNode(name);
       parent.addChild(newNode);
@@ -175,7 +174,6 @@ public class CampaignResourceBundle implements MTResourceBundle {
       return null;
     }
   }
-
 
   private List<String> pathAsList(String path) {
     String trimmedPath = path.replaceAll("^/", "").replaceAll("/$", "").trim();
@@ -188,13 +186,22 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public String toString() {
-    return "CampaignResourceBundle{" +
-        "name='" + name + '\'' +
-        ", qualifiedName='" + qualifiedName + '\'' +
-        ", version='" + version + '\'' +
-        ", resourceTree=" + resourceTree +
-        ", resourceIdMap=" + resourceIdMap +
-        ", propertyChangeSupport=" + propertyChangeSupport +
-        '}';
+    return "CampaignResourceBundle{"
+        + "name='"
+        + name
+        + '\''
+        + ", qualifiedName='"
+        + qualifiedName
+        + '\''
+        + ", version='"
+        + version
+        + '\''
+        + ", resourceTree="
+        + resourceTree
+        + ", resourceIdMap="
+        + resourceIdMap
+        + ", propertyChangeSupport="
+        + propertyChangeSupport
+        + '}';
   }
 }

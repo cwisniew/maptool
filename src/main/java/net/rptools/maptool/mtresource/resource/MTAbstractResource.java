@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.mtresource;
+package net.rptools.maptool.mtresource.resource;
 
 import java.util.UUID;
 
@@ -24,13 +24,19 @@ class MTAbstractResource implements MTResource {
   private final MTResourceType resourceType;
   private final String filename;
 
-  MTAbstractResource(UUID resourceId, String resourceName, String resourcePath, String fname, MTResourceType type) {
+  MTAbstractResource(
+      UUID resourceId,
+      String resourceName,
+      String resourcePath,
+      String fname,
+      MTResourceType type) {
     id = resourceId;
     name = resourceName;
     path = resourcePath;
     filename = fname;
     resourceType = type;
   }
+
   MTAbstractResource(String resourceName, String resourcePath, String fname, MTResourceType type) {
     this(UUID.randomUUID(), resourceName, resourcePath, fname, type);
   }
@@ -39,7 +45,6 @@ class MTAbstractResource implements MTResource {
   public UUID getId() {
     return id;
   }
-
 
   @Override
   public MTResourceType getResourceType() {
@@ -81,16 +86,24 @@ class MTAbstractResource implements MTResource {
     return getPath() + getName();
   }
 
-
   @Override
   public String toString() {
-    return "{ " +
-        "id = " + getId().toString() + ", " +
-        "resourceType = " + getResourceType().toString() + ", " +
-        "name = " + getName() + ", " +
-        "path = " + getPath() + ", " +
-        "filename = " + getFilename() + ", " +
-        "}";
-
+    return "{ "
+        + "id = "
+        + getId().toString()
+        + ", "
+        + "resourceType = "
+        + getResourceType().toString()
+        + ", "
+        + "name = "
+        + getName()
+        + ", "
+        + "path = "
+        + getPath()
+        + ", "
+        + "filename = "
+        + getFilename()
+        + ", "
+        + "}";
   }
 }

@@ -258,9 +258,6 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
 
-
-
-
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
 

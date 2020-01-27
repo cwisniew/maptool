@@ -12,10 +12,27 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.mtresource;
+package net.rptools.maptool.mtresource.resource;
 
-/** The resource type that is stored. */
-public enum MTResourceType {
-  TEXT,
-  DIRECTORY
+import java.util.UUID;
+
+public interface MTResource {
+
+  UUID getId();
+
+  MTResourceType getResourceType();
+
+  boolean isText();
+
+  boolean isDirectory();
+
+  String getText();
+
+  String getName();
+
+  String getFilename();
+
+  String getPath();
+
+  String getFullPath();
 }

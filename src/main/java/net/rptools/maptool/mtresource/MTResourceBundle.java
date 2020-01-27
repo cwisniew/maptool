@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Optional;
 import java.util.UUID;
 import javax.swing.tree.TreeNode;
+import net.rptools.maptool.mtresource.resource.MTResource;
 
 public interface MTResourceBundle extends Comparable<MTResourceBundle> {
 

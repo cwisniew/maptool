@@ -21,22 +21,24 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.table.TableModel;
+import net.rptools.maptool.mtresource.resource.MTResource;
+import net.rptools.maptool.mtresource.resource.MTResourceFactory;
 
 public class CampaignResourceLibrary implements MTResourceLibrary {
   private final Set<MTResourceBundle> resourceBundles = new TreeSet<>();
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
-
   // TODO: CDW remove
-  public  CampaignResourceLibrary() {
+  public CampaignResourceLibrary() {
     // Add some bogus data for testing while developing
+    MTResourceFactory resourceFactory = new MTResourceFactory();
     CampaignResourceBundle bundle = new CampaignResourceBundle();
     bundle.setName("Test 1");
     bundle.setQualifiedName("maptool.test1");
     bundle.setVersion("1.0.1");
-    MTResource res = new TextResource("res1", "/test", "res1.js", "var test = 1");
+    MTResource res = resourceFactory.resourceFor("res1", "/test", "res1.js", "var test = 1");
     bundle.putResource("/test", res);
-    res = new TextResource("res2", "/test/val1", "res2.js", "var test = 2");
+    res = resourceFactory.resourceFor("res2", "/test/val1", "res2.html", "var test = 2");
     bundle.putResource("/test/val1", res);
     resourceBundles.add(bundle);
 
@@ -45,22 +47,27 @@ public class CampaignResourceLibrary implements MTResourceLibrary {
     bundle.setQualifiedName("maptool.test2");
     bundle.setVersion("1.0.2");
     resourceBundles.add(bundle);
-    res = new TextResource("res1_1", "/test/", "res1_1.js", "var test = 3");
+    res = resourceFactory.resourceFor("res1_1", "/test/", "res1_1.js", "var test = 3");
     bundle.putResource("/test/", res);
-    res = new TextResource("res2_2", "/test2/", "res2_1.js", "var test = 2");
+    res = resourceFactory.resourceFor("res2_2", "/test2/", "res2_1.css", "var test = 2");
     bundle.putResource("/test2/", res);
 
     bundle = new CampaignResourceBundle();
     bundle.setName("Test 3");
     bundle.setQualifiedName("maptool.test3");
     bundle.setVersion("1.0.3");
-    res = new TextResource("res3_1", "/", "res1_3.js", "var test = 3");
+    res = resourceFactory.resourceFor("res3_1", "/", "res1_3.js", "var test = 3");
     bundle.putResource("/", res);
-    res = new TextResource("res3_2", "/test4", "res2_3.js", "var test = 3");
+    res = resourceFactory.resourceFor("res3_2", "/test4", "res2_3.txt", "var test = 3");
+    bundle.putResource("/test4", res);
+    res = resourceFactory.resourceFor("res3_3", "/test4", "res3_3", "var test = 3");
+    bundle.putResource("/test4", res);
+    res = resourceFactory.resourceFor("res3_4", "/test4", "res3_4.mtms", "var test = 3");
+    bundle.putResource("/test4", res);
+    res = resourceFactory.resourceFor("res3_5", "/test4", "res3_5.csv", "var test = 3");
     bundle.putResource("/test4", res);
 
     resourceBundles.add(bundle);
-
   }
 
   @Override

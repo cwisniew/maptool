@@ -22,13 +22,13 @@ import net.rptools.maptool.mtresource.MTResourceLibrary;
 
 public class CampaignResourcesPanel extends JPanel {
 
-
-  public CampaignResourcesPanel(MTResourceLibrary resourceLibrary)  {
+  public CampaignResourcesPanel(MTResourceLibrary resourceLibrary) {
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     splitPane.setContinuousLayout(true);
 
     ResourceTreePanel resourceListPanel = new ResourceTreePanel();
-    ResourceBundlePanel resourceBundlePanel = new ResourceBundlePanel(resourceLibrary, resourceListPanel::setResourceBundle);
+    ResourceBundlePanel resourceBundlePanel =
+        new ResourceBundlePanel(resourceLibrary, resourceListPanel::setResourceBundle);
     Dimension minTopDimension = new Dimension(100, 200);
     resourceBundlePanel.setMinimumSize(minTopDimension);
     splitPane.setTopComponent(resourceBundlePanel);

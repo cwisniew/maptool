@@ -38,13 +38,17 @@ public class ResourceBundlePanel extends JPanel {
 
     tableModel = new ResourceBundleTableModel(resourceLibrary);
     resourceBundlesTable = new JTable(tableModel);
-    //TODO CDW: resourceBundlesTable.getSelectionModel().addListSelectionListener(l -> { if (!l.getValueIsAdjusting()) System.out.println(resourceBundlesTable.getSelectedRow()); });
-    resourceBundlesTable.getSelectionModel().addListSelectionListener(l -> {
-      if (!l.getValueIsAdjusting()) {
-        int index = resourceBundlesTable.getSelectedRow();
-        bundleSelected.accept(tableModel.getResourceBundle(index));
-      }
-    });
+    // TODO CDW: resourceBundlesTable.getSelectionModel().addListSelectionListener(l -> { if
+    // (!l.getValueIsAdjusting()) System.out.println(resourceBundlesTable.getSelectedRow()); });
+    resourceBundlesTable
+        .getSelectionModel()
+        .addListSelectionListener(
+            l -> {
+              if (!l.getValueIsAdjusting()) {
+                int index = resourceBundlesTable.getSelectedRow();
+                bundleSelected.accept(tableModel.getResourceBundle(index));
+              }
+            });
 
     resourceBundlesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     JScrollPane scrollPane = new JScrollPane(resourceBundlesTable);
