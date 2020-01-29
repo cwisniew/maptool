@@ -15,13 +15,12 @@
 package net.rptools.maptool.mtresource;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
 
-public class ResourceBundleTableModel extends AbstractTableModel implements PropertyChangeListener {
+public class ResourceBundleTableModel extends AbstractTableModel {
 
   private static final int NUMBER_COLUMNS = 3;
 
@@ -31,9 +30,17 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
 
   public ResourceBundleTableModel(MTResourceLibrary lib) {
     resourceLibrary = lib;
-    resourceBundles.addAll(resourceLibrary.getResourceBundles());
 
-    resourceLibrary.addPropertyChangeListener(pcl -> resourceBundleChange(pcl));
+    resourceLibrary.addPropertyChangeListener(pcl -> resourceBundleAdded(pcl));
+
+    for (MTResourceBundle bundle :resourceLibrary.getResourceBundles()) {
+      addResourceBundle(bundle);
+    }
+  }
+
+  private void addResourceBundle(MTResourceBundle bundle) {
+    resourceBundles.add(bundle);
+    bundle.addPropertyChangeListener(pcl -> resourceBundleChanged(bundle, pcl));
   }
 
   @Override
@@ -59,8 +66,6 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
     throw new IllegalArgumentException("Column out of range.");
   }
 
-  @Override
-  public void propertyChange(PropertyChangeEvent evt) {}
 
   @Override
   public String getColumnName(int column) {
@@ -80,9 +85,19 @@ public class ResourceBundleTableModel extends AbstractTableModel implements Prop
     return resourceBundles.get(index);
   }
 
-  private void resourceBundleChange(PropertyChangeEvent pcl) {
-    resourceBundles.clear();
-    resourceBundles.addAll(resourceLibrary.getResourceBundles());
-    fireTableDataChanged();
+  private void resourceBundleChanged(MTResourceBundle bundle, PropertyChangeEvent pcl) {
+    int ind = resourceBundles.indexOf(bundle);
+    if (ind >= 0) {
+      fireTableRowsUpdated(ind, ind);
+    }
+  }
+
+
+
+  private void resourceBundleAdded(PropertyChangeEvent pcl) {
+    if (pcl.getPropertyName().equals(MTResourceLibrary.NEW_RESOURCE_BUNDLE)) {
+      addResourceBundle((MTResourceBundle) pcl.getNewValue());
+      fireTableRowsInserted(resourceBundles.size(), resourceBundles.size());
+    }
   }
 }

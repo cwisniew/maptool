@@ -14,17 +14,20 @@
  */
 package net.rptools.maptool.mtresource;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import net.rptools.maptool.mtresource.resource.MTResource;
 import net.rptools.maptool.mtresource.resource.MTResourceFactory;
 
-public class CampaignResourceLibrary implements MTResourceLibrary {
-  private final Set<MTResourceBundle> resourceBundles = new TreeSet<>();
+public class CampaignResourceLibrary implements MTResourceLibrary, PropertyChangeListener {
+  private final Map<String, MTResourceBundle> resourceBundleMap = new HashMap<>();
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
   // TODO: CDW remove
@@ -39,11 +42,11 @@ public class CampaignResourceLibrary implements MTResourceLibrary {
     bundle.putResource("/test", res);
     res = resourceFactory.resourceFor("res2", "/test/val1", "res2.html", "var test = 2");
     bundle.putResource("/test/val1", res);
-    resourceBundles.add(bundle);
+    putResourceBundle(bundle);
 
     bundle =
         new CampaignResourceBundle("Test 2", "maptool.test2", "Test No 2", "This is another test");
-    resourceBundles.add(bundle);
+    putResourceBundle(bundle);
     res = resourceFactory.resourceFor("res1_1", "/test/", "res1_1.js", "var test = 3");
     bundle.putResource("/test/", res);
     res = resourceFactory.resourceFor("res2_2", "/test2/", "res2_1.css", "var test = 2");
@@ -63,24 +66,35 @@ public class CampaignResourceLibrary implements MTResourceLibrary {
     res = resourceFactory.resourceFor("res3_5", "/test4", "res3_5.csv", "var test = 3");
     bundle.putResource("/test4", res);
 
-    resourceBundles.add(bundle);
+    putResourceBundle(bundle);
   }
 
-  private void addResourceBundle(MTResourceBundle resourceBundle) {
-    resourceBundles.add(resourceBundle);
-    propertyChangeSupport.firePropertyChange("addResourceBundle", null, resourceBundle);
+  private void putResourceBundle(MTResourceBundle resourceBundle) {
+    resourceBundleMap.put(resourceBundle.getQualifiedName(), resourceBundle);
+    propertyChangeSupport.firePropertyChange(MTResourceLibrary.NEW_RESOURCE_BUNDLE, null, resourceBundle);
   }
 
   @Override
-  public void addResourceBundle(
+  public void putResourceBundle(
       String name, String qualifiedName, String shortDescription, String longDescription) {
-    addResourceBundle(
+    putResourceBundle(
         new CampaignResourceBundle(name, qualifiedName, shortDescription, longDescription));
   }
 
   @Override
   public Collection<MTResourceBundle> getResourceBundles() {
-    return Collections.unmodifiableCollection(resourceBundles);
+    Set<MTResourceBundle> resourceBundles = new TreeSet<>(resourceBundleMap.values());
+    return resourceBundles;
+  }
+
+  @Override
+  public boolean hasResourceBundle(String qualifiedName) {
+    return resourceBundleMap.containsKey(qualifiedName);
+  }
+
+  @Override
+  public MTResourceBundle getResourceBundle(String qualifiedName) {
+    return resourceBundleMap.get(qualifiedName);
   }
 
   @Override
@@ -91,5 +105,10 @@ public class CampaignResourceLibrary implements MTResourceLibrary {
   @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     propertyChangeSupport.removePropertyChangeListener(pcl);
+  }
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt) {
+    propertyChangeSupport.firePropertyChange("changedResourceBundle", evt.getOldValue(), evt.getNewValue());
   }
 }

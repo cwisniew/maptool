@@ -33,6 +33,8 @@ public class ResourceBundlePanel extends JPanel {
   private final JTable resourceBundlesTable;
   private final ResourceBundleTableModel tableModel;
 
+  private MTResourceBundle selectedResourceBundle;
+
   public ResourceBundlePanel(MTResourceLibrary lib, Consumer<MTResourceBundle> bundleSelected) {
     resourceLibrary = lib;
 
@@ -46,7 +48,10 @@ public class ResourceBundlePanel extends JPanel {
             l -> {
               if (!l.getValueIsAdjusting()) {
                 int index = resourceBundlesTable.getSelectedRow();
-                bundleSelected.accept(tableModel.getResourceBundle(index));
+                if (index >= 0) {
+                  selectedResourceBundle = tableModel.getResourceBundle(index);
+                  bundleSelected.accept(selectedResourceBundle);
+                }
               }
             });
 
@@ -68,6 +73,12 @@ public class ResourceBundlePanel extends JPanel {
     buttonPanel.add(newButton);
 
     JButton editButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.edit"));
+    editButton.addActionListener(
+        l -> {
+          ResourceBundleDialog dialog = new ResourceBundleDialog(selectedResourceBundle);
+          dialog.showDialog();
+        }
+    );
     buttonPanel.add(editButton);
 
     JButton deleteButton =

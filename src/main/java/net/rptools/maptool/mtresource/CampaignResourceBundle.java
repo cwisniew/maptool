@@ -135,6 +135,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public void setShortDescription(String desc) {
+    propertyChangeSupport.firePropertyChange("shortDescription", shortDescription, desc);
     shortDescription = desc;
   }
 
@@ -145,6 +146,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public void setLongDescription(String desc) {
+    propertyChangeSupport.firePropertyChange("longDescription", longDescription, desc);
     longDescription = desc;
   }
 

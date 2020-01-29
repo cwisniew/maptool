@@ -23,20 +23,36 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.mtresource.MTResourceBundle;
 
 public class ResourceBundleDialog extends AbeillePanel<ResourceBundleDetails> {
 
   private GenericDialog dialog;
   private ResourceBundleDetails resourceBundleDetails = new ResourceBundleDetails();
+  private MTResourceBundle editingBundle;
 
   public ResourceBundleDialog() {
     super("net/rptools/maptool/client/ui/forms/resourceBundleDialog.xml");
     panelInit();
   }
 
+  public ResourceBundleDialog(MTResourceBundle editing) {
+    super("net/rptools/maptool/client/ui/forms/resourceBundleDialog.xml");
+    editingBundle = editing;
+    panelInit();
+    JTextField qualifiedName = (JTextField) getComponent("@qualifiedName");
+    qualifiedName.setEditable(false);
+  }
+
   public void showDialog() {
     dialog =
         new GenericDialog(I18N.getText("resourceBundle.dialog.title"), MapTool.getFrame(), this);
+    if (editingBundle != null) {
+      resourceBundleDetails.setBundleName(editingBundle.getName());
+      resourceBundleDetails.setQualifiedName(editingBundle.getQualifiedName());
+      resourceBundleDetails.setShortDescription(editingBundle.getShortDescription());
+      resourceBundleDetails.setLongDescription(editingBundle.getLongDescription());
+    }
     bind(resourceBundleDetails);
     JButton cancelButton = (JButton) getComponent("cancelButton");
     cancelButton.addActionListener(l -> dialog.closeDialog());
@@ -53,13 +69,25 @@ public class ResourceBundleDialog extends AbeillePanel<ResourceBundleDetails> {
     commit();
     if (checkRequiredFields()) {
       if (isQualifiedNameValid()) {
-        MapTool.getCampaignResourceLibrary()
-            .addResourceBundle(
-                resourceBundleDetails.getBundleName(),
-                resourceBundleDetails.getQualifiedName(),
-                resourceBundleDetails.getShortDescription(),
-                resourceBundleDetails.getLongDescription());
-        dialog.closeDialog();
+        if (editingBundle == null) {
+          if (MapTool.getCampaignResourceLibrary()
+              .hasResourceBundle(resourceBundleDetails.getQualifiedName())) {
+            MapTool.showWarning(I18N.getText("resourceBundle.warning.existingBundle"));
+            return;
+          }
+          MapTool.getCampaignResourceLibrary()
+              .putResourceBundle(
+                  resourceBundleDetails.getBundleName(),
+                  resourceBundleDetails.getQualifiedName(),
+                  resourceBundleDetails.getShortDescription(),
+                  resourceBundleDetails.getLongDescription());
+          dialog.closeDialog();
+        } else {
+          editingBundle.setName(resourceBundleDetails.getBundleName());
+          editingBundle.setShortDescription(resourceBundleDetails.getShortDescription());
+          editingBundle.setLongDescription(resourceBundleDetails.getLongDescription());
+          dialog.closeDialog();
+        }
       } else {
         JLabel label = (JLabel) getComponent("qualifiedNameError");
         label.setText("resourceBundle.dialog.invalidQualifiedName");
