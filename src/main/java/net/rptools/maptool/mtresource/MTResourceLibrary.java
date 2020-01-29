@@ -20,9 +20,12 @@ import java.util.Collection;
 public interface MTResourceLibrary {
 
   String NEW_RESOURCE_BUNDLE = "addResourceBundle";
+  String REMOVE_RESOURCE_BUNDLE = "removeResourceBundle";
 
   void putResourceBundle(
       String name, String qualifiedName, String shortDescription, String longDescription);
+
+  void removeResourceBundle(String qualifiedName);
 
   Collection<MTResourceBundle> getResourceBundles();
 
@@ -33,5 +36,4 @@ public interface MTResourceLibrary {
   void addPropertyChangeListener(PropertyChangeListener pcl);
 
   void removePropertyChangeListener(PropertyChangeListener pcl);
-
 }

@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.mtresource.MTResourceBundle;
 import net.rptools.maptool.mtresource.MTResourceLibrary;
@@ -32,6 +33,10 @@ public class ResourceBundlePanel extends JPanel {
   private final MTResourceLibrary resourceLibrary;
   private final JTable resourceBundlesTable;
   private final ResourceBundleTableModel tableModel;
+
+  private JButton newButton;
+  private JButton editButton;
+  private JButton deleteButton;
 
   private MTResourceBundle selectedResourceBundle;
 
@@ -51,6 +56,8 @@ public class ResourceBundlePanel extends JPanel {
                 if (index >= 0) {
                   selectedResourceBundle = tableModel.getResourceBundle(index);
                   bundleSelected.accept(selectedResourceBundle);
+                  editButton.setEnabled(true);
+                  deleteButton.setEnabled(true);
                 }
               }
             });
@@ -64,7 +71,7 @@ public class ResourceBundlePanel extends JPanel {
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    JButton newButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.new"));
+    newButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.new"));
     newButton.addActionListener(
         l -> {
           ResourceBundleDialog dialog = new ResourceBundleDialog();
@@ -72,17 +79,30 @@ public class ResourceBundlePanel extends JPanel {
         });
     buttonPanel.add(newButton);
 
-    JButton editButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.edit"));
+    editButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.edit"));
     editButton.addActionListener(
         l -> {
           ResourceBundleDialog dialog = new ResourceBundleDialog(selectedResourceBundle);
           dialog.showDialog();
-        }
-    );
+        });
+    editButton.setEnabled(false);
     buttonPanel.add(editButton);
 
-    JButton deleteButton =
-        new JButton(I18N.getText("panel.CampaignResources.bundle.button.delete"));
+    deleteButton = new JButton(I18N.getText("panel.CampaignResources.bundle.button.delete"));
+    deleteButton.setEnabled(false);
+    deleteButton.addActionListener(
+        l -> {
+          boolean delete = MapTool.confirm("Are you sure you want to delete?");
+          if (delete) {
+            int index = resourceBundlesTable.getSelectedRow();
+            if (index >= 0) {
+              MTResourceBundle bundle = tableModel.getResourceBundle(index);
+              selectedResourceBundle = null;
+              MapTool.getCampaignResourceLibrary().removeResourceBundle(bundle.getQualifiedName());
+            }
+          }
+        });
+
     buttonPanel.add(deleteButton);
 
     add(buttonPanel, BorderLayout.PAGE_END);

@@ -18,7 +18,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +70,8 @@ public class CampaignResourceLibrary implements MTResourceLibrary, PropertyChang
 
   private void putResourceBundle(MTResourceBundle resourceBundle) {
     resourceBundleMap.put(resourceBundle.getQualifiedName(), resourceBundle);
-    propertyChangeSupport.firePropertyChange(MTResourceLibrary.NEW_RESOURCE_BUNDLE, null, resourceBundle);
+    propertyChangeSupport.firePropertyChange(
+        MTResourceLibrary.NEW_RESOURCE_BUNDLE, null, resourceBundle);
   }
 
   @Override
@@ -79,6 +79,16 @@ public class CampaignResourceLibrary implements MTResourceLibrary, PropertyChang
       String name, String qualifiedName, String shortDescription, String longDescription) {
     putResourceBundle(
         new CampaignResourceBundle(name, qualifiedName, shortDescription, longDescription));
+  }
+
+  @Override
+  public void removeResourceBundle(String qualifiedName) {
+    MTResourceBundle bundle = resourceBundleMap.get(qualifiedName);
+    if (bundle != null) {
+      resourceBundleMap.remove(qualifiedName);
+      propertyChangeSupport.firePropertyChange(
+          MTResourceLibrary.REMOVE_RESOURCE_BUNDLE, bundle, null);
+    }
   }
 
   @Override
@@ -109,6 +119,7 @@ public class CampaignResourceLibrary implements MTResourceLibrary, PropertyChang
 
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    propertyChangeSupport.firePropertyChange("changedResourceBundle", evt.getOldValue(), evt.getNewValue());
+    propertyChangeSupport.firePropertyChange(
+        "changedResourceBundle", evt.getOldValue(), evt.getNewValue());
   }
 }
