@@ -29,9 +29,7 @@ import net.rptools.maptool.mtresource.tree.ResourceTreeNode;
 
 public class CampaignResourceBundle implements MTResourceBundle {
 
-
   private final Object lock = new Object();
-
 
   private final UUID id;
   private String name;
