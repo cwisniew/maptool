@@ -17,19 +17,23 @@ package net.rptools.maptool.mtresource;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.tree.TreeNode;
 import net.rptools.maptool.mtresource.resource.MTResource;
 import net.rptools.maptool.mtresource.tree.ResourceTreeConverter;
 import net.rptools.maptool.mtresource.tree.ResourceTreeNode;
-import org.jetbrains.annotations.NotNull;
 
 public class CampaignResourceBundle implements MTResourceBundle {
 
+
+  private final Object lock = new Object();
+
+
+  private final UUID id;
   private String name;
   private String qualifiedName;
   private String shortDescription;
@@ -37,7 +41,7 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   private final ResourceTreeNode resourceTree = new ResourceTreeNode("/");
 
-  private final Map<UUID, MTResource> resourceIdMap = new HashMap<>();
+  private final Map<UUID, MTResource> resourceIdMap = new ConcurrentHashMap<>();
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
@@ -47,55 +51,70 @@ public class CampaignResourceBundle implements MTResourceBundle {
     qualifiedName = qname;
     shortDescription = shortDesc;
     longDescription = longDesc;
+    id = UUID.randomUUID();
   }
 
   @Override
   public UUID getId() {
-    return null;
+    return id;
   }
 
   @Override
   public String getName() {
-    return name;
+    synchronized (lock) {
+      return name;
+    }
   }
 
   @Override
   public void setName(String bundleName) {
-    propertyChangeSupport.firePropertyChange("name", name, bundleName);
-    name = bundleName;
+    String oldName;
+    synchronized (lock) {
+      oldName = name;
+      name = bundleName;
+    }
+    propertyChangeSupport.firePropertyChange("name", oldName, bundleName);
   }
 
   @Override
   public String getQualifiedName() {
-    return qualifiedName;
+    synchronized (lock) {
+      return qualifiedName;
+    }
   }
 
   @Override
   public void setQualifiedName(String qname) {
-    propertyChangeSupport.firePropertyChange("version", qualifiedName, qname);
-    qualifiedName = qname;
+    String oldQName;
+    synchronized (lock) {
+      oldQName = qualifiedName;
+      qualifiedName = qname;
+    }
+    propertyChangeSupport.firePropertyChange("version", oldQName, qname);
   }
 
   @Override
   public Optional<MTResource> getResource(String fullPath) {
     List<String> pathList = pathAsList(fullPath);
-    String name = pathList.get(pathList.size() - 1);
+    String filename = pathList.get(pathList.size() - 1);
     pathList = pathList.subList(0, pathList.size() - 1);
-    return getResource(pathList, name);
+    return getResource(pathList, filename);
   }
 
   @Override
-  public Optional<MTResource> getResource(String path, String name) {
-    return getResource(pathAsList(path), name);
+  public Optional<MTResource> getResource(String path, String filename) {
+    return getResource(pathAsList(path), filename);
   }
 
-  private Optional<MTResource> getResource(List<String> path, @NotNull String name) {
-    ResourceTreeNode node = getPath(resourceTree, path, false);
+  private Optional<MTResource> getResource(List<String> path, String filename) {
+    synchronized (lock) {
+      ResourceTreeNode node = getPath(resourceTree, path, false);
 
-    if (node != null) {
-      for (ResourceTreeNode child : node.getChildren()) {
-        if (name.equals(child.getResource().getName())) {
-          return Optional.of(child.getResource());
+      if (node != null) {
+        for (ResourceTreeNode child : node.getChildren()) {
+          if (filename.equals(child.getResource().getName())) {
+            return Optional.of(child.getResource());
+          }
         }
       }
     }
@@ -106,11 +125,13 @@ public class CampaignResourceBundle implements MTResourceBundle {
   @Override
   public void putResource(String path, MTResource res) {
 
-    ResourceTreeNode parent = getPath(resourceTree, pathAsList(path), true);
+    synchronized (lock) {
+      ResourceTreeNode parent = getPath(resourceTree, pathAsList(path), true);
 
-    parent.addChild(res);
+      parent.addChild(res);
 
-    resourceIdMap.put(res.getId(), res);
+      resourceIdMap.put(res.getId(), res);
+    }
   }
 
   @Override
@@ -130,39 +151,55 @@ public class CampaignResourceBundle implements MTResourceBundle {
 
   @Override
   public String getShortDescription() {
-    return shortDescription;
+    synchronized (lock) {
+      return shortDescription;
+    }
   }
 
   @Override
   public void setShortDescription(String desc) {
-    propertyChangeSupport.firePropertyChange("shortDescription", shortDescription, desc);
-    shortDescription = desc;
+    String oldDesc;
+    synchronized (lock) {
+      oldDesc = shortDescription;
+      shortDescription = desc;
+    }
+    propertyChangeSupport.firePropertyChange("shortDescription", oldDesc, desc);
   }
 
   @Override
   public String getLongDescription() {
-    return longDescription;
+    synchronized (lock) {
+      return longDescription;
+    }
   }
 
   @Override
   public void setLongDescription(String desc) {
-    propertyChangeSupport.firePropertyChange("longDescription", longDescription, desc);
-    longDescription = desc;
+    String oldDesc;
+    synchronized (lock) {
+      oldDesc = longDescription;
+      longDescription = desc;
+    }
+    propertyChangeSupport.firePropertyChange("longDescription", oldDesc, desc);
   }
 
   @Override
   public TreeNode getResourceTree() {
-    ResourceTreeConverter converter = new ResourceTreeConverter();
-    return converter.convert(resourceTree);
+    synchronized (lock) {
+      ResourceTreeConverter converter = new ResourceTreeConverter();
+      return converter.convert(resourceTree);
+    }
   }
 
   @Override
-  public int compareTo(@NotNull MTResourceBundle o) {
-    int compare = name.compareTo(o.getName());
-    if (compare != 0) {
-      return compare;
+  public int compareTo(MTResourceBundle o) {
+    synchronized (lock) {
+      int compare = name.compareTo(o.getName());
+      if (compare != 0) {
+        return compare;
+      }
+      return qualifiedName.compareTo(o.getQualifiedName());
     }
-    return qualifiedName.compareTo(o.getQualifiedName());
   }
 
   private ResourceTreeNode getPath(ResourceTreeNode parent, List<String> path, boolean create) {
@@ -174,19 +211,21 @@ public class CampaignResourceBundle implements MTResourceBundle {
     String name = path.get(0);
     List<String> remainingPath = path.subList(1, path.size());
 
-    for (ResourceTreeNode child : parent.getChildren()) {
-      if (child.isDirectory() && child.getDirectoryName().equals(name)) {
-        return getPath(child, remainingPath, create);
+    synchronized (lock) {
+      for (ResourceTreeNode child : parent.getChildren()) {
+        if (child.isDirectory() && child.getDirectoryName().equals(name)) {
+          return getPath(child, remainingPath, create);
+        }
       }
-    }
 
-    // If it gets here there is no matching path.
-    if (create) {
-      ResourceTreeNode newNode = new ResourceTreeNode(name);
-      parent.addChild(newNode);
-      return getPath(newNode, remainingPath, create);
-    } else {
-      return null;
+      // If it gets here there is no matching path.
+      if (create) {
+        ResourceTreeNode newNode = new ResourceTreeNode(name);
+        parent.addChild(newNode);
+        return getPath(newNode, remainingPath, create);
+      } else {
+        return null;
+      }
     }
   }
 

@@ -18,15 +18,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.maptool.mtresource.resource.MTResource;
 import net.rptools.maptool.mtresource.resource.MTResourceFactory;
 
 public class CampaignResourceLibrary implements MTResourceLibrary, PropertyChangeListener {
-  private final Map<String, MTResourceBundle> resourceBundleMap = new HashMap<>();
+  private final Map<String, MTResourceBundle> resourceBundleMap = new ConcurrentHashMap<>();
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
   // TODO: CDW remove
