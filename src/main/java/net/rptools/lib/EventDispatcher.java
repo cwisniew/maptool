@@ -24,6 +24,7 @@ import java.util.Map;
  *
  * @author trevor
  */
+@Deprecated(since = "1.8", forRemoval = true)
 public class EventDispatcher {
 
   private Map<Enum<?>, List<AppEventListener>> listenerMap =
