@@ -28,8 +28,7 @@ import net.rptools.maptool.model.Zone.Event;
 import net.rptools.parser.ParserException;
 
 public class HTMLFrameFactory {
-  private HTMLFrameFactory() {
-  }
+  private HTMLFrameFactory() {}
 
   public enum FrameType {
     FRAME,
@@ -223,15 +222,16 @@ public class HTMLFrameFactory {
 
     @Subscribe
     private void handleZoneActivatedEvent(ZoneActivatedEvent event) {
-      SwingUtilities.invokeLater(() -> {
-        Zone oldZone = event.getOldZone();
-        Zone newZone = event.getZone();
+      SwingUtilities.invokeLater(
+          () -> {
+            Zone oldZone = event.getOldZone();
+            Zone newZone = event.getZone();
 
-        if (oldZone != null) {
-          oldZone.removeModelChangeListener(this);
-        }
-        newZone.addModelChangeListener(this);
-      });
+            if (oldZone != null) {
+              oldZone.removeModelChangeListener(this);
+            }
+            newZone.addModelChangeListener(this);
+          });
     }
   }
 

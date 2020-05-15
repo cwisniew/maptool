@@ -31,8 +31,7 @@ public class WebAppInitiative {
 
   private static final WebAppInitiative instance = new WebAppInitiative();
 
-  private class InitiativeListener
-      implements PropertyChangeListener, ModelChangeListener {
+  private class InitiativeListener implements PropertyChangeListener, ModelChangeListener {
 
     private InitiativeList initiativeList;
     private Zone zone;

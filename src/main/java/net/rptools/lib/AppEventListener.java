@@ -14,6 +14,7 @@
  */
 package net.rptools.lib;
 
+@Deprecated(since = "1.8", forRemoval = true)
 public interface AppEventListener {
 
   public void handleAppEvent(AppEvent event);

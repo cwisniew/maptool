@@ -55,8 +55,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -126,8 +124,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 /** */
-public class MapToolFrame extends DefaultDockableHolder
-    implements WindowListener {
+public class MapToolFrame extends DefaultDockableHolder implements WindowListener {
   private static final Logger log = LogManager.getLogger(MapToolFrame.class);
   private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
   private static final String MAPTOOL_LOGO_IMAGE =
@@ -388,13 +385,16 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = new InitiativePanel();
-    MapTool.getEventBus().register(new Consumer<ZoneActivatedEvent>() {
-      @Override
-      @Subscribe
-      public void accept(ZoneActivatedEvent zoneActivatedEvent) {
-        SwingUtilities.invokeLater(() -> initiativePanel.setZone(zoneActivatedEvent.getZone()));
-      }
-    });
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> initiativePanel.setZone(zoneActivatedEvent.getZone()));
+              }
+            });
 
     overlayPanel = new HTMLOverlayPanel();
 
@@ -481,31 +481,33 @@ public class MapToolFrame extends DefaultDockableHolder
     else registerForMacOSXEvents();
 
     // Listen for Zone Activated events.
-    MapTool.getEventBus().register(new Consumer<ZoneActivatedEvent>() {
-      @Override
-      @Subscribe
-      public void accept(ZoneActivatedEvent zoneActivatedEvent) {
-        SwingUtilities.invokeLater(() ->  {
-        final Zone zone = zoneActivatedEvent.getZone();
-        // Let's add all the assets, starting with the backgrounds
-        for (Token token : zone.getBackgroundStamps()) {
-          MD5Key key = token.getImageAssetId();
-          ImageManager.getImage(key);
-        }
-        // Now the stamps
-        for (Token token : zone.getStampTokens()) {
-          MD5Key key = token.getImageAssetId();
-          ImageManager.getImage(key);
-        }
-        // Now add the rest
-        for (Token token : zone.getAllTokens()) {
-          MD5Key key = token.getImageAssetId();
-          ImageManager.getImage(key);
-        }
-      });
-      }
-    });
-
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      final Zone zone = zoneActivatedEvent.getZone();
+                      // Let's add all the assets, starting with the backgrounds
+                      for (Token token : zone.getBackgroundStamps()) {
+                        MD5Key key = token.getImageAssetId();
+                        ImageManager.getImage(key);
+                      }
+                      // Now the stamps
+                      for (Token token : zone.getStampTokens()) {
+                        MD5Key key = token.getImageAssetId();
+                        ImageManager.getImage(key);
+                      }
+                      // Now add the rest
+                      for (Token token : zone.getAllTokens()) {
+                        MD5Key key = token.getImageAssetId();
+                        ImageManager.getImage(key);
+                      }
+                    });
+              }
+            });
 
     restorePreferences();
     updateKeyStrokes();
@@ -1214,13 +1216,16 @@ public class MapToolFrame extends DefaultDockableHolder
           }
         });
     // Add Zone Change event
-    MapTool.getEventBus().register(new Consumer<ZoneActivatedEvent>() {
-      @Override
-      @Subscribe
-      public void accept(ZoneActivatedEvent zoneActivatedEvent) {
-        SwingUtilities.invokeLater(() -> drawPanelTreeModel.setZone(zoneActivatedEvent.getZone()));
-      }
-    });
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> drawPanelTreeModel.setZone(zoneActivatedEvent.getZone()));
+              }
+            });
 
     return splitPane;
   }
@@ -1315,13 +1320,16 @@ public class MapToolFrame extends DefaultDockableHolder
             }
           }
         });
-    MapTool.getEventBus().register(new Consumer<ZoneActivatedEvent>() {
-      @Override
-      @Subscribe
-      public void accept(ZoneActivatedEvent zoneActivatedEvent) {
-        SwingUtilities.invokeLater(() -> tokenPanelTreeModel.setZone(zoneActivatedEvent.getZone()));
-      }
-    });
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> tokenPanelTreeModel.setZone(zoneActivatedEvent.getZone()));
+              }
+            });
 
     return tree;
   }
@@ -1758,8 +1766,6 @@ public class MapToolFrame extends DefaultDockableHolder
       setUndecorated(true);
     }
   }
-
-
 
   // WINDOW LISTENER
   public void windowOpened(WindowEvent e) {}

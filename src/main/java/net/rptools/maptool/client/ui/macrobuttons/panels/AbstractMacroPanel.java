@@ -31,8 +31,8 @@ import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AreaGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroupPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
-import net.rptools.maptool.events.ZoneActivatedEvent;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.ZoneActivatedEvent;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -195,16 +195,17 @@ public abstract class AbstractMacroPanel extends JPanel
 
   @Subscribe
   protected void handleZoneActivatedEvent(ZoneActivatedEvent event) {
-    SwingUtilities.invokeLater(() -> {
-    Zone oldZone = event.getOldZone();
-    Zone newZone = event.getZone();
+    SwingUtilities.invokeLater(
+        () -> {
+          Zone oldZone = event.getOldZone();
+          Zone newZone = event.getZone();
 
-    if (oldZone != null) {
-      oldZone.removeModelChangeListener(this);
-    }
-    newZone.addModelChangeListener(this);
-    reset();
-    });
+          if (oldZone != null) {
+            oldZone.removeModelChangeListener(this);
+          }
+          newZone.addModelChangeListener(this);
+          reset();
+        });
   }
 
   public static void clearHotkeys(AbstractMacroPanel panel) {

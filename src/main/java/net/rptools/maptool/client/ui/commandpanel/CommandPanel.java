@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.commandpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -58,10 +60,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
@@ -74,6 +75,8 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.events.PreferencesChangedEvent;
+import net.rptools.maptool.events.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -86,8 +89,7 @@ import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
-public class CommandPanel extends JPanel
-    implements Observer, AppEventListener, ModelChangeListener {
+public class CommandPanel extends JPanel implements Observer, ModelChangeListener {
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -127,7 +129,7 @@ public class CommandPanel extends JPanel
     initializeSmilies();
     addFocusHotKey();
 
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    MapTool.getEventBus().register(this);
   }
 
   public ChatProcessor getChatProcessor() {
@@ -323,10 +325,9 @@ public class CommandPanel extends JPanel
     return null;
   }
 
-  @Override
-  public void handleAppEvent(AppEvent event) {
-    Zone oldZone = (Zone) event.getOldValue();
-    Zone newZone = (Zone) event.getNewValue();
+  private void handleZoneActivatedEvent(ZoneActivatedEvent event) {
+    Zone oldZone = event.getOldZone();
+    Zone newZone = event.getZone();
 
     if (oldZone != null) {
       oldZone.removeModelChangeListener(this);
@@ -648,14 +649,18 @@ public class CommandPanel extends JPanel
           AppActions.NEWLINE_COMMAND_ID);
 
       // Resize on demand
-      MapTool.getEventDispatcher()
-          .addListener(
-              MapTool.PreferencesEvent.Changed,
-              new AppEventListener() {
-                public void handleAppEvent(AppEvent event) {
-                  commandTextArea.setFont(
-                      commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
-                  doLayout();
+      MapTool.getEventBus()
+          .register(
+              new Consumer<PreferencesChangedEvent>() {
+                @Override
+                @Subscribe
+                public void accept(PreferencesChangedEvent preferencesChangedEvent) {
+                  SwingUtilities.invokeLater(
+                      () ->
+                          commandTextArea.setFont(
+                              commandTextArea
+                                  .getFont()
+                                  .deriveFont((float) AppPreferences.getFontSize())));
                 }
               });
     }
@@ -837,12 +842,12 @@ public class CommandPanel extends JPanel
     if (messagePanel == null) {
       messagePanel = new MessagePanel();
       // Update whenever the preferences change
-      MapTool.getEventDispatcher()
-          .addListener(
-              MapTool.PreferencesEvent.Changed,
-              new AppEventListener() {
-                public void handleAppEvent(AppEvent event) {
-                  messagePanel.refreshRenderer();
+      MapTool.getEventBus()
+          .register(
+              new Consumer<PreferencesChangedEvent>() {
+                @Override
+                public void accept(PreferencesChangedEvent preferencesChangedEvent) {
+                  SwingUtilities.invokeLater(() -> messagePanel.refreshRenderer());
                 }
               });
     }

@@ -36,14 +36,15 @@ public class WebTokenInfo {
 
   private WebTokenInfo() {
     // Add listener for new zones.
-    MapTool.getEventBus().register(new Consumer<ZoneAddedEvent>() {
-      @Override
-      @Subscribe
-      public void accept(ZoneAddedEvent zoneAddedEvent) {
-        SwingUtilities.invokeLater(() -> addTokenChangeListeners());
-      }
-    });
-
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneAddedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneAddedEvent zoneAddedEvent) {
+                SwingUtilities.invokeLater(() -> addTokenChangeListeners());
+              }
+            });
 
     addTokenChangeListeners();
   }

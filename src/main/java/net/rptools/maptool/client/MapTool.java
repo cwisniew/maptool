@@ -139,10 +139,6 @@ public class MapTool {
 
   private static String clientId = AppUtil.readClientId();
 
-  public enum PreferencesEvent {
-    Changed
-  }
-
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
   // TODO: Add preferences option as well as add auto-purge after x days preferences
@@ -603,17 +599,13 @@ public class MapTool {
     return eventDispatcher;
   }
 
-
   /**
    * Returns the main MapTool {@link EventBus}.
+   *
    * @return
    */
   public static EventBus getEventBus() {
     return eventBus;
-  }
-
-  private static void registerEvents() {
-    getEventDispatcher().registerEvents(PreferencesEvent.values());
   }
 
   /**
@@ -679,7 +671,6 @@ public class MapTool {
     ImageIO.setUseCache(false);
 
     eventDispatcher = new EventDispatcher();
-    registerEvents();
 
     try {
       SoundManager.configure(SOUND_PROPERTIES);
