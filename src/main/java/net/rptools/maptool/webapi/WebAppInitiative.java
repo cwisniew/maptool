@@ -24,7 +24,7 @@ import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
-import net.rptools.maptool.events.ZoneActivatedEvent;
+import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.model.*;
 
 public class WebAppInitiative {

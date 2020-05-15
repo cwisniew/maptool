@@ -80,7 +80,7 @@ import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
-import net.rptools.maptool.events.ZoneAddedEvent;
+import net.rptools.maptool.events.zone.ZoneAddedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -131,7 +131,7 @@ public class MapTool {
 
   public static final String SND_INVALID_OPERATION = "invalidOperation";
 
-  /**
+  /*
    * Version of Java being used. Note that this is the "specification version" , so expect numbers
    * like 1.4, 1.5, and 1.6.
    */
@@ -171,7 +171,6 @@ public class MapTool {
   private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
-  private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
 
@@ -595,10 +594,6 @@ public class MapTool {
     return autoSaveManager;
   }
 
-  public static EventDispatcher getEventDispatcher() {
-    return eventDispatcher;
-  }
-
   /**
    * Returns the main MapTool {@link EventBus}.
    *
@@ -670,7 +665,6 @@ public class MapTool {
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
-    eventDispatcher = new EventDispatcher();
 
     try {
       SoundManager.configure(SOUND_PROPERTIES);

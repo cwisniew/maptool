@@ -25,7 +25,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.events.ZoneAddedEvent;
+import net.rptools.maptool.events.zone.ZoneAddedEvent;
 import net.rptools.maptool.model.*;
 
 public class WebTokenInfo {

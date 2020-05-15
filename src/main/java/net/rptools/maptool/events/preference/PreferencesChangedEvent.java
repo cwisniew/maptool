@@ -12,31 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.events;
+package net.rptools.maptool.events.preference;
 
-import net.rptools.maptool.model.Zone;
+/** Event raised when there has been changes to the preferences. */
+public class PreferencesChangedEvent {
 
-/** Abstract base class for all Zone based events. */
-abstract class ZoneEvent {
-
-  /** Zone that the event {@link Zone} occured for. */
-  private final Zone zone;
-
-  /**
-   * Creates a new {@code ZoneEvent}.
-   *
-   * @param zone The {@link Zone} that the event occured for.
-   */
-  ZoneEvent(Zone zone) {
-    this.zone = zone;
-  }
-
-  /**
-   * Returns the {@link Zone} that the event occured for.
-   *
-   * @return
-   */
-  public Zone getZone() {
-    return zone;
-  }
+  /** Creates a new {@code PreferencesChangedEvent}. */
+  public PreferencesChangedEvent() {}
 }

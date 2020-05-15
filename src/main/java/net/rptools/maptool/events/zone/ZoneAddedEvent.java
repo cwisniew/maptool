@@ -12,19 +12,19 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.events;
+package net.rptools.maptool.events.zone;
 
 import net.rptools.maptool.model.Zone;
 
-/** Event raised when a {@link Zone} is removed. */
-public class ZoneRemovedEvent extends ZoneEvent {
+/** Event raised when a new {@link Zone} is added. */
+public class ZoneAddedEvent extends ZoneEvent {
 
   /**
    * Creates a new {@code ZoneAddedEvent}.
    *
-   * @param zone The {@link Zone} that was removed..
+   * @param zone The {@link Zone} that was added.
    */
-  public ZoneRemovedEvent(Zone zone) {
+  public ZoneAddedEvent(Zone zone) {
     super(zone);
   }
 }

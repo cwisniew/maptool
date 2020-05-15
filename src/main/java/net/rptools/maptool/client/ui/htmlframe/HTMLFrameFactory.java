@@ -21,7 +21,7 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
-import net.rptools.maptool.events.ZoneActivatedEvent;
+import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
