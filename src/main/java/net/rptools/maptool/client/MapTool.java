@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -50,6 +52,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
@@ -77,6 +80,7 @@ import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.ZoneAddedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -180,6 +184,9 @@ public class MapTool {
   private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
+
+  private static final EventBus eventBus =
+      new AsyncEventBus("main-mt-event-queue", Executors.newSingleThreadExecutor());
 
   private static final MTWebAppServer webAppServer = new MTWebAppServer();
 
@@ -602,6 +609,15 @@ public class MapTool {
     return eventDispatcher;
   }
 
+
+  /**
+   * Returns the main MapTool {@link EventBus}.
+   * @return
+   */
+  public static EventBus getEventBus() {
+    return eventBus;
+  }
+
   private static void registerEvents() {
     getEventDispatcher().registerEvents(ZoneEvent.values());
     getEventDispatcher().registerEvents(PreferencesEvent.values());
@@ -980,7 +996,7 @@ public class MapTool {
           && (getPlayer().isGM() || zone.isVisible())) {
         currRenderer = renderer;
       }
-      eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
+      eventBus.post(new ZoneAddedEvent(zone));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1128,7 +1144,7 @@ public class MapTool {
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
-    eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
+    eventBus.post(new ZoneAddedEvent(zone));
 
     // Show the new zone
     if (changeZone) {

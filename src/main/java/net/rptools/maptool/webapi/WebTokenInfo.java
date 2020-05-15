@@ -14,36 +14,36 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
+import java.util.function.Consumer;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.ZoneAddedEvent;
 import net.rptools.maptool.model.*;
 
 public class WebTokenInfo {
 
   private static final WebTokenInfo instance = new WebTokenInfo();
 
-  private final AppEventListener appEventListener;
   private final Map<Zone, ModelChangeListener> modelChangeListeners = new WeakHashMap<>();
 
   private WebTokenInfo() {
     // Add listener for new zones.
-    appEventListener =
-        new AppEventListener() {
-          @Override
-          public void handleAppEvent(AppEvent appEvent) {
-            if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
-              addTokenChangeListeners();
-            }
-          }
-        };
+    MapTool.getEventBus().register(new Consumer<ZoneAddedEvent>() {
+
+      @Override
+      @Subscribe
+      public void accept(ZoneAddedEvent zoneAddedEvent) {
+        addTokenChangeListeners();
+      }
+    });
+
 
     addTokenChangeListeners();
   }
