@@ -138,13 +138,6 @@ public class MapTool {
 
   private static String clientId = AppUtil.readClientId();
 
-  public enum ZoneEvent {
-    Added,
-    Removed,
-    Activated,
-    Deactivated
-  }
-
   public enum PreferencesEvent {
     Changed
   }
@@ -619,7 +612,6 @@ public class MapTool {
   }
 
   private static void registerEvents() {
-    getEventDispatcher().registerEvents(ZoneEvent.values());
     getEventDispatcher().registerEvents(PreferencesEvent.values());
   }
 
