@@ -86,6 +86,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
@@ -157,7 +158,7 @@ public class MapTool {
 
   private static ObservableList<Player> playerList;
   private static ObservableList<TextMessage> messageList;
-  private static Player player;
+  private static LocalPlayer player;
 
   private static ClientConnection conn;
   private static ClientMethodHandler handler;
@@ -701,7 +702,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new Player("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, "");
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -1146,7 +1147,7 @@ public class MapTool {
     }
   }
 
-  public static Player getPlayer() {
+  public static LocalPlayer getPlayer() {
     return player;
   }
 
@@ -1158,13 +1159,14 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new Player(username, Player.Role.GM, null));
+        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, Player player) throws IOException {
+  public static void createConnection(String host, int port, LocalPlayer player)
+      throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
