@@ -60,7 +60,6 @@ import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
-import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
@@ -80,6 +79,7 @@ import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.chat.NewTextMessageEvent;
 import net.rptools.maptool.events.zone.ZoneAddedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -153,7 +153,7 @@ public class MapTool {
   private static Campaign campaign;
 
   private static ObservableList<Player> playerList;
-  private static ObservableList<TextMessage> messageList;
+  // TODO: CDW: remove private static ObservableList<TextMessage> messageList;
   private static LocalPlayer player;
 
   private static ClientConnection conn;
@@ -665,7 +665,6 @@ public class MapTool {
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
-
     try {
       SoundManager.configure(SOUND_PROPERTIES);
       SoundManager.registerSoundEvent(
@@ -678,8 +677,8 @@ public class MapTool {
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
     playerList = new ObservableList<Player>();
-    messageList =
-        new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+    // TODO: CDW: Remove messageList = new
+    // ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
     handler = new ClientMethodHandler();
 
@@ -810,9 +809,10 @@ public class MapTool {
     }
   }
 
-  public static ObservableList<TextMessage> getMessageList() {
+  /* TODO: CDW: Remove public static ObservableList<TextMessage> getMessageList() {
     return messageList;
   }
+   */
 
   /**
    * These are the messages that originate from the server
@@ -846,7 +846,8 @@ public class MapTool {
     if (message.isWhisper()) {
       setLastWhisperer(message.getSource());
     }
-    messageList.add(message);
+    eventBus.post(new NewTextMessageEvent(message));
+    // TODO: CDW Remove messageList.add(message);
   }
 
   /**

@@ -445,7 +445,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
     commandPanel = new CommandPanel();
-    MapTool.getMessageList().addObserver(commandPanel);
+    // TODO: CDW: Remove MapTool.getMessageList().addObserver(commandPanel);
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));

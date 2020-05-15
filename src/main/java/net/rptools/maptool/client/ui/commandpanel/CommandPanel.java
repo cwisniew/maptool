@@ -40,8 +40,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -75,13 +73,13 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.events.chat.NewTextMessageEvent;
 import net.rptools.maptool.events.preference.PreferencesChangedEvent;
 import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -89,7 +87,7 @@ import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
-public class CommandPanel extends JPanel implements Observer, ModelChangeListener {
+public class CommandPanel extends JPanel implements ModelChangeListener {
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -325,6 +323,7 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
     return null;
   }
 
+  @Subscribe
   private void handleZoneActivatedEvent(ZoneActivatedEvent event) {
     Zone oldZone = event.getOldZone();
     Zone newZone = event.getZone();
@@ -333,6 +332,11 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
       oldZone.removeModelChangeListener(this);
     }
     newZone.addModelChangeListener(this);
+  }
+
+  @Subscribe
+  private void handleNewTextMessageEvent(NewTextMessageEvent event) {
+    SwingUtilities.invokeLater(() -> addMessage(event.getTextMessage()));
   }
 
   /**
@@ -969,8 +973,8 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
 
   ////
   // OBSERVER
-  public void update(Observable o, Object arg) {
-    ObservableList<TextMessage> textList = MapTool.getMessageList();
+  /* TODO: CDW: remove public void update(Observable o, Object arg) {
+      ObservableList<TextMessage> textList = MapTool.getMessageList();
     ObservableList.Event event = (ObservableList.Event) arg;
     switch (event) {
       case append:
@@ -986,7 +990,7 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
       default:
         throw new IllegalArgumentException("Unknown event: " + event);
     }
-  }
+  }*/
 
   private void addFocusHotKey() {
     KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
