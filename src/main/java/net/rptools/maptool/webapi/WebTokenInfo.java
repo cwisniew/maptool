@@ -21,6 +21,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -36,11 +37,10 @@ public class WebTokenInfo {
   private WebTokenInfo() {
     // Add listener for new zones.
     MapTool.getEventBus().register(new Consumer<ZoneAddedEvent>() {
-
       @Override
       @Subscribe
       public void accept(ZoneAddedEvent zoneAddedEvent) {
-        addTokenChangeListeners();
+        SwingUtilities.invokeLater(() -> addTokenChangeListeners());
       }
     });
 
