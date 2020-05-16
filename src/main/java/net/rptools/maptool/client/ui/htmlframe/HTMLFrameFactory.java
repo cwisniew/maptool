@@ -14,13 +14,14 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.common.eventbus.Subscribe;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
@@ -193,9 +194,9 @@ public class HTMLFrameFactory {
     MapTool.getFrame().getOverlayPanel().doTokenChanged(token);
   }
 
-  public static class Listener implements ModelChangeListener, AppEventListener {
+  public static class Listener implements ModelChangeListener {
     public Listener() {
-      MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+      MapTool.getEventBus().register(this);
       MapTool.getFrame().getCurrentZoneRenderer().getZone().addModelChangeListener(this);
     }
 
@@ -224,14 +225,18 @@ public class HTMLFrameFactory {
       }
     }
 
-    public void handleAppEvent(AppEvent event) {
-      Zone oldZone = (Zone) event.getOldValue();
-      Zone newZone = (Zone) event.getNewValue();
+    @Subscribe
+    private void handleZoneActivatedEvent(ZoneActivatedEvent event) {
+      SwingUtilities.invokeLater(
+          () -> {
+            Zone oldZone = event.getOldZone();
+            Zone newZone = event.getZone();
 
-      if (oldZone != null) {
-        oldZone.removeModelChangeListener(this);
-      }
-      newZone.addModelChangeListener(this);
+            if (oldZone != null) {
+              oldZone.removeModelChangeListener(this);
+            }
+            newZone.addModelChangeListener(this);
+          });
     }
   }
 

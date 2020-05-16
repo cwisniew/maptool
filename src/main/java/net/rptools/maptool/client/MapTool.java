@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -50,6 +52,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
@@ -57,7 +60,6 @@ import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
-import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
@@ -77,6 +79,8 @@ import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.chat.NewTextMessageEvent;
+import net.rptools.maptool.events.zone.ZoneAddedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -127,24 +131,13 @@ public class MapTool {
 
   public static final String SND_INVALID_OPERATION = "invalidOperation";
 
-  /**
+  /*
    * Version of Java being used. Note that this is the "specification version" , so expect numbers
    * like 1.4, 1.5, and 1.6.
    */
   public static Double JAVA_VERSION;
 
   private static String clientId = AppUtil.readClientId();
-
-  public enum ZoneEvent {
-    Added,
-    Removed,
-    Activated,
-    Deactivated
-  }
-
-  public enum PreferencesEvent {
-    Changed
-  }
 
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
@@ -160,7 +153,7 @@ public class MapTool {
   private static Campaign campaign;
 
   private static ObservableList<Player> playerList;
-  private static ObservableList<TextMessage> messageList;
+  // TODO: CDW: remove private static ObservableList<TextMessage> messageList;
   private static LocalPlayer player;
 
   private static ClientConnection conn;
@@ -178,9 +171,11 @@ public class MapTool {
   private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
-  private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
+
+  private static final EventBus eventBus =
+      new AsyncEventBus("main-mt-event-queue", Executors.newSingleThreadExecutor());
 
   private static final MTWebAppServer webAppServer = new MTWebAppServer();
 
@@ -599,13 +594,13 @@ public class MapTool {
     return autoSaveManager;
   }
 
-  public static EventDispatcher getEventDispatcher() {
-    return eventDispatcher;
-  }
-
-  private static void registerEvents() {
-    getEventDispatcher().registerEvents(ZoneEvent.values());
-    getEventDispatcher().registerEvents(PreferencesEvent.values());
+  /**
+   * Returns the main MapTool {@link EventBus}.
+   *
+   * @return
+   */
+  public static EventBus getEventBus() {
+    return eventBus;
   }
 
   /**
@@ -670,9 +665,6 @@ public class MapTool {
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
-    eventDispatcher = new EventDispatcher();
-    registerEvents();
-
     try {
       SoundManager.configure(SOUND_PROPERTIES);
       SoundManager.registerSoundEvent(
@@ -685,8 +677,8 @@ public class MapTool {
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
     playerList = new ObservableList<Player>();
-    messageList =
-        new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+    // TODO: CDW: Remove messageList = new
+    // ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
     handler = new ClientMethodHandler();
 
@@ -817,9 +809,10 @@ public class MapTool {
     }
   }
 
-  public static ObservableList<TextMessage> getMessageList() {
+  /* TODO: CDW: Remove public static ObservableList<TextMessage> getMessageList() {
     return messageList;
   }
+   */
 
   /**
    * These are the messages that originate from the server
@@ -853,7 +846,8 @@ public class MapTool {
     if (message.isWhisper()) {
       setLastWhisperer(message.getSource());
     }
-    messageList.add(message);
+    eventBus.post(new NewTextMessageEvent(message));
+    // TODO: CDW Remove messageList.add(message);
   }
 
   /**
@@ -981,7 +975,7 @@ public class MapTool {
           && (getPlayer().isGM() || zone.isVisible())) {
         currRenderer = renderer;
       }
-      eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
+      eventBus.post(new ZoneAddedEvent(zone));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1129,7 +1123,7 @@ public class MapTool {
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
-    eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
+    eventBus.post(new ZoneAddedEvent(zone));
 
     // Show the new zone
     if (changeZone) {

@@ -12,10 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib;
+package net.rptools.maptool.events.preference;
 
-@Deprecated(since = "1.8", forRemoval = true)
-public interface AppEventListener {
+/** Event raised when there has been changes to the preferences. */
+public class PreferencesChangedEvent {
 
-  public void handleAppEvent(AppEvent event);
+  /** Creates a new {@code PreferencesChangedEvent}. */
+  public PreferencesChangedEvent() {}
 }

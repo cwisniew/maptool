@@ -117,7 +117,7 @@ public class SelectionPanel extends AbstractMacroPanel {
       MapTool.getProfilingNoteFrame().addText(results);
       if (log.isDebugEnabled()) log.debug(results);
     }
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    MapTool.getEventBus().register(this);
   }
 
   @Override

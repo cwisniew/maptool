@@ -53,6 +53,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.events.preference.PreferencesChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
@@ -183,7 +184,7 @@ public class PreferencesDialog extends JDialog {
 
           setVisible(false);
           dispose();
-          MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
+          MapTool.getEventBus().post(new PreferencesChangedEvent());
         });
 
     tabbedPane = panel.getTabbedPane("TabPane");

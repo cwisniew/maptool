@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
@@ -41,10 +42,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
@@ -53,8 +53,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -103,6 +101,8 @@ import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
 import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.chat.ChatTypingEvent;
+import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -123,8 +123,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 /** */
-public class MapToolFrame extends DefaultDockableHolder
-    implements WindowListener, AppEventListener {
+public class MapToolFrame extends DefaultDockableHolder implements WindowListener {
   private static final Logger log = LogManager.getLogger(MapToolFrame.class);
   private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
   private static final String MAPTOOL_LOGO_IMAGE =
@@ -184,7 +183,6 @@ public class MapToolFrame extends DefaultDockableHolder
   private Timer chatTimer;
   private long chatNotifyDuration;
   private final ChatNotificationTimers chatTyperTimers;
-  private final ChatTyperObserver chatTyperObserver;
 
   private final GlassPane glassPane;
   /** Model for the token tree panel of the map explorer. */
@@ -308,19 +306,17 @@ public class MapToolFrame extends DefaultDockableHolder
     public void keyPressed(KeyEvent e) {}
   }
 
-  private class ChatTyperObserver implements Observer {
-    public void update(Observable o, Object arg) {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
+  private class ChatTyperObserver {
+    @Subscribe
+    private void chatTypingEvent(ChatTypingEvent event) {
+      SwingUtilities.invokeLater(() -> {
               chatTypingPanel.invalidate();
               chatTypingPanel.repaint();
-            }
-          });
+      });
     }
   }
 
-  public class ChatNotificationTimers extends Observable {
+  public class ChatNotificationTimers {
     private final LinkedMap chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
@@ -331,8 +327,7 @@ public class MapToolFrame extends DefaultDockableHolder
         MapTool.getFrame().getChatTimer().start();
         MapTool.getFrame().getChatTypingPanel().setVisible(true);
         chatTypingNotificationTimers.put(playerName, System.currentTimeMillis());
-        setChanged();
-        notifyObservers();
+        MapTool.getEventBus().post(new ChatTypingNotification());
       }
     }
 
@@ -343,9 +338,10 @@ public class MapToolFrame extends DefaultDockableHolder
 
     public synchronized void removeChatTyper(final String playerName) {
       chatTypingNotificationTimers.remove(playerName);
-      if (chatTypingNotificationTimers.isEmpty()) turnOffUpdates();
-      setChanged();
-      notifyObservers();
+      if (chatTypingNotificationTimers.isEmpty()) {
+        turnOffUpdates();
+      }
+      MapTool.getEventBus().post(new ChatTypingNotification());
     }
 
     public synchronized LinkedMap getChatTypers() {
@@ -384,7 +380,18 @@ public class MapToolFrame extends DefaultDockableHolder
     assetPanel = createAssetPanel();
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
-    initiativePanel = createInitiativePanel();
+    initiativePanel = new InitiativePanel();
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> initiativePanel.setZone(zoneActivatedEvent.getZone()));
+              }
+            });
+
     overlayPanel = new HTMLOverlayPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
@@ -434,7 +441,7 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
     commandPanel = new CommandPanel();
-    MapTool.getMessageList().addObserver(commandPanel);
+    // TODO: CDW: Remove MapTool.getMessageList().addObserver(commandPanel);
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
@@ -469,7 +476,34 @@ public class MapToolFrame extends DefaultDockableHolder
     if (!AppUtil.MAC_OS_X) removeWindowsF10();
     else registerForMacOSXEvents();
 
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    // Listen for Zone Activated events.
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      final Zone zone = zoneActivatedEvent.getZone();
+                      // Let's add all the assets, starting with the backgrounds
+                      for (Token token : zone.getBackgroundStamps()) {
+                        MD5Key key = token.getImageAssetId();
+                        ImageManager.getImage(key);
+                      }
+                      // Now the stamps
+                      for (Token token : zone.getStampTokens()) {
+                        MD5Key key = token.getImageAssetId();
+                        ImageManager.getImage(key);
+                      }
+                      // Now add the rest
+                      for (Token token : zone.getAllTokens()) {
+                        MD5Key key = token.getImageAssetId();
+                        ImageManager.getImage(key);
+                      }
+                    });
+              }
+            });
 
     restorePreferences();
     updateKeyStrokes();
@@ -478,9 +512,8 @@ public class MapToolFrame extends DefaultDockableHolder
     configureDocking();
 
     new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
-    chatTyperObserver = new ChatTyperObserver();
+    MapTool.getEventBus().register(new ChatTyperObserver());
     chatTyperTimers = new ChatNotificationTimers();
-    chatTyperTimers.addObserver(chatTyperObserver);
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
   }
@@ -1178,14 +1211,17 @@ public class MapToolFrame extends DefaultDockableHolder
           }
         });
     // Add Zone Change event
-    MapTool.getEventDispatcher()
-        .addListener(
-            new AppEventListener() {
-              public void handleAppEvent(AppEvent event) {
-                drawPanelTreeModel.setZone((Zone) event.getNewValue());
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> drawPanelTreeModel.setZone(zoneActivatedEvent.getZone()));
               }
-            },
-            MapTool.ZoneEvent.Activated);
+            });
+
     return splitPane;
   }
 
@@ -1279,14 +1315,17 @@ public class MapToolFrame extends DefaultDockableHolder
             }
           }
         });
-    MapTool.getEventDispatcher()
-        .addListener(
-            new AppEventListener() {
-              public void handleAppEvent(AppEvent event) {
-                tokenPanelTreeModel.setZone((Zone) event.getNewValue());
+    MapTool.getEventBus()
+        .register(
+            new Consumer<ZoneActivatedEvent>() {
+              @Override
+              @Subscribe
+              public void accept(ZoneActivatedEvent zoneActivatedEvent) {
+                SwingUtilities.invokeLater(
+                    () -> tokenPanelTreeModel.setZone(zoneActivatedEvent.getZone()));
               }
-            },
-            MapTool.ZoneEvent.Activated);
+            });
+
     return tree;
   }
 
@@ -1321,18 +1360,6 @@ public class MapToolFrame extends DefaultDockableHolder
   private ClientConnectionPanel createConnectionPanel() {
     ClientConnectionPanel panel = new ClientConnectionPanel();
     return panel;
-  }
-
-  private InitiativePanel createInitiativePanel() {
-    MapTool.getEventDispatcher()
-        .addListener(
-            new AppEventListener() {
-              public void handleAppEvent(AppEvent event) {
-                initiativePanel.setZone((Zone) event.getNewValue());
-              }
-            },
-            MapTool.ZoneEvent.Activated);
-    return new InitiativePanel();
   }
 
   private AssetPanel createAssetPanel() {
@@ -1578,9 +1605,7 @@ public class MapToolFrame extends DefaultDockableHolder
     toolbox.setTargetRenderer(renderer);
 
     if (renderer != null) {
-      // Previous zone must be passed for the listeners to be properly removed. Fix #1670.
-      MapTool.getEventDispatcher()
-          .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
+      MapTool.getEventBus().post(new ZoneActivatedEvent(renderer.getZone(), oldZone));
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
       DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
@@ -1734,37 +1759,6 @@ public class MapToolFrame extends DefaultDockableHolder
   public class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
       setUndecorated(true);
-    }
-  }
-
-  // APP EVENT LISTENER
-  public void handleAppEvent(AppEvent evt) {
-    if (evt.getId() != MapTool.ZoneEvent.Activated) {
-      return;
-    }
-    final Zone zone = (Zone) evt.getNewValue();
-    // AssetAvailableListener listener = new AssetAvailableListener() {
-    // public void assetAvailable(net.rptools.lib.MD5Key key) {
-    // ZoneRenderer renderer = getCurrentZoneRenderer();
-    // if (renderer.getZone() == zone) {
-    // ImageManager.getImage(key, renderer);
-    // }
-    // }
-    // };
-    // Let's add all the assets, starting with the backgrounds
-    for (Token token : zone.getBackgroundStamps()) {
-      MD5Key key = token.getImageAssetId();
-      ImageManager.getImage(key);
-    }
-    // Now the stamps
-    for (Token token : zone.getStampTokens()) {
-      MD5Key key = token.getImageAssetId();
-      ImageManager.getImage(key);
-    }
-    // Now add the rest
-    for (Token token : zone.getAllTokens()) {
-      MD5Key key = token.getImageAssetId();
-      ImageManager.getImage(key);
     }
   }
 

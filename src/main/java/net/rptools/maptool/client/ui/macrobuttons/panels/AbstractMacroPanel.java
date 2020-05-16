@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -25,14 +26,13 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AreaGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroupPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -42,7 +42,7 @@ import net.rptools.maptool.model.Zone;
 
 @SuppressWarnings("serial")
 public abstract class AbstractMacroPanel extends JPanel
-    implements Scrollable, MouseListener, ModelChangeListener, AppEventListener {
+    implements Scrollable, MouseListener, ModelChangeListener {
   private String panelClass = "";
   private GUID tokenId = null;
 
@@ -193,15 +193,19 @@ public abstract class AbstractMacroPanel extends JPanel
   @Override
   public void modelChanged(ModelChangeEvent event) {}
 
-  public void handleAppEvent(AppEvent event) {
-    Zone oldZone = (Zone) event.getOldValue();
-    Zone newZone = (Zone) event.getNewValue();
+  @Subscribe
+  protected void handleZoneActivatedEvent(ZoneActivatedEvent event) {
+    SwingUtilities.invokeLater(
+        () -> {
+          Zone oldZone = event.getOldZone();
+          Zone newZone = event.getZone();
 
-    if (oldZone != null) {
-      oldZone.removeModelChangeListener(this);
-    }
-    newZone.addModelChangeListener(this);
-    reset();
+          if (oldZone != null) {
+            oldZone.removeModelChangeListener(this);
+          }
+          newZone.addModelChangeListener(this);
+          reset();
+        });
   }
 
   public static void clearHotkeys(AbstractMacroPanel panel) {
