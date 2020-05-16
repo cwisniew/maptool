@@ -29,6 +29,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -44,15 +45,29 @@ public class SelectionPanel extends AbstractMacroPanel {
   private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();
   private CodeTimer timer;
 
-  public SelectionPanel() {
+  /** The Event Bus used in MapTool. */
+  private final MapToolEventBus eventBus;
+
+  public static SelectionPanel createSelectionPanel() {
+    var selectionPanel = new SelectionPanel(new MapToolEventBus());
+    selectionPanel.initEventBus();
+
+    return selectionPanel;
+  }
+
+  private SelectionPanel(MapToolEventBus mapToolEventBus) {
     // TODO: refactoring reminder
     setPanelClass("SelectionPanel");
+    eventBus = mapToolEventBus;
     init(
         new ArrayList<
             Token>()); // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just
     // send an empty list
   }
 
+  private void initEventBus() {
+    eventBus.getMainEventBus().register(this);
+  }
   public List<MacroButtonProperties> getCommonMacros() {
     return commonMacros;
   }
@@ -117,7 +132,6 @@ public class SelectionPanel extends AbstractMacroPanel {
       MapTool.getProfilingNoteFrame().addText(results);
       if (log.isDebugEnabled()) log.debug(results);
     }
-    MapTool.getEventBus().register(this);
   }
 
   @Override

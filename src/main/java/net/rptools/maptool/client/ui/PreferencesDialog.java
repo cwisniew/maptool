@@ -53,6 +53,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.preference.PreferencesChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
@@ -157,6 +158,9 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<String> jamLanguageOverrideComboBox;
   private boolean jvmValuesChanged = false;
 
+  /** The Event Bus used in MapTool. */
+  private final MapToolEventBus eventBus = new MapToolEventBus();
+
   public PreferencesDialog() {
     super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -184,7 +188,8 @@ public class PreferencesDialog extends JDialog {
 
           setVisible(false);
           dispose();
-          MapTool.getEventBus().post(new PreferencesChangedEvent());
+          eventBus.getMainEventBus().post(new PreferencesChangedEvent());
+
         });
 
     tabbedPane = panel.getTabbedPane("TabPane");

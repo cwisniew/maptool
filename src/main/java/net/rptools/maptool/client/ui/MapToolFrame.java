@@ -101,6 +101,7 @@ import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
 import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.chat.ChatTypingEvent;
 import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
@@ -224,10 +225,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final CampaignPanel campaignPanel = new CampaignPanel();
   private final GmPanel gmPanel = new GmPanel();
   private final GlobalPanel globalPanel = new GlobalPanel();
-  private final SelectionPanel selectionPanel = new SelectionPanel();
-  private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
+  private final SelectionPanel selectionPanel = SelectionPanel.createSelectionPanel();
+  private final ImpersonatePanel impersonatePanel = ImpersonatePanel.createImpersonatePanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
+
+
+  /** The Event Bus used in MapTool. */
+  private final MapToolEventBus eventBus = new MapToolEventBus();
 
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
@@ -327,7 +332,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
         MapTool.getFrame().getChatTimer().start();
         MapTool.getFrame().getChatTypingPanel().setVisible(true);
         chatTypingNotificationTimers.put(playerName, System.currentTimeMillis());
-        MapTool.getEventBus().post(new ChatTypingNotification());
+        eventBus.getMainEventBus().post(new ChatTypingNotification());
       }
     }
 
@@ -341,7 +346,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       if (chatTypingNotificationTimers.isEmpty()) {
         turnOffUpdates();
       }
-      MapTool.getEventBus().post(new ChatTypingNotification());
+      eventBus.getMainEventBus().post(new ChatTypingNotification());
     }
 
     public synchronized LinkedMap getChatTypers() {
@@ -381,7 +386,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = new InitiativePanel();
-    MapTool.getEventBus()
+    eventBus.getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -440,8 +445,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
-    commandPanel = new CommandPanel();
-    // TODO: CDW: Remove MapTool.getMessageList().addObserver(commandPanel);
+    commandPanel = CommandPanel.createCommandPanel();
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
@@ -477,7 +481,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     else registerForMacOSXEvents();
 
     // Listen for Zone Activated events.
-    MapTool.getEventBus()
+    eventBus.getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -512,7 +516,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     configureDocking();
 
     new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
-    MapTool.getEventBus().register(new ChatTyperObserver());
+    eventBus.getMainEventBus().register(new ChatTyperObserver());
     chatTyperTimers = new ChatNotificationTimers();
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
@@ -1211,7 +1215,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
           }
         });
     // Add Zone Change event
-    MapTool.getEventBus()
+    eventBus.getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -1315,7 +1319,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
             }
           }
         });
-    MapTool.getEventBus()
+    eventBus.getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -1605,7 +1609,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     toolbox.setTargetRenderer(renderer);
 
     if (renderer != null) {
-      MapTool.getEventBus().post(new ZoneActivatedEvent(renderer.getZone(), oldZone));
+      eventBus.getMainEventBus().post(new ZoneActivatedEvent(renderer.getZone(), oldZone));
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
       DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());

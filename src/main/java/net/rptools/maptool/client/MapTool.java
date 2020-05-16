@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -79,6 +77,7 @@ import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.chat.NewTextMessageEvent;
 import net.rptools.maptool.events.zone.ZoneAddedEvent;
 import net.rptools.maptool.language.I18N;
@@ -174,9 +173,6 @@ public class MapTool {
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
 
-  private static final EventBus eventBus =
-      new AsyncEventBus("main-mt-event-queue", Executors.newSingleThreadExecutor());
-
   private static final MTWebAppServer webAppServer = new MTWebAppServer();
 
   // Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
@@ -188,6 +184,10 @@ public class MapTool {
   private static int windowX = -1;
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
+
+
+  /** The MapTool Event Bus. */
+  private static final MapToolEventBus eventBus = new MapToolEventBus();
 
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
@@ -594,14 +594,6 @@ public class MapTool {
     return autoSaveManager;
   }
 
-  /**
-   * Returns the main MapTool {@link EventBus}.
-   *
-   * @return
-   */
-  public static EventBus getEventBus() {
-    return eventBus;
-  }
 
   /**
    * This was added to make it easier to set a breakpoint and locate when the frame was initialized.
@@ -846,7 +838,7 @@ public class MapTool {
     if (message.isWhisper()) {
       setLastWhisperer(message.getSource());
     }
-    eventBus.post(new NewTextMessageEvent(message));
+    eventBus.getMainEventBus().post(new NewTextMessageEvent(message));
     // TODO: CDW Remove messageList.add(message);
   }
 
@@ -975,7 +967,7 @@ public class MapTool {
           && (getPlayer().isGM() || zone.isVisible())) {
         currRenderer = renderer;
       }
-      eventBus.post(new ZoneAddedEvent(zone));
+      eventBus.getMainEventBus().post(new ZoneAddedEvent(zone));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1123,7 +1115,7 @@ public class MapTool {
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
-    eventBus.post(new ZoneAddedEvent(zone));
+    eventBus.getMainEventBus().post(new ZoneAddedEvent(zone));
 
     // Show the new zone
     if (changeZone) {

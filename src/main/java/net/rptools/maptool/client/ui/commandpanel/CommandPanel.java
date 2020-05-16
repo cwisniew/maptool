@@ -73,6 +73,7 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.chat.NewTextMessageEvent;
 import net.rptools.maptool.events.preference.PreferencesChangedEvent;
 import net.rptools.maptool.events.zone.ZoneActivatedEvent;
@@ -118,7 +119,20 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
   /** The identity representing no impersonation. */
   private static final TokenIdentity emptyIdentity = new TokenIdentity();
 
-  public CommandPanel() {
+
+
+  /** The Event Bus used in MapTool. */
+  private final MapToolEventBus eventBus;
+
+
+  public static CommandPanel createCommandPanel() {
+    var commandPanel = new CommandPanel(new MapToolEventBus());
+    commandPanel.init();
+    return commandPanel;
+  }
+
+  private CommandPanel(MapToolEventBus mapToolEventBus) {
+    eventBus = mapToolEventBus;
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createLineBorder(Color.gray));
 
@@ -127,7 +141,10 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
     initializeSmilies();
     addFocusHotKey();
 
-    MapTool.getEventBus().register(this);
+  }
+
+  private void init() {
+    eventBus.getMainEventBus().register(this);
   }
 
   public ChatProcessor getChatProcessor() {
@@ -538,7 +555,7 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
 
     subPanel.add(BorderLayout.EAST, createTextPropertiesPanel());
     subPanel.add(BorderLayout.NORTH, createCharacterLabel());
-    subPanel.add(BorderLayout.CENTER, createCommandPanel());
+    subPanel.add(BorderLayout.CENTER, createCommandPanelUI());
 
     panel.add(BorderLayout.WEST, createAvatarPanel());
     panel.add(BorderLayout.CENTER, subPanel);
@@ -551,7 +568,7 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
     return avatarPanel;
   }
 
-  private JComponent createCommandPanel() {
+  private JComponent createCommandPanelUI() {
     JScrollPane pane =
         new JScrollPane(
             getCommandTextArea(),
@@ -653,7 +670,7 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
           AppActions.NEWLINE_COMMAND_ID);
 
       // Resize on demand
-      MapTool.getEventBus()
+      eventBus.getMainEventBus()
           .register(
               new Consumer<PreferencesChangedEvent>() {
                 @Override
@@ -846,7 +863,7 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
     if (messagePanel == null) {
       messagePanel = new MessagePanel();
       // Update whenever the preferences change
-      MapTool.getEventBus()
+      eventBus.getMainEventBus()
           .register(
               new Consumer<PreferencesChangedEvent>() {
                 @Override

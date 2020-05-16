@@ -24,6 +24,7 @@ import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.model.*;
 
@@ -31,10 +32,13 @@ public class WebAppInitiative {
 
   private static final WebAppInitiative instance = new WebAppInitiative();
 
+  private final MapToolEventBus eventBus = new MapToolEventBus();
+
   private class InitiativeListener implements PropertyChangeListener, ModelChangeListener {
 
     private InitiativeList initiativeList;
     private Zone zone;
+
 
     private void setList(InitiativeList ilist) {
       if (initiativeList != null) {
@@ -87,7 +91,7 @@ public class WebAppInitiative {
 
   private WebAppInitiative() {
     initiativeListener = new InitiativeListener();
-    MapTool.getEventBus().register(initiativeListener);
+    eventBus.getMainEventBus().register(initiativeListener);
     SwingUtilities.invokeLater(() -> initiativeListener.updateListeners());
   }
 

@@ -26,6 +26,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
@@ -33,9 +34,23 @@ import net.rptools.maptool.model.Zone.Event;
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
 
-  public ImpersonatePanel() {
+  /** The Event Bus used in MapTool. */
+  private final MapToolEventBus eventBus;
+
+  public static ImpersonatePanel createImpersonatePanel() {
+    var impersonatePanel = new ImpersonatePanel(new MapToolEventBus());
+    impersonatePanel.initEventBus();
+
+    return impersonatePanel;
+  }
+
+  private ImpersonatePanel(MapToolEventBus mapToolEventBus) {
     setPanelClass("ImpersonatePanel");
-    MapTool.getEventBus().register(this);
+    eventBus = mapToolEventBus;
+  }
+
+  private void initEventBus() {
+    eventBus.getMainEventBus().register(this);
   }
 
   public void init() {

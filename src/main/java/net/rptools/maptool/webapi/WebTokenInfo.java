@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.zone.ZoneAddedEvent;
 import net.rptools.maptool.model.*;
 
@@ -34,9 +35,11 @@ public class WebTokenInfo {
 
   private final Map<Zone, ModelChangeListener> modelChangeListeners = new WeakHashMap<>();
 
+  private final MapToolEventBus eventBus = new MapToolEventBus();
+
   private WebTokenInfo() {
     // Add listener for new zones.
-    MapTool.getEventBus()
+    eventBus.getMainEventBus()
         .register(
             new Consumer<ZoneAddedEvent>() {
               @Override

@@ -21,6 +21,7 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -52,7 +53,7 @@ public class HTMLFrameFactory {
       String name, FrameType frameType, boolean isHTML5, String properties, String html)
       throws ParserException {
     if (listener == null) {
-      listener = new HTMLFrameFactory.Listener();
+      listener = HTMLFrameFactory.Listener.createListener();
     }
     boolean input = false;
     boolean temporary = false;
@@ -195,8 +196,23 @@ public class HTMLFrameFactory {
   }
 
   public static class Listener implements ModelChangeListener {
-    public Listener() {
-      MapTool.getEventBus().register(this);
+
+    /** The Event Bus used in MapTool. */
+    private final MapToolEventBus eventBus = new MapToolEventBus();
+
+
+    public static Listener createListener() {
+      Listener listener = new Listener();
+      listener.init();
+
+      return listener;
+    }
+
+    private Listener() {
+    }
+
+    private void init() {
+      eventBus.getMainEventBus().register(this);
       MapTool.getFrame().getCurrentZoneRenderer().getZone().addModelChangeListener(this);
     }
 
