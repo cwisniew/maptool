@@ -50,7 +50,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
@@ -184,7 +183,6 @@ public class MapTool {
   private static int windowX = -1;
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
-
 
   /** The MapTool Event Bus. */
   private static final MapToolEventBus eventBus = new MapToolEventBus();
@@ -594,7 +592,6 @@ public class MapTool {
     return autoSaveManager;
   }
 
-
   /**
    * This was added to make it easier to set a breakpoint and locate when the frame was initialized.
    *
@@ -674,7 +671,7 @@ public class MapTool {
 
     handler = new ClientMethodHandler();
 
-    setClientFrame(new MapToolFrame(menuBar));
+    setClientFrame(new MapToolFrame(menuBar, eventBus));
 
     serverCommand = new ServerCommandClientImpl();
 

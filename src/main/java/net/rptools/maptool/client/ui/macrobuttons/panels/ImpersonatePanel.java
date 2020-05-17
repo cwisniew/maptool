@@ -37,8 +37,8 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   /** The Event Bus used in MapTool. */
   private final MapToolEventBus eventBus;
 
-  public static ImpersonatePanel createImpersonatePanel() {
-    var impersonatePanel = new ImpersonatePanel(new MapToolEventBus());
+  public static ImpersonatePanel createImpersonatePanel(MapToolEventBus eventBus) {
+    var impersonatePanel = new ImpersonatePanel(eventBus);
     impersonatePanel.initEventBus();
 
     return impersonatePanel;

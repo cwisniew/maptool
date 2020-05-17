@@ -25,6 +25,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
 import net.rptools.maptool.events.zone.ZoneActivatedEvent;
 import net.rptools.maptool.model.*;
 
@@ -34,11 +35,10 @@ public class WebAppInitiative {
 
   private final MapToolEventBus eventBus = new MapToolEventBus();
 
-  private class InitiativeListener implements PropertyChangeListener, ModelChangeListener {
+  private class InitiativeListener implements PropertyChangeListener {
 
     private InitiativeList initiativeList;
     private Zone zone;
-
 
     private void setList(InitiativeList ilist) {
       if (initiativeList != null) {
@@ -50,11 +50,7 @@ public class WebAppInitiative {
 
     private void setZone(Zone z) {
       setList(z.getInitiativeList());
-      if (zone != null) {
-        zone.removeModelChangeListener(this);
-      }
       zone = z;
-      zone.addModelChangeListener(this);
     }
 
     @Override
@@ -65,11 +61,13 @@ public class WebAppInitiative {
       System.out.println("Here!");
     }
 
-    public void modelChanged(ModelChangeEvent event) {
-      if (event.getEvent().equals(Zone.Event.INITIATIVE_LIST_CHANGED)) {
-        setList(((Zone) event.getModel()).getInitiativeList());
-        sendInitiative();
-      }
+    @Subscribe
+    private void initiativePanelReplaced(InitiativeListReplacedEvent listReplacedEvent) {
+      SwingUtilities.invokeLater(
+          () -> {
+            setList(listReplacedEvent.getZone().getInitiativeList());
+            sendInitiative();
+          });
     }
 
     @Subscribe

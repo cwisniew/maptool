@@ -189,7 +189,6 @@ public class PreferencesDialog extends JDialog {
           setVisible(false);
           dispose();
           eventBus.getMainEventBus().post(new PreferencesChangedEvent());
-
         });
 
     tabbedPane = panel.getTabbedPane("TabPane");

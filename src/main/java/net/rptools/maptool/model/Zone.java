@@ -39,6 +39,8 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -1931,7 +1933,7 @@ public class Zone extends BaseModel {
   /** @param initiativeList Setter for the initiativeList */
   public void setInitiativeList(InitiativeList initiativeList) {
     this.initiativeList = initiativeList;
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.INITIATIVE_LIST_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new InitiativeListReplacedEvent(this));
   }
 
   public void optimize() {

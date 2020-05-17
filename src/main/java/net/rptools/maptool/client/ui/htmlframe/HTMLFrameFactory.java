@@ -53,7 +53,7 @@ public class HTMLFrameFactory {
       String name, FrameType frameType, boolean isHTML5, String properties, String html)
       throws ParserException {
     if (listener == null) {
-      listener = HTMLFrameFactory.Listener.createListener();
+      listener = HTMLFrameFactory.Listener.createListener(new MapToolEventBus());
     }
     boolean input = false;
     boolean temporary = false;
@@ -198,17 +198,17 @@ public class HTMLFrameFactory {
   public static class Listener implements ModelChangeListener {
 
     /** The Event Bus used in MapTool. */
-    private final MapToolEventBus eventBus = new MapToolEventBus();
+    private final MapToolEventBus eventBus;
 
-
-    public static Listener createListener() {
-      Listener listener = new Listener();
+    public static Listener createListener(MapToolEventBus eventBus) {
+      Listener listener = new Listener(eventBus);
       listener.init();
 
       return listener;
     }
 
-    private Listener() {
+    private Listener(MapToolEventBus mapToolEventBus) {
+      eventBus = mapToolEventBus;
     }
 
     private void init() {

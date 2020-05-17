@@ -119,14 +119,11 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
   /** The identity representing no impersonation. */
   private static final TokenIdentity emptyIdentity = new TokenIdentity();
 
-
-
   /** The Event Bus used in MapTool. */
   private final MapToolEventBus eventBus;
 
-
-  public static CommandPanel createCommandPanel() {
-    var commandPanel = new CommandPanel(new MapToolEventBus());
+  public static CommandPanel createCommandPanel(MapToolEventBus eventBus) {
+    var commandPanel = new CommandPanel(eventBus);
     commandPanel.init();
     return commandPanel;
   }
@@ -140,7 +137,6 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
     add(BorderLayout.CENTER, getMessagePanel());
     initializeSmilies();
     addFocusHotKey();
-
   }
 
   private void init() {
@@ -670,7 +666,8 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
           AppActions.NEWLINE_COMMAND_ID);
 
       // Resize on demand
-      eventBus.getMainEventBus()
+      eventBus
+          .getMainEventBus()
           .register(
               new Consumer<PreferencesChangedEvent>() {
                 @Override
@@ -863,7 +860,8 @@ public class CommandPanel extends JPanel implements ModelChangeListener {
     if (messagePanel == null) {
       messagePanel = new MessagePanel();
       // Update whenever the preferences change
-      eventBus.getMainEventBus()
+      eventBus
+          .getMainEventBus()
           .register(
               new Consumer<PreferencesChangedEvent>() {
                 @Override

@@ -39,7 +39,8 @@ public class WebTokenInfo {
 
   private WebTokenInfo() {
     // Add listener for new zones.
-    eventBus.getMainEventBus()
+    eventBus
+        .getMainEventBus()
         .register(
             new Consumer<ZoneAddedEvent>() {
               @Override

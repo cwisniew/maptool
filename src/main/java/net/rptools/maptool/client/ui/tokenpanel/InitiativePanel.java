@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -33,6 +34,8 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InitiativeList;
@@ -117,12 +120,26 @@ public class InitiativePanel extends JPanel
   /** Flag indicating that the owners of tokens can only move their tokens when it is their turn. */
   private boolean movementLock;
 
+  /** The event bus used by MapTool. */
+  private final MapToolEventBus eventBus;
+
+  public static InitiativePanel createInitiativePanel(MapToolEventBus eventBus) {
+    var initiativePanel = new InitiativePanel(eventBus);
+    initiativePanel.init();
+    return initiativePanel;
+  }
+
+  private void init() {
+    eventBus.getMainEventBus().register(this);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
   /** Setup the menu */
-  public InitiativePanel() {
+  private InitiativePanel(MapToolEventBus mapToolEventBus) {
+    eventBus = mapToolEventBus;
 
     // Build the form and add it's component
     setLayout(new BorderLayout());
@@ -478,6 +495,18 @@ public class InitiativePanel extends JPanel
     } // endif
   }
 
+  @Subscribe
+  private void initiativePanelReplaced(InitiativeListReplacedEvent listReplacedEvent) {
+    SwingUtilities.invokeLater(
+        () -> {
+          if (listReplacedEvent.getZone() == zone) {
+            int oldSize = model.getSize();
+            setList(listReplacedEvent.getZone().getInitiativeList());
+            if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
+          }
+        });
+  }
+
   /*---------------------------------------------------------------------------------------------
    * ModelChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
@@ -489,11 +518,7 @@ public class InitiativePanel extends JPanel
   @Override
   public void modelChanged(ModelChangeEvent event) {
     if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      if ((Zone) event.getModel() == zone) {
-        int oldSize = model.getSize();
-        setList(((Zone) event.getModel()).getInitiativeList());
-        if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
-      }
+      throw new AssertionError("Should not happen!");
     } else if (event.getEvent().equals(Event.TOKEN_ADDED)
         || event.getEvent().equals(Event.TOKEN_CHANGED)
         || event.getEvent().equals(Event.TOKEN_REMOVED)) {

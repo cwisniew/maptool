@@ -48,8 +48,8 @@ public class SelectionPanel extends AbstractMacroPanel {
   /** The Event Bus used in MapTool. */
   private final MapToolEventBus eventBus;
 
-  public static SelectionPanel createSelectionPanel() {
-    var selectionPanel = new SelectionPanel(new MapToolEventBus());
+  public static SelectionPanel createSelectionPanel(MapToolEventBus eventBus) {
+    var selectionPanel = new SelectionPanel(eventBus);
     selectionPanel.initEventBus();
 
     return selectionPanel;
@@ -68,6 +68,7 @@ public class SelectionPanel extends AbstractMacroPanel {
   private void initEventBus() {
     eventBus.getMainEventBus().register(this);
   }
+
   public List<MacroButtonProperties> getCommonMacros() {
     return commonMacros;
   }

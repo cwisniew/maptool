@@ -225,14 +225,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final CampaignPanel campaignPanel = new CampaignPanel();
   private final GmPanel gmPanel = new GmPanel();
   private final GlobalPanel globalPanel = new GlobalPanel();
-  private final SelectionPanel selectionPanel = SelectionPanel.createSelectionPanel();
-  private final ImpersonatePanel impersonatePanel = ImpersonatePanel.createImpersonatePanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
 
-
   /** The Event Bus used in MapTool. */
-  private final MapToolEventBus eventBus = new MapToolEventBus();
+  private final MapToolEventBus eventBus;
+
+  private final SelectionPanel selectionPanel;
+  private final ImpersonatePanel impersonatePanel;
 
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
@@ -314,10 +314,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private class ChatTyperObserver {
     @Subscribe
     private void chatTypingEvent(ChatTypingEvent event) {
-      SwingUtilities.invokeLater(() -> {
-              chatTypingPanel.invalidate();
-              chatTypingPanel.repaint();
-      });
+      SwingUtilities.invokeLater(
+          () -> {
+            chatTypingPanel.invalidate();
+            chatTypingPanel.repaint();
+          });
     }
   }
 
@@ -358,9 +359,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
-  public MapToolFrame(JMenuBar menuBar) {
+  public MapToolFrame(JMenuBar menuBar, MapToolEventBus mapToolEventBus) {
     // Set up the frame
     super(AppConstants.APP_NAME);
+
+    eventBus = mapToolEventBus;
+    selectionPanel = SelectionPanel.createSelectionPanel(eventBus);
+    impersonatePanel = ImpersonatePanel.createImpersonatePanel(eventBus);
 
     this.menuBar = menuBar;
 
@@ -385,8 +390,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     assetPanel = createAssetPanel();
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
-    initiativePanel = new InitiativePanel();
-    eventBus.getMainEventBus()
+    initiativePanel = InitiativePanel.createInitiativePanel(eventBus);
+    eventBus
+        .getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -445,7 +451,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
-    commandPanel = CommandPanel.createCommandPanel();
+    commandPanel = CommandPanel.createCommandPanel(eventBus);
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
@@ -481,7 +487,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     else registerForMacOSXEvents();
 
     // Listen for Zone Activated events.
-    eventBus.getMainEventBus()
+    eventBus
+        .getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -1215,7 +1222,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
           }
         });
     // Add Zone Change event
-    eventBus.getMainEventBus()
+    eventBus
+        .getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
@@ -1319,7 +1327,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
             }
           }
         });
-    eventBus.getMainEventBus()
+    eventBus
+        .getMainEventBus()
         .register(
             new Consumer<ZoneActivatedEvent>() {
               @Override
