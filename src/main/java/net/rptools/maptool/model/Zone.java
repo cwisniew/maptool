@@ -41,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
+import net.rptools.maptool.events.zone.GridChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -78,7 +79,7 @@ public class Zone extends BaseModel {
     TOKEN_ADDED,
     TOKEN_REMOVED,
     TOKEN_CHANGED,
-    GRID_CHANGED,
+    //GRID_CHANGED,
     DRAWABLE_ADDED,
     DRAWABLE_REMOVED,
     FOG_CHANGED,
@@ -86,7 +87,7 @@ public class Zone extends BaseModel {
     LABEL_REMOVED,
     LABEL_CHANGED,
     TOPOLOGY_CHANGED,
-    INITIATIVE_LIST_CHANGED,
+    //INITIATIVE_LIST_CHANGED,
     BOARD_CHANGED,
     TOKEN_EDITED, // the token was edited
     TOKEN_MACRO_CHANGED, // a token macro changed
@@ -498,7 +499,7 @@ public class Zone extends BaseModel {
     this.grid = grid;
     grid.setZone(this);
     // tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new GridChangedEvent(grid, this));
   }
 
   public Grid getGrid() {

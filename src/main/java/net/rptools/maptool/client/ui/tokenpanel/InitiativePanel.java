@@ -511,15 +511,8 @@ public class InitiativePanel extends JPanel
    * ModelChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see
-   *     net.rptools.maptool.model.ModelChangeListener#modelChanged(net.rptools.maptool.model.ModelChangeEvent)
-   */
-  @Override
   public void modelChanged(ModelChangeEvent event) {
-    if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      throw new AssertionError("Should not happen!");
-    } else if (event.getEvent().equals(Event.TOKEN_ADDED)
+    if (event.getEvent().equals(Event.TOKEN_ADDED)
         || event.getEvent().equals(Event.TOKEN_CHANGED)
         || event.getEvent().equals(Event.TOKEN_REMOVED)) {
       model.updateModel();

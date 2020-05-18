@@ -41,8 +41,9 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.zone.GridChangedEvent;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
-import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -283,7 +284,7 @@ public abstract class Grid implements Cloneable {
     this.offsetX = offsetX;
     this.offsetY = offsetY;
 
-    fireGridChanged();
+    postGridChangedEvent();
   }
 
   /** @return The x component of the grid's offset. */
@@ -335,7 +336,7 @@ public abstract class Grid implements Cloneable {
   public void setSize(int size) {
     this.size = constrainSize(size);
     cellShape = createCellShape(size);
-    fireGridChanged();
+    postGridChangedEvent();
   }
 
   /**
@@ -495,10 +496,10 @@ public abstract class Grid implements Cloneable {
     }
   }
 
-  private void fireGridChanged() {
+  private void postGridChangedEvent() {
     if (zone != null) {
       gridShapeCache.clear();
-      zone.fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
+      new MapToolEventBus().getMainEventBus().post(new GridChangedEvent(this, zone));
     }
   }
 

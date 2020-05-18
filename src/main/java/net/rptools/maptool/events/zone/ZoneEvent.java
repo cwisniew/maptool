@@ -19,20 +19,20 @@ import net.rptools.maptool.model.Zone;
 /** Abstract base class for all Zone based events. */
 abstract class ZoneEvent {
 
-  /** Zone that the event {@link Zone} occured for. */
+  /** Zone that the event {@link Zone} occurred for. */
   private final Zone zone;
 
   /**
    * Creates a new {@code ZoneEvent}.
    *
-   * @param zone The {@link Zone} that the event occured for.
+   * @param zone The {@link Zone} that the event occurred for.
    */
   ZoneEvent(Zone zone) {
     this.zone = zone;
   }
 
   /**
-   * Returns the {@link Zone} that the event occured for.
+   * Returns the {@link Zone} that the event occurred for.
    *
    * @return
    */
