@@ -240,7 +240,6 @@ public class Zone extends BaseModel {
     // TODO: Was this needed?
     // setGrid(new SquareGrid());
     undo = new UndoPerZone(this); // registers as ModelChangeListener for drawables...
-    addModelChangeListener(undo);
   }
 
   public void setBackgroundPaint(DrawablePaint paint) {
@@ -352,7 +351,6 @@ public class Zone extends BaseModel {
     visionType = zone.visionType;
 
     undo = new UndoPerZone(this); // Undo/redo manager isn't copied
-    addModelChangeListener(undo);
     setName(zone.getName());
 
     try {
