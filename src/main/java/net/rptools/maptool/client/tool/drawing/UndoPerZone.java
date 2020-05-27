@@ -188,5 +188,4 @@ public class UndoPerZone {
       MapTool.serverCommand().draw(zone.getId(), pen, drawable);
     }
   }
-
 }

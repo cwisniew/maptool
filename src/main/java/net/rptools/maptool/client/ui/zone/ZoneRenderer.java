@@ -4814,7 +4814,6 @@ public class ZoneRenderer extends JComponent
     public void modelChanged(ModelChangeEvent event) {
       Object evt = event.getEvent();
 
-
       if (evt == Zone.Event.TOKEN_CHANGED
           || evt == Zone.Event.TOKEN_REMOVED
           || evt == Zone.Event.TOKEN_ADDED) {
@@ -5022,7 +5021,10 @@ public class ZoneRenderer extends JComponent
 
   @Subscribe
   private void handleVBLChangedEvent(VBLChangedEvent event) {
-      flushFog();
-      flushLight();
+    SwingUtilities.invokeLater(
+        () -> {
+          flushFog();
+          flushLight();
+        });
   }
 }

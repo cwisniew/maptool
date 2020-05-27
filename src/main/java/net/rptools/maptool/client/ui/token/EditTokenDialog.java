@@ -787,7 +787,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     MapTool.getFrame().resetTokenPanels();
 
     // Jamz: TODO check if VBL changed on token first
-    eventBus.getMainEventBus().post(new VBLChangedEvent(MapTool.getFrame().getCurrentZoneRenderer().getZone()));
+    eventBus
+        .getMainEventBus()
+        .post(new VBLChangedEvent(MapTool.getFrame().getCurrentZoneRenderer().getZone()));
     return true;
   }
 

@@ -41,6 +41,9 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
+import net.rptools.maptool.events.labels.LabelAddedEvent;
+import net.rptools.maptool.events.labels.LabelChangedEvent;
+import net.rptools.maptool.events.labels.LabelRemovedEvent;
 import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.events.zone.GridChangedEvent;
 import net.rptools.maptool.language.I18N;
@@ -79,15 +82,15 @@ public class Zone extends BaseModel {
     TOKEN_ADDED,
     TOKEN_REMOVED,
     TOKEN_CHANGED,
-    //GRID_CHANGED,
+    // GRID_CHANGED,
     DRAWABLE_ADDED,
     DRAWABLE_REMOVED,
     FOG_CHANGED,
-    LABEL_ADDED,
-    LABEL_REMOVED,
-    LABEL_CHANGED,
-    //TOPOLOGY_CHANGED,
-    //INITIATIVE_LIST_CHANGED,
+    // LABEL_ADDED,
+    // LABEL_REMOVED,
+    // LABEL_CHANGED,
+    // TOPOLOGY_CHANGED,
+    // INITIATIVE_LIST_CHANGED,
     BOARD_CHANGED,
     TOKEN_EDITED, // the token was edited
     TOKEN_MACRO_CHANGED, // a token macro changed
@@ -802,7 +805,6 @@ public class Zone extends BaseModel {
     removeTopology(area, getTopologyMode());
   }
 
-
   /** @return the topology of the zone */
   public Area getTopology() {
     return topology;
@@ -1145,9 +1147,9 @@ public class Zone extends BaseModel {
     labels.put(label.getId(), label);
 
     if (newLabel) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.LABEL_ADDED, label));
+      eventBus.getMainEventBus().post(new LabelAddedEvent(this, label));
     } else {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.LABEL_CHANGED, label));
+      eventBus.getMainEventBus().post(new LabelChangedEvent(this, label));
     }
   }
 
@@ -1158,7 +1160,7 @@ public class Zone extends BaseModel {
   public void removeLabel(GUID labelId) {
     Label label = labels.remove(labelId);
     if (label != null) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.LABEL_REMOVED, label));
+      eventBus.getMainEventBus().post(new LabelRemovedEvent(this, label));
     }
   }
 
@@ -2120,6 +2122,7 @@ public class Zone extends BaseModel {
 
   /**
    * Sets the {@link MapToolEventBus} to be used for dispatching events.
+   *
    * @param eventBus the {@link MapToolEventBus} to use.
    */
   public void setEventBus(MapToolEventBus eventBus) {
@@ -2129,7 +2132,9 @@ public class Zone extends BaseModel {
   /**
    * Enables or disable dispatching of events. If {@link #setEventBus(MapToolEventBus)} has not
    * previously been called this has no effect.
-   * @param enable {@code true} to enable sending of events, {@code false} to disanle sending of events.
+   *
+   * @param enable {@code true} to enable sending of events, {@code false} to disanle sending of
+   *     events.
    */
   public void setEnableEvents(boolean enable) {
     enableEvents = enable;
@@ -2137,8 +2142,8 @@ public class Zone extends BaseModel {
 
   /**
    * Dispatches the event if the event bus has been set and event dispatching has been enabled.
-   * @param event the event to dispatch.
    *
+   * @param event the event to dispatch.
    * @see #setEventBus(MapToolEventBus)
    * @see #setEnableEvents(boolean)
    */

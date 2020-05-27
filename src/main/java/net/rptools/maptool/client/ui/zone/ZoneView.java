@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -36,6 +37,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -887,18 +889,21 @@ public class ZoneView implements ModelChangeListener {
     return hasVBL;
   }
 
-
+  @Subscribe
   private void handleVBLChangedEvent(VBLChangedEvent event) {
-    tokenVisionCache.clear();
-    lightSourceCache.clear();
-    brightLightCache.clear();
-    drawableLightCache.clear();
-    personalBrightLightCache.clear();
-    personalDrawableLightCache.clear();
-    visibleAreaMap.clear();
-    topologyTree = null;
-    tokenTopology = null;
-    tokenVisibleAreaCache.clear();
+    SwingUtilities.invokeLater(
+        () -> {
+          tokenVisionCache.clear();
+          lightSourceCache.clear();
+          brightLightCache.clear();
+          drawableLightCache.clear();
+          personalBrightLightCache.clear();
+          personalDrawableLightCache.clear();
+          visibleAreaMap.clear();
+          topologyTree = null;
+          tokenTopology = null;
+          tokenVisibleAreaCache.clear();
+        });
   }
 
   /** Has a single field: the visibleArea area */

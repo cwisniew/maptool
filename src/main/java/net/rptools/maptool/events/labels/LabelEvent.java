@@ -12,33 +12,25 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.events.zone;
+package net.rptools.maptool.events.labels;
 
-import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
 
-/** Event fired when the {@link Grid} is Changed for a {@link Zone}. */
-public class GridChangedEvent extends ZoneEvent {
+abstract class LabelEvent {
+  private final Zone zone;
+  private final Label label;
 
-  private final Grid grid;
-
-  /**
-   * Creates a new {@code ZoneEvent}.
-   *
-   * @param grid The {@link Grid} that changed.
-   * @param zone The {@link Zone} that the event occurred for.
-   */
-  public GridChangedEvent(Grid grid, Zone zone) {
-    super(zone);
-    this.grid = grid;
+  LabelEvent(Zone zone, Label label) {
+    this.zone = zone;
+    this.label = label;
   }
 
-  /**
-   * Returns the {@link Grid} that changed.
-   *
-   * @return the {@link Grid} that changed.
-   */
-  public Grid getGrid() {
-    return grid;
+  public Zone getZone() {
+    return zone;
+  }
+
+  public Label getLabel() {
+    return label;
   }
 }
