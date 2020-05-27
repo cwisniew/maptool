@@ -45,6 +45,7 @@ import net.rptools.maptool.events.labels.LabelAddedEvent;
 import net.rptools.maptool.events.labels.LabelChangedEvent;
 import net.rptools.maptool.events.labels.LabelRemovedEvent;
 import net.rptools.maptool.events.vbl.VBLChangedEvent;
+import net.rptools.maptool.events.zone.BackgroundChanged;
 import net.rptools.maptool.events.zone.GridChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -91,7 +92,7 @@ public class Zone extends BaseModel {
     // LABEL_CHANGED,
     // TOPOLOGY_CHANGED,
     // INITIATIVE_LIST_CHANGED,
-    BOARD_CHANGED,
+    // BOARD_CHANGED,
     TOKEN_EDITED, // the token was edited
     TOKEN_MACRO_CHANGED, // a token macro changed
     TOKEN_PANEL_CHANGED // the panel appearance changed
@@ -538,14 +539,14 @@ public class Zone extends BaseModel {
     boardPosition.x = position.x;
     boardPosition.y = position.y;
     setBoardChanged(true);
-    fireModelChangeEvent(new ModelChangeEvent(mapAsset, Event.BOARD_CHANGED));
+    eventBus.getMainEventBus().post(new BackgroundChanged(this, mapAsset));
   }
 
   public void setBoard(int newX, int newY) {
     boardPosition.x = newX;
     boardPosition.y = newY;
     setBoardChanged(true);
-    fireModelChangeEvent(new ModelChangeEvent(mapAsset, Event.BOARD_CHANGED));
+    eventBus.getMainEventBus().post(new BackgroundChanged(this, mapAsset));
   }
 
   public void setBoard(Point position, MD5Key asset) {
