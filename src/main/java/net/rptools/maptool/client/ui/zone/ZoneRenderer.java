@@ -107,7 +107,8 @@ import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.events.vbl.VBLChangedEvent;
+import net.rptools.maptool.events.vision.FogChangedEvent;
+import net.rptools.maptool.events.vision.VBLChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.Asset;
@@ -4827,9 +4828,6 @@ public class ZoneRenderer extends JComponent
           flush((Token) event.getArg());
         }
       }
-      if (evt == Zone.Event.FOG_CHANGED) {
-        flushFog = true;
-      }
       MapTool.getFrame().updateTokenTree(); // for any event
       repaintDebouncer.dispatch();
     }
@@ -5025,6 +5023,17 @@ public class ZoneRenderer extends JComponent
         () -> {
           flushFog();
           flushLight();
+          MapTool.getFrame().updateTokenTree();
+          repaintDebouncer.dispatch();
+        });
+  }
+
+  private void handleFogChangedEvent(FogChangedEvent event) {
+    SwingUtilities.invokeLater(
+        () -> {
+          flushFog = true;
+          MapTool.getFrame().updateTokenTree();
+          repaintDebouncer.dispatch();
         });
   }
 }

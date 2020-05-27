@@ -108,7 +108,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.events.vbl.VBLChangedEvent;
+import net.rptools.maptool.events.vision.VBLChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;

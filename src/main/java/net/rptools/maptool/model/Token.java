@@ -53,7 +53,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.events.vbl.VBLChangedEvent;
+import net.rptools.maptool.events.vision.VBLChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;

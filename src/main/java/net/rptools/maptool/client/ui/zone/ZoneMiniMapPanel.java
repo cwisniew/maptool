@@ -31,13 +31,12 @@ import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
+import net.rptools.maptool.events.vision.FogChangedEvent;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
 
 /** */
-public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
+public class ZoneMiniMapPanel extends JPanel {
 
   private static final int SIZE_WIDTH = 125;
   private static final int SIZE_HEIGHT = 100;
@@ -161,12 +160,7 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
 
   public void zoneActivated(Zone zone) {
 
-    if (this.zone != null) {
-      this.zone.removeModelChangeListener(this);
-    }
-
     this.zone = zone;
-    this.zone.addModelChangeListener(this);
 
     flush();
     resize();
@@ -175,13 +169,12 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
     repaint();
   }
 
-  ////
-  // ModelChangeListener
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.getEvent() == Zone.Event.FOG_CHANGED) {
-      flush();
-      repaint();
-    }
+  private void handleFogChangedEven(FogChangedEvent event) {
+    SwingUtilities.invokeLater(
+        () -> {
+          flush();
+          repaint();
+        });
   }
 
   ////

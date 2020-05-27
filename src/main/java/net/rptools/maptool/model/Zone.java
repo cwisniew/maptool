@@ -44,7 +44,8 @@ import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
 import net.rptools.maptool.events.labels.LabelAddedEvent;
 import net.rptools.maptool.events.labels.LabelChangedEvent;
 import net.rptools.maptool.events.labels.LabelRemovedEvent;
-import net.rptools.maptool.events.vbl.VBLChangedEvent;
+import net.rptools.maptool.events.vision.FogChangedEvent;
+import net.rptools.maptool.events.vision.VBLChangedEvent;
 import net.rptools.maptool.events.zone.BackgroundChanged;
 import net.rptools.maptool.events.zone.GridChangedEvent;
 import net.rptools.maptool.language.I18N;
@@ -86,7 +87,7 @@ public class Zone extends BaseModel {
     // GRID_CHANGED,
     DRAWABLE_ADDED,
     DRAWABLE_REMOVED,
-    FOG_CHANGED,
+    // FOG_CHANGED,
     // LABEL_ADDED,
     // LABEL_REMOVED,
     // LABEL_CHANGED,
@@ -599,7 +600,7 @@ public class Zone extends BaseModel {
 
   public void setHasFog(boolean flag) {
     hasFog = flag;
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   /**
@@ -853,7 +854,7 @@ public class Zone extends BaseModel {
     if (!globalOnly) {
       exposedAreaMeta.clear();
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   /**
@@ -877,7 +878,7 @@ public class Zone extends BaseModel {
       }
     }
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   /**
@@ -909,12 +910,12 @@ public class Zone extends BaseModel {
           zr.getZoneView().flush();
         }
         putToken(tok);
-        fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+        eventBus.getMainEventBus().post(new FogChangedEvent(this));
         return; // FJE Added so that TEA isn't added to the GEA, below.
       }
     }
     exposedArea.add(area);
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   /**
@@ -965,7 +966,7 @@ public class Zone extends BaseModel {
       // Not using IF so add the EA to the GEA instead of a TEA.
       exposedArea.add(area);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   /**
@@ -1003,7 +1004,7 @@ public class Zone extends BaseModel {
       exposedArea.reset();
       exposedArea.add(area);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   public void hideArea(Area area, Set<GUID> selectedToks) {
@@ -1040,7 +1041,7 @@ public class Zone extends BaseModel {
     } else {
       exposedArea.subtract(area);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   public long getCreationTime() {
@@ -2100,7 +2101,7 @@ public class Zone extends BaseModel {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
     }
     exposedAreaMeta.put(tokenExposedAreaGUID, meta);
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    eventBus.getMainEventBus().post(new FogChangedEvent(this));
   }
 
   /**

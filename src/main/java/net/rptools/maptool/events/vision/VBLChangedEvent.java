@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.events.vbl;
+package net.rptools.maptool.events.vision;
 
 import net.rptools.maptool.model.Zone;
 

@@ -42,7 +42,7 @@ import javax.swing.SwingWorker;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
-import net.rptools.maptool.events.vbl.VBLChangedEvent;
+import net.rptools.maptool.events.vision.VBLChangedEvent;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Direction;
