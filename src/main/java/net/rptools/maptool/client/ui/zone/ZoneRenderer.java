@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -105,6 +106,8 @@ import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarCellPoint;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.Asset;
@@ -235,6 +238,9 @@ public class ZoneRenderer extends JComponent
 
   private ZonePoint previousZonePoint;
 
+  /** The {@link MapToolEventBus} used for sending events. */
+  private final MapToolEventBus eventBus;
+
   public enum TokenMoveCompletion {
     TRUE,
     FALSE,
@@ -246,11 +252,12 @@ public class ZoneRenderer extends JComponent
    *
    * @param zone the zone of the ZoneRenderer
    */
-  public ZoneRenderer(Zone zone) {
+  public ZoneRenderer(Zone zone, MapToolEventBus mapToolEventBus) {
     if (zone == null) {
       throw new IllegalArgumentException("Zone cannot be null");
     }
     this.zone = zone;
+    eventBus = mapToolEventBus;
     zone.addModelChangeListener(new ZoneModelChangeListener());
 
     // The interval, in milliseconds, during which calls to repaint() will be debounced.
@@ -662,7 +669,7 @@ public class ZoneRenderer extends JComponent
     }
 
     if (vblTokenMoved) {
-      zone.tokenTopologyChanged();
+      eventBus.getMainEventBus().post(new VBLChangedEvent(zone));
     }
   }
 
@@ -4796,10 +4803,7 @@ public class ZoneRenderer extends JComponent
     public void modelChanged(ModelChangeEvent event) {
       Object evt = event.getEvent();
 
-      if (evt == Zone.Event.TOPOLOGY_CHANGED) {
-        flushFog();
-        flushLight();
-      }
+
       if (evt == Zone.Event.TOKEN_CHANGED
           || evt == Zone.Event.TOKEN_REMOVED
           || evt == Zone.Event.TOKEN_ADDED) {
@@ -5003,5 +5007,11 @@ public class ZoneRenderer extends JComponent
     } else {
       noise = null;
     }
+  }
+
+  @Subscribe
+  private void handleVBLChangedEvent(VBLChangedEvent event) {
+      flushFog();
+      flushLight();
   }
 }

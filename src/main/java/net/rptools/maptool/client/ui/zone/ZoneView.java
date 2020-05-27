@@ -40,6 +40,7 @@ import javax.swing.SwingWorker;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
+import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Direction;
@@ -846,24 +847,6 @@ public class ZoneView implements ModelChangeListener {
           }
         }
       }
-
-      // Moved this event to the bottom so we can check the other events
-      // since if a token that has VBL is added/removed/edited (rotated/moved/etc)
-      // it should also trip a Topology change
-      if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedVBL) {
-        tokenVisionCache.clear();
-        lightSourceCache.clear();
-        brightLightCache.clear();
-        drawableLightCache.clear();
-        personalBrightLightCache.clear();
-        personalDrawableLightCache.clear();
-        visibleAreaMap.clear();
-        topologyTree = null;
-        tokenTopology = null;
-        tokenVisibleAreaCache.clear();
-
-        // topologyAreaData = null; // Jamz: This isn't used, probably never completed code.
-      }
     }
   }
 
@@ -902,6 +885,20 @@ public class ZoneView implements ModelChangeListener {
     if (hasSight) visibleAreaMap.clear();
 
     return hasVBL;
+  }
+
+
+  private void handleVBLChangedEvent(VBLChangedEvent event) {
+    tokenVisionCache.clear();
+    lightSourceCache.clear();
+    brightLightCache.clear();
+    drawableLightCache.clear();
+    personalBrightLightCache.clear();
+    personalDrawableLightCache.clear();
+    visibleAreaMap.clear();
+    topologyTree = null;
+    tokenTopology = null;
+    tokenVisibleAreaCache.clear();
   }
 
   /** Has a single field: the visibleArea area */

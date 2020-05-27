@@ -79,6 +79,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.chat.NewTextMessageEvent;
 import net.rptools.maptool.events.zone.ZoneAddedEvent;
+import net.rptools.maptool.events.zone.ZoneRemovedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -965,6 +966,8 @@ public class MapTool {
         currRenderer = renderer;
       }
       eventBus.getMainEventBus().post(new ZoneAddedEvent(zone));
+      zone.setEventBus(eventBus);
+      zone.setEnableEvents(true);
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1112,7 +1115,8 @@ public class MapTool {
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
-    eventBus.getMainEventBus().post(new ZoneAddedEvent(zone));
+    eventBus.getMainEventBus().post(new ZoneRemovedEvent(zone));
+    zone.setEnableEvents(false);
 
     // Show the new zone
     if (changeZone) {

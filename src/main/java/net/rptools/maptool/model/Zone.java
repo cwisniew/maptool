@@ -41,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.events.initiative.InitiativeListReplacedEvent;
+import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.events.zone.GridChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -66,7 +67,6 @@ import org.apache.logging.log4j.Logger;
 public class Zone extends BaseModel {
 
   private static final Logger log = LogManager.getLogger(Zone.class);
-
   /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
     OFF,
@@ -86,7 +86,7 @@ public class Zone extends BaseModel {
     LABEL_ADDED,
     LABEL_REMOVED,
     LABEL_CHANGED,
-    TOPOLOGY_CHANGED,
+    //TOPOLOGY_CHANGED,
     //INITIATIVE_LIST_CHANGED,
     BOARD_CHANGED,
     TOKEN_EDITED, // the token was edited
@@ -226,6 +226,11 @@ public class Zone extends BaseModel {
 
   private TokenSelection tokenSelection = TokenSelection.ALL;
 
+  private transient MapToolEventBus eventBus;
+
+  /** Used to disable events until zone is actually added. */
+  private transient boolean enableEvents = false;
+
   // These are transitionary properties, very soon the width and height won't matter
   private int height;
   private int width;
@@ -345,6 +350,7 @@ public class Zone extends BaseModel {
    * @param keepIds Should the token ids stay the same.
    */
   public Zone(Zone zone, boolean keepIds) {
+
     backgroundPaint = zone.backgroundPaint;
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;
@@ -496,7 +502,7 @@ public class Zone extends BaseModel {
     this.grid = grid;
     grid.setZone(this);
     // tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
-    new MapToolEventBus().getMainEventBus().post(new GridChangedEvent(grid, this));
+    eventBus.getMainEventBus().post(new GridChangedEvent(grid, this));
   }
 
   public Grid getGrid() {
@@ -739,11 +745,11 @@ public class Zone extends BaseModel {
 
   public void clearTopology() {
     topology = new Area();
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    dispatchEvent(new VBLChangedEvent(this));
   }
 
   /**
-   * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
+   * Add the area to the topology, and fire a {@link VBLChangedEvent} event.
    *
    * @param area the area
    * @param topologyMode the mode of the topology
@@ -762,7 +768,7 @@ public class Zone extends BaseModel {
         break;
     }
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    dispatchEvent(new VBLChangedEvent(this));
   }
 
   public void addTopology(Area area) {
@@ -770,7 +776,7 @@ public class Zone extends BaseModel {
   }
 
   /**
-   * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
+   * Subtract the area from the topology, and fire a {@link VBLChangedEvent} event.
    *
    * @param area the area
    * @param topologyMode the mode of the topology
@@ -789,17 +795,13 @@ public class Zone extends BaseModel {
         break;
     }
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    dispatchEvent(new VBLChangedEvent(this));
   }
 
   public void removeTopology(Area area) {
     removeTopology(area, getTopologyMode());
   }
 
-  /** Fire the event TOPOLOGY_CHANGED. */
-  public void tokenTopologyChanged() {
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
 
   /** @return the topology of the zone */
   public Area getTopology() {
@@ -1986,8 +1988,7 @@ public class Zone extends BaseModel {
     }
   }
 
-  ////
-  // Backward compatibility
+  // Initialise transient fields and Backward compatibility
   @Override
   protected Object readResolve() {
     super.readResolve();
@@ -2115,5 +2116,35 @@ public class Zone extends BaseModel {
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
+  }
+
+  /**
+   * Sets the {@link MapToolEventBus} to be used for dispatching events.
+   * @param eventBus the {@link MapToolEventBus} to use.
+   */
+  public void setEventBus(MapToolEventBus eventBus) {
+    this.eventBus = eventBus;
+  }
+
+  /**
+   * Enables or disable dispatching of events. If {@link #setEventBus(MapToolEventBus)} has not
+   * previously been called this has no effect.
+   * @param enable {@code true} to enable sending of events, {@code false} to disanle sending of events.
+   */
+  public void setEnableEvents(boolean enable) {
+    enableEvents = enable;
+  }
+
+  /**
+   * Dispatches the event if the event bus has been set and event dispatching has been enabled.
+   * @param event the event to dispatch.
+   *
+   * @see #setEventBus(MapToolEventBus)
+   * @see #setEnableEvents(boolean)
+   */
+  private void dispatchEvent(Object event) {
+    if (enableEvents && eventBus != null) {
+      eventBus.getMainEventBus().post(event);
+    }
   }
 }

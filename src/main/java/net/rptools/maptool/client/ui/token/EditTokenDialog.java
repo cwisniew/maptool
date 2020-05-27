@@ -107,6 +107,8 @@ import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -154,9 +156,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private AutoGenerateVblSwingWorker autoGenerateVblSwingWorker =
       new AutoGenerateVblSwingWorker(false, Color.BLACK);
 
+  private final MapToolEventBus eventBus;
+
   /** Create a new token notes dialog. */
-  public EditTokenDialog() {
+  public EditTokenDialog(MapToolEventBus mapToolEventBus) {
     super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
+    eventBus = mapToolEventBus;
     panelInit();
   }
 
@@ -782,7 +787,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     MapTool.getFrame().resetTokenPanels();
 
     // Jamz: TODO check if VBL changed on token first
-    MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
+    eventBus.getMainEventBus().post(new VBLChangedEvent(MapTool.getFrame().getCurrentZoneRenderer().getZone()));
     return true;
   }
 

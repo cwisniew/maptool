@@ -782,7 +782,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   private EditTokenDialog getTokenPropertiesDialog() {
     if (tokenPropertiesDialog == null) {
-      tokenPropertiesDialog = new EditTokenDialog();
+      tokenPropertiesDialog = new EditTokenDialog(eventBus);
     }
     return tokenPropertiesDialog;
   }

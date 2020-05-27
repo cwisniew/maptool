@@ -52,6 +52,8 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -88,6 +90,8 @@ public class Token extends BaseModel implements Cloneable {
 
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID;
+
+  private transient MapToolEventBus eventBus = new MapToolEventBus();
 
   public enum TokenShape {
     TOP_DOWN("Top down"),
@@ -2360,6 +2364,9 @@ public class Token extends BaseModel implements Cloneable {
   @Override
   protected Object readResolve() {
     super.readResolve();
+
+    eventBus = new MapToolEventBus();
+
     // FJE: If the propertyMap field has something in it, it could be:
     // a pre-1.3b66 token that contains a HashMap<?,?>, or
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
@@ -2579,7 +2586,7 @@ public class Token extends BaseModel implements Cloneable {
       case setVBL:
         setVBL((Area) parameters[0]);
         if (!hasVBL()) { // if VBL removed
-          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
+          eventBus.getMainEventBus().post(new VBLChangedEvent(zone));
         }
         break;
       case setImageAsset:

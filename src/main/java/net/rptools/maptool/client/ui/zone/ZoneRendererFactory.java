@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.zone;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Zone;
 
 public class ZoneRendererFactory {
@@ -25,7 +26,7 @@ public class ZoneRendererFactory {
    * @return the new {@link ZoneRenderer}
    */
   public static ZoneRenderer newRenderer(Zone zone) {
-    ZoneRenderer renderer = new ZoneRenderer(zone);
+    ZoneRenderer renderer = new ZoneRenderer(zone, new MapToolEventBus());
     if (MapTool.getFrame() != null) {
       renderer.addOverlay(MapTool.getFrame().getPointerOverlay());
     }

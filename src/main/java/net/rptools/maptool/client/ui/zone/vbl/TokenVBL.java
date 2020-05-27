@@ -29,6 +29,8 @@ import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.vbl.VBLChangedEvent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
@@ -195,7 +197,7 @@ public class TokenVBL {
           .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     }
 
-    MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
+    new MapToolEventBus().getMainEventBus().post(new VBLChangedEvent(renderer.getZone()));
     renderer.repaint();
     return null;
   }
