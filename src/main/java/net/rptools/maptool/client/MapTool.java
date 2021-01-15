@@ -110,6 +110,9 @@ import org.apache.logging.log4j.core.config.Configurator;
 /** */
 public class MapTool {
 
+  private static String clientId = AppUtil.readClientId();
+
+
   private static final Logger log = LogManager.getLogger(MapTool.class);
 
   private static SentryClient sentry;
@@ -121,8 +124,6 @@ public class MapTool {
   private static final String SOUND_PROPERTIES = "net/rptools/maptool/client/sounds.properties";
 
   public static final String SND_INVALID_OPERATION = "invalidOperation";
-
-  private static String clientId = AppUtil.readClientId();
 
   public enum ZoneEvent {
     Added,

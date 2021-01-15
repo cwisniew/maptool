@@ -47,7 +47,7 @@ public class AppUtil {
 
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
+  private static Logger log;
   private static final String CLIENT_ID_FILE = "client-id";
   private static final String CONFIG_SUB_DIR = "config";
   private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
@@ -76,6 +76,7 @@ public class AppUtil {
 
   static {
     System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
+    log = LogManager.getLogger(AppUtil.class);
     packagerCfgFileName =
         getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
             ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
