@@ -77,6 +77,7 @@ import net.rptools.maptool.client.ui.StartServerDialog;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.SysInfoDialog;
+import net.rptools.maptool.client.ui.WhatsNewDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
@@ -3039,6 +3040,18 @@ public class AppActions {
               });
         }
       };
+
+  public static final Action WHATS_NEW =
+      new DefaultClientAction() {
+        {
+          init("action.whatsNew");
+        }
+
+        @Override
+        protected void executeAction() {
+          new WhatsNewDialog().show();
+        }
+  };
 
   public static final Action GATHER_DEBUG_INFO =
       new DefaultClientAction() {
