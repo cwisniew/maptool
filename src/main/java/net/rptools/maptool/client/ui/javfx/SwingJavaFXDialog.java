@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.javfx;
 
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -23,8 +24,11 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import java.util.concurrent.Callable;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -36,6 +40,8 @@ import javafx.scene.Parent;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Implements a Swing dialog with JavaFX contents. This is currently preferable to creating a top
@@ -46,10 +52,13 @@ import net.rptools.maptool.language.I18N;
  */
 public class SwingJavaFXDialog extends JDialog {
 
+  /** Class for log messages. */
+  private static final Logger log = LogManager.getLogger(SwingJavaFXDialog.class);
+
   /** Keeps track of if the dialog has already positioned itself. */
   private boolean hasPositionedItself;
 
-  private static final  ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
+
 
   /**
    * Creates a new modal {@code SwingJavaFXDialog}.
@@ -63,6 +72,7 @@ public class SwingJavaFXDialog extends JDialog {
   public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel) {
     this(title, parent, panel, true);
   }
+
 
   /**
    * Creates a new {@code SwingJavaFXDialog}.
@@ -141,23 +151,6 @@ public class SwingJavaFXDialog extends JDialog {
                         closeDialog();
                       }
                     });
-
-    Task<Parent> loadFXMLTask = new Task<>() {
-      @Override
-      protected Parent call() {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource(fxmlPath), RESOURCE_BUNDLE
-        );
-        try {
-          return loader.load();
-        } catch (IOException e) {
-          MapTool.showError(I18N.getText("error.unableToLoadFXML", fxmlPath), e);
-          return null;
-        }
-      }
-    };
-
-    loadFXMLTask.setOnSucceeded();
 
 
   }

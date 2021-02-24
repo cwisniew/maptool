@@ -1,21 +1,18 @@
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.whatsnew;
 
+import java.io.IOException;
 import javax.swing.SwingUtilities;
 
-import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.javfx.FXMLLoaderUtil;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 
 public class WhatsNewDialog {
 
   private final String whatsNew;
+  private static final String FXML_PATH = "/net/rptools/maptool/client/ui/fxml/WhatsNew.fxml";
 
 
   public WhatsNewDialog(String content) {
@@ -24,25 +21,12 @@ public class WhatsNewDialog {
 
 
   public void show() {
-    if (SwingUtilities.isEventDispatchThread()) {
-      showEDT();
-    } else {
-      SwingUtilities.invokeLater(this::showEDT);
-    }
+    FXMLLoaderUtil loaderUtil = new FXMLLoaderUtil();
+    loaderUtil.jfxPanelFromFXML(FXML_PATH, this::showEDT);
   }
 
 
-  private void showEDT() {
-      JFXPanel panel = new JFXPanel();
-      Platform.runLater(() -> {
-        Group root = new Group();
-        Scene scene = new Scene(root);
-        Text text = new Text("This is a test");
-        root.getChildren().add(text);
-
-        panel.setScene(scene);
-
-      });
+  private void showEDT(JFXPanel panel) {
     SwingJavaFXDialog dialog = new SwingJavaFXDialog(I18N.getText("action.whatsNew.title"), MapTool.getFrame(), panel);
     dialog.showDialog();
   }

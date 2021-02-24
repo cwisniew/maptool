@@ -8,7 +8,7 @@ import java.util.Locale;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.ui.WhatsNewDialog;
+import net.rptools.maptool.client.ui.whatsnew.WhatsNewDialog;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
