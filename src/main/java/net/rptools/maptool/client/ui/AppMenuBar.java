@@ -389,6 +389,8 @@ public class AppMenuBar extends JMenuBar {
       menu.addSeparator();
     }
     menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
+    menu.addSeparator();
+    menu.add(new JMenuItem(AppActions.WHATS_NEW));
 
     // Jamz: Box2d Testing...
     // menu.addSeparator();

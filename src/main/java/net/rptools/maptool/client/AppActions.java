@@ -3049,7 +3049,7 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-          new WhatsNewDialog().show();
+          new WhatsNew().display();
         }
   };
 

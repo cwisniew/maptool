@@ -1,6 +1,7 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -41,14 +42,42 @@ public class WhatsNew {
     String languageCode = Locale.getDefault().getLanguage();
     lastReadMD5Path = whatsNewDir.resolve(FILE_PREFIX + "-" + languageCode + MD5_SUFFIX);
     whatsNewFile = whatsNewDir.resolve(FILE_PREFIX + "-" + languageCode + FILE_SUFFIX);
-    whatsNewURL = WHATS_NEW_URL_BASE + FILE_PREFIX + "-" + languageCode + FILE_SUFFIX);
+    whatsNewURL = WHATS_NEW_URL_BASE + FILE_PREFIX + "-" + languageCode + FILE_SUFFIX;
     whatsNewFallBackURL = WHATS_NEW_URL_BASE + FILE_PREFIX + "-" + FALLBACK_LANG_CODE + FILE_SUFFIX;
   }
 
 
   public void fetchBackgroundAndDisplay() {
+    new Thread(() -> {
+      fetch();
+      MD5Key current = getWhatsNewMD5();
+      MD5Key last = getLastReadMD5();
+      if (last == null || !last.equals(current)) {
+        display();
+        updateLastReadMD5(current);
+      }
+    }).start();
+  }
 
+  private void updateLastReadMD5(MD5Key current) {
+    try {
+      Files.writeString(lastReadMD5Path, current.toString());
+    } catch (IOException e) {
+      log.error("Unable to read file containing last read 'whats new' details", e);
+    }
+  }
 
+  private MD5Key getLastReadMD5() {
+    if (!lastReadMD5Path.toFile().exists()) {
+      return null;
+    }
+    try {
+      String last = Files.readString(lastReadMD5Path);
+      return new MD5Key(last.getBytes(StandardCharsets.UTF_8));
+    } catch (IOException e) {
+      log.error("Unable to read file containing last read 'whats new' details", e);
+      return null;
+    }
   }
 
   public void fetchBackground() {
@@ -111,7 +140,7 @@ public class WhatsNew {
   }
 
   private synchronized void calcWhatsNewMD5(String wnText) {
-    whatsNewMD5 = new MD5Key(wnText);
+    whatsNewMD5 = new MD5Key(wnText.getBytes(StandardCharsets.UTF_8));
   }
 
   private synchronized MD5Key getWhatsNewMD5() {

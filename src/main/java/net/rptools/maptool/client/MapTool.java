@@ -1337,6 +1337,8 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+
+    new WhatsNew().fetchBackgroundAndDisplay();
   }
 
   /**
