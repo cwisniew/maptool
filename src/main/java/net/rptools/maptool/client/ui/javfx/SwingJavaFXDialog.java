@@ -20,13 +20,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.util.ResourceBundle;
+
+import javafx.concurrent.Task;
 import javafx.embed.swing.JFXPanel;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 
 /**
  * Implements a Swing dialog with JavaFX contents. This is currently preferable to creating a top
@@ -39,6 +48,8 @@ public class SwingJavaFXDialog extends JDialog {
 
   /** Keeps track of if the dialog has already positioned itself. */
   private boolean hasPositionedItself;
+
+  private static final  ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
 
   /**
    * Creates a new modal {@code SwingJavaFXDialog}.
@@ -95,6 +106,60 @@ public class SwingJavaFXDialog extends JDialog {
                 closeDialog();
               }
             });
+  }
+
+  public SwingJavaFXDialog(String title, Frame parent, String fxmlPath, boolean modal) {
+    super(parent, title, modal);
+
+    if (!SwingUtilities.isEventDispatchThread()) {
+      throw new IllegalStateException("SwingJavaFXDialog must be created on the Swing EDT thread.");
+    }
+
+    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+    setLayout(new GridLayout());
+
+    JFXPanel panel = new JFXPanel();
+    add(panel);
+    addWindowListener(
+            new WindowAdapter() {
+              @Override
+              public void windowClosing(WindowEvent e) {
+                closeDialog();
+              }
+            });
+    // ESCAPE cancels the window without committing
+    panel
+            .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
+    panel
+            .getActionMap()
+            .put(
+                    "cancel",
+                    new AbstractAction() {
+                      public void actionPerformed(ActionEvent e) {
+                        closeDialog();
+                      }
+                    });
+
+    Task<Parent> loadFXMLTask = new Task<>() {
+      @Override
+      protected Parent call() {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource(fxmlPath), RESOURCE_BUNDLE
+        );
+        try {
+          return loader.load();
+        } catch (IOException e) {
+          MapTool.showError(I18N.getText("error.unableToLoadFXML", fxmlPath), e);
+          return null;
+        }
+      }
+    };
+
+    loadFXMLTask.setOnSucceeded();
+
+
   }
 
   /**

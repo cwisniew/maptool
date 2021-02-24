@@ -1,4 +1,4 @@
-package net.rptools.maptool.client;
+package net.rptools.maptool.client.ui.whatsnew;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.ui.WhatsNewDialog;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
