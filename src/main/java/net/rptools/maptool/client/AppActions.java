@@ -87,6 +87,7 @@ import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
+import net.rptools.maptool.client.ui.macrolibraries.MacroLibrariesDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -3065,6 +3066,17 @@ public class AppActions {
                 AddResourceDialog dialog = new AddResourceDialog();
                 dialog.showDialog();
               });
+        }
+      };
+
+  public static final Action MACRO_LIBRARIES =
+      new DefaultClientAction() {
+        {
+          init("action.macroLibraries");
+        }
+        @Override
+        protected void executeAction() {
+          new MacroLibrariesDialog().show();
         }
       };
 
