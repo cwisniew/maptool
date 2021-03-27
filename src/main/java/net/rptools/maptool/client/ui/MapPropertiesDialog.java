@@ -44,6 +44,8 @@ import net.rptools.maptool.model.HexGridVertical;
 import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.AStarRoundingOptions;
+import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -285,13 +287,13 @@ public class MapPropertiesDialog extends JDialog {
         StringUtil.parseInteger(
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
 
-    zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setVisionType((VisionType) getVisionTypeCombo().getSelectedItem());
     zone.setAStarRounding(
-        (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
+        (AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
-    zone.setMapAsset(mapAsset != null ? mapAsset.getId() : null);
+    zone.setMapAsset(mapAsset != null ? mapAsset.getMD5Key() : null);
     // TODO: Handle grid type changes
   }
 
@@ -703,7 +705,7 @@ public class MapPropertiesDialog extends JDialog {
       }
       // Map
       if (mapAsset != null) {
-        BufferedImage image = ImageManager.getImageAndWait(mapAsset.getId());
+        BufferedImage image = ImageManager.getImageAndWait(mapAsset.getMD5Key());
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
         SwingUtil.constrainTo(imgSize, size.width - 10 * 4, size.height - 10 * 4);
 

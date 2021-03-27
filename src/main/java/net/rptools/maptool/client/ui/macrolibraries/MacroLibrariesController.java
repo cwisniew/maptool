@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.macrolibraries;
 
 import java.net.URL;
@@ -38,13 +52,19 @@ public class MacroLibrariesController {
 
   @FXML // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
-    assert installedLibrariesList != null : "fx:id=\"installedLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert availableLibrariesList != null : "fx:id=\"availableLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert librariesWebView != null : "fx:id=\"librariesWebView\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert updateAllButton != null : "fx:id=\"updateAllButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert addFromURLButton1 != null : "fx:id=\"addFromURLButton1\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert addLocalButton != null : "fx:id=\"addLocalButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert closeButton != null : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-
+    assert installedLibrariesList != null
+        : "fx:id=\"installedLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert availableLibrariesList != null
+        : "fx:id=\"availableLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert librariesWebView != null
+        : "fx:id=\"librariesWebView\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert updateAllButton != null
+        : "fx:id=\"updateAllButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert addFromURLButton1 != null
+        : "fx:id=\"addFromURLButton1\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert addLocalButton != null
+        : "fx:id=\"addLocalButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert closeButton != null
+        : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
   }
 }

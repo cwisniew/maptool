@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
@@ -339,11 +340,15 @@ public class AppActions {
             for (Asset asset : assetSet) {
 
               // Index it
-              builder.append(asset.getId()).append(" assets/").append(asset.getId()).append("\n");
+              builder
+                  .append(asset.getMD5Key())
+                  .append(" assets/")
+                  .append(asset.getMD5Key())
+                  .append("\n");
               // Save it
-              ZipEntry entry = new ZipEntry("assets/" + asset.getId().toString());
+              ZipEntry entry = new ZipEntry("assets/" + asset.getMD5Key().toString());
               out.putNextEntry(entry);
-              out.write(asset.getImage());
+              out.write(asset.getData());
             }
 
             // Handle the index
@@ -473,12 +478,12 @@ public class AppActions {
             ftp.setEnabled(true);
             ProgressBarList pbl = new ProgressBarList(MapTool.getFrame(), ftp, missing.size() + 1);
 
-            for (Map.Entry<MD5Key, Asset> entry : missing.entrySet()) {
+            for (Entry<MD5Key, Asset> entry : missing.entrySet()) {
               String remote = entry.getKey().toString();
               repoEntries.put(remote, new File(dir, remote).getPath());
               ftp.addToQueue(
                   new FTPTransferObject(
-                      Direction.FTP_PUT, entry.getValue().getImage(), dir, remote));
+                      Direction.FTP_PUT, entry.getValue().getMD5Key(), dir, remote));
             }
             // We're done with "missing", so empty it now.
             missing.clear();
@@ -2948,8 +2953,8 @@ public class AppActions {
 
     public QuickMapAction(String name, File imagePath) {
       try {
-        Asset asset = new Asset(name, FileUtils.readFileToByteArray(imagePath));
-        assetId = asset.getId();
+        Asset asset = Asset.createImageAsset(name, FileUtils.readFileToByteArray(imagePath));
+        assetId = asset.getMD5Key();
 
         // Make smaller
         BufferedImage iconImage =
@@ -2967,7 +2972,7 @@ public class AppActions {
         AssetManager.putAsset(asset);
 
         // But don't use up any extra memory
-        AssetManager.removeAsset(asset.getId());
+        AssetManager.removeAsset(asset.getMD5Key());
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
@@ -2981,7 +2986,7 @@ public class AppActions {
             Asset asset = AssetManager.getAsset(assetId);
 
             Zone zone = ZoneFactory.createZone();
-            zone.setBackgroundPaint(new DrawableTexturePaint(asset.getId()));
+            zone.setBackgroundPaint(new DrawableTexturePaint(asset.getMD5Key()));
             zone.setName(asset.getName());
 
             MapTool.addZone(zone);
@@ -3074,6 +3079,7 @@ public class AppActions {
         {
           init("action.macroLibraries");
         }
+
         @Override
         protected void executeAction() {
           new MacroLibrariesDialog().show();

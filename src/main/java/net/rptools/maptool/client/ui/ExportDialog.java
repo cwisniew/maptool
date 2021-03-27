@@ -48,6 +48,7 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -762,7 +763,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // This will be later modified by the fog (for players),
     // and by the tiling texture (for re-importing)
     //
-    Player.Role viewRole = viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM;
+    Role viewRole = viewAsPlayer ? Role.PLAYER : Role.GM;
     PlayerView view = renderer.getPlayerView(viewRole, false);
     Rectangle extents = renderer.zoneExtents(view);
     try {
@@ -802,7 +803,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       int tileX = 0, tileY = 0;
 
       if (paint.getClass() == dummy.getClass()) {
-        Image bgTexture = ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getId());
+        Image bgTexture =
+            ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getMD5Key());
         tileX = bgTexture.getWidth(null);
         tileY = bgTexture.getHeight(null);
         int x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
