@@ -30,7 +30,7 @@ public class FXMLLoaderUtil {
   private static final ResourceBundle RESOURCE_BUNDLE =
       ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
 
-  public void parentFromFXML(String fxmlPath, BiConsumer<Parent, Object> callback) {
+  public void parentFromFXML(String fxmlPath, BiConsumer<Parent, SwingJavaFXDialogController> callback) {
     Platform.runLater(
         () -> {
           JFXPanel panel = new JFXPanel();
@@ -39,7 +39,7 @@ public class FXMLLoaderUtil {
           Parent parentControl = null;
           try {
             parentControl = loader.load();
-            Object controller = loader.getController();
+            SwingJavaFXDialogController controller = loader.getController();
             callback.accept(parentControl, controller);
           } catch (IOException e) {
             MapTool.showError(I18N.getText("javafx.error.errorLoadingFXML", fxmlPath), e);
@@ -47,7 +47,7 @@ public class FXMLLoaderUtil {
         });
   }
 
-  public void jfxPanelFromFXML(String fxmlPath, BiConsumer<JFXPanel, Object> callback) {
+  public void jfxPanelFromFXML(String fxmlPath, BiConsumer<JFXPanel, SwingJavaFXDialogController> callback) {
     Platform.runLater(
         () -> {
           JFXPanel panel = new JFXPanel();

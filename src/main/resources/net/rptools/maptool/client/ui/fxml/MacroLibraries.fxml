@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.web.WebView?>
 
-
 <BorderPane xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.macrolibraries.MacroLibrariesController">
    <center>
       <SplitPane dividerPositions="0.27424749163879597" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
@@ -20,12 +19,12 @@
                <children>
                   <TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <tabs>
-                        <Tab text="%macro.libraries.installed">
+                        <Tab closable="false" text="%macro.libraries.installed">
                            <content>
                               <ListView fx:id="installedLibrariesList" prefHeight="200.0" prefWidth="200.0" />
                            </content>
                         </Tab>
-                        <Tab text="%macro.libraries.available">
+                        <Tab closable="false" text="%macro.libraries.available">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -52,7 +51,7 @@
             <Button fx:id="updateAllButton" mnemonicParsing="false" text="%macro.libraries.updateAll" />
             <Button fx:id="addFromURLButton1" mnemonicParsing="false" text="%macro.libraries.addFromURL" />
             <Button fx:id="addLocalButton" mnemonicParsing="false" text="%macro.libraries.addLocal" />
-            <Button fx:id="closeButton" mnemonicParsing="false" text="%macro.libraries.close">
+            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#closeButtonAction" text="%macro.libraries.close">
                <HBox.margin>
                   <Insets />
                </HBox.margin>

@@ -16,12 +16,20 @@ package net.rptools.maptool.client.ui.macrolibraries;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.web.WebView;
+import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
+import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 
-public class MacroLibrariesController {
+public class MacroLibrariesController implements SwingJavaFXDialogController {
+
+  /** Concurrent hash map for listeners */
+  private final KeySetView<SwingJavaFXDialogEventHandler, Boolean> eventHandlers = ConcurrentHashMap.newKeySet();
 
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
@@ -66,5 +74,25 @@ public class MacroLibrariesController {
         : "fx:id=\"addLocalButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
     assert closeButton != null
         : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+  }
+
+  @FXML
+  void closeButtonAction(ActionEvent event) {
+    eventHandlers.forEach(h -> h.close(this));
+  }
+
+  @Override
+  public void registerEventHandler(SwingJavaFXDialogEventHandler handler) {
+    eventHandlers.add(handler);
+  }
+
+  @Override
+  public void deregisterEventHandler(SwingJavaFXDialogEventHandler handler) {
+    eventHandlers.remove(handler);
+  }
+
+  @Override
+  public void init() {
+    // TODO: CDW
   }
 }
