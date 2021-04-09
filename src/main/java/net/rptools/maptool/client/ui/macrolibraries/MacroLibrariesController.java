@@ -24,7 +24,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.web.WebView;
-import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 
@@ -62,12 +61,6 @@ public class MacroLibrariesController implements SwingJavaFXDialogController {
   @FXML
     // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
-    assert updateAllButton
-        != null : "fx:id=\"updateAllButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert addFromURLButton1
-        != null : "fx:id=\"addFromURLButton1\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert addLocalButton
-        != null : "fx:id=\"addLocalButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
     assert closeButton
         != null : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
     assert installedLibrariesList
@@ -91,12 +84,6 @@ public class MacroLibrariesController implements SwingJavaFXDialogController {
   @FXML
   void addFromURLAction(ActionEvent event) {
     System.out.println("addURL");
-  }
-
-  @FXML
-  void createAction(ActionEvent event) {
-    SwingUtilities.invokeLater(() -> new MacroLibraryEditDialog().show());
-    System.out.println("create");
   }
 
   @Override

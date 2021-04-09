@@ -38,9 +38,6 @@
    <bottom>
       <HBox alignment="CENTER" fillHeight="false" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="updateAllButton" mnemonicParsing="false" text="%macro.libraries.updateAll" />
-            <Button fx:id="addFromURLButton1" mnemonicParsing="false" text="%macro.libraries.addFromURL" />
-            <Button fx:id="addLocalButton" mnemonicParsing="false" text="%macro.libraries.addLocal" />
             <Button fx:id="closeButton" mnemonicParsing="false" onAction="#closeButtonAction" text="%macro.libraries.close">
                <HBox.margin>
                   <Insets />
@@ -61,7 +58,6 @@
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#addLocalAction" text="%macro.libraries.addLocal" />
                 <MenuItem mnemonicParsing="false" onAction="#addFromURLAction" text="%macro.libraries.addFromURL" />
-                  <MenuItem mnemonicParsing="false" onAction="#createAction" text="%macro.libraries.create" />
               </items>
             </MenuButton>
          </children>
