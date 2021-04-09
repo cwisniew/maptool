@@ -91,7 +91,6 @@ import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
-import net.rptools.maptool.webapi.MTWebAppServer;
 import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
@@ -170,8 +169,6 @@ public class MapTool {
   private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
-
-  private static final MTWebAppServer webAppServer = new MTWebAppServer();
 
   // Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
   private static boolean debug = false;
@@ -1373,26 +1370,6 @@ public class MapTool {
       return AppPreferences.getUseToolTipForInlineRoll();
     } else {
       return getServerPolicy().getUseToolTipsForDefaultRollFormat();
-    }
-  }
-
-  public static MTWebAppServer getWebAppServer() {
-    return webAppServer;
-  }
-
-  public static void startWebAppServer(final int port) {
-    try {
-      Thread webAppThread =
-          new Thread(
-              () -> {
-                webAppServer.setPort(port);
-                webAppServer.startServer();
-              });
-
-      webAppThread.start();
-    } catch (Exception e) { // TODO: This needs to be logged
-      System.out.println("Unable to start web server");
-      e.printStackTrace();
     }
   }
 

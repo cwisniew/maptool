@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
@@ -40,7 +41,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
-import org.eclipse.jetty.util.StringUtil;
 
 @SuppressWarnings("serial")
 public class ButtonGroupPopupMenu extends JPopupMenu {
@@ -278,7 +278,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                       if (alreadyExists) {
                         String tokenName = token.getName();
-                        if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                        if (MapTool.getPlayer().isGM() &&  !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
                           tokenName = tokenName + "(" + token.getGMName() + ")";
                         }
                         alreadyExists =
@@ -301,7 +301,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                   }
                   if (alreadyExists) {
                     String tokenName = token.getName();
-                    if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                    if (MapTool.getPlayer().isGM() && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
                       tokenName += "(" + token.getGMName() + ")";
                     }
                     alreadyExists =
@@ -358,7 +358,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               List<MacroButtonProperties> toAdd = new ArrayList<>(newButtonProps.size());
               int nextIndex = token.getMacroNextIndex();
               String tokenName = token.getName();
-              if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+              if (MapTool.getPlayer().isGM() && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
                 tokenName = tokenName + "(" + token.getGMName() + ")";
               }
               for (MacroButtonProperties nextProps : newButtonProps) {

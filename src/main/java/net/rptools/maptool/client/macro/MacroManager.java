@@ -78,7 +78,6 @@ public class MacroManager {
     registerMacro(new ChangeColorMacro());
     registerMacro(new WhisperReplyMacro());
     registerMacro(new EmotePluralMacro());
-    registerMacro(new ExperimentsMacro());
     registerMacro(new TextureNoise());
     registerMacro(new VersionMacro());
     registerMacro(new AboutMacro());
