@@ -434,8 +434,9 @@ public final class Asset {
    * @return replacement object on read.
    */
   Object readResolve() {
-    byte[] dataVal;
-    dataVal = Objects.requireNonNullElseGet(this.data, () -> new byte[0]);
-    return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type);
+    byte[] dataVal = Objects.requireNonNullElseGet(this.data, () -> new byte[0]);
+    // If we have no type default to Image for compatibility
+    Type type = Objects.requireNonNullElse(this.type, Type.IMAGE);
+    return new Asset(this.md5Key, this.name, dataVal, this.extension, type);
   }
 }
