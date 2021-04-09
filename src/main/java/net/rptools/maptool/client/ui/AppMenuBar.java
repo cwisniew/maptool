@@ -97,7 +97,6 @@ public class AppMenuBar extends JMenuBar {
     fileMenu.add(createExportMenu());
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(AppActions.ADD_RESOURCE_TO_LIBRARY));
-    fileMenu.add(new JMenuItem(AppActions.MACRO_LIBRARIES));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(AppActions.START_SERVER));
     fileMenu.add(new JMenuItem(AppActions.CONNECT_TO_SERVER));
@@ -201,6 +200,8 @@ public class AppMenuBar extends JMenuBar {
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ZOOM_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ENFORCE_NOTIFICATION, menu));
 
+    menu.add(new JSeparator());
+    menu.add(new JMenuItem(AppActions.MACRO_LIBRARIES));
     menu.add(new JSeparator());
 
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_COLLECT_PROFILING_DATA, menu));

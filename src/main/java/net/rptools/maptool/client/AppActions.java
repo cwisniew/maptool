@@ -1314,6 +1314,18 @@ public class AppActions {
         }
       };
 
+  public static final Action MACRO_LIBRARIES =
+      new DefaultClientAction() {
+        {
+          init("action.macroLibraries");
+        }
+
+        @Override
+        protected void executeAction() {
+          new MacroLibrariesDialog().show();
+        }
+      };
+
   /** This is the menu option that forces the player view to continuously track the GM view. */
   public static final Action TOGGLE_LINK_PLAYER_VIEW =
       new AdminClientAction() {
@@ -3074,17 +3086,7 @@ public class AppActions {
         }
       };
 
-  public static final Action MACRO_LIBRARIES =
-      new DefaultClientAction() {
-        {
-          init("action.macroLibraries");
-        }
 
-        @Override
-        protected void executeAction() {
-          new MacroLibrariesDialog().show();
-        }
-      };
 
   public static final Action EXIT =
       new DefaultClientAction() {

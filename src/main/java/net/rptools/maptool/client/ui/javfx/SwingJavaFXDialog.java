@@ -17,10 +17,14 @@ package net.rptools.maptool.client.ui.javfx;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.layout.StackPane;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -78,7 +82,6 @@ public class SwingJavaFXDialog extends JDialog {
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
     setLayout(new GridLayout());
-
     add(panel);
     addWindowListener(
         new WindowAdapter() {
@@ -86,6 +89,7 @@ public class SwingJavaFXDialog extends JDialog {
           public void windowClosing(WindowEvent e) {
             closeDialog();
           }
+
         });
     // ESCAPE cancels the window without committing
     panel
@@ -100,6 +104,13 @@ public class SwingJavaFXDialog extends JDialog {
                 closeDialog();
               }
             });
+    addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(ComponentEvent e) {
+        super.componentResized(e);
+        revalidate();
+      }
+    });
   }
 
   public SwingJavaFXDialog(String title, Frame parent, String fxmlPath, boolean modal) {
