@@ -25,23 +25,18 @@ import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.language.I18N;
 
-/**
- * Class that displays and manages the dialog for Macro libraries.
- */
+/** Class that displays and manages the dialog for Macro libraries. */
 public class MacroLibrariesDialog {
   /** The path of the FXML file for the dialog. */
   private static final String FXML_PATH = "/net/rptools/maptool/client/ui/fxml/MacroLibraries.fxml";
   /** The {@link SwingJavaFXDialog} used to display the dialog. */
   private SwingJavaFXDialog dialog;
 
-
-  /**
-   * Shows the dialog and its contents.
-   * This method must be called on the Swing Event thread.
-   */
+  /** Shows the dialog and its contents. This method must be called on the Swing Event thread. */
   public void show() {
     if (!SwingUtilities.isEventDispatchThread()) {
-      throw new AssertionError("MacroLibrariesDialog.show() can only be called on the Swing thread.");
+      throw new AssertionError(
+          "MacroLibrariesDialog.show() can only be called on the Swing thread.");
     }
 
     FXMLLoaderUtil loaderUtil = new FXMLLoaderUtil();
@@ -49,15 +44,16 @@ public class MacroLibrariesDialog {
   }
 
   /**
-   * Displays the contents of the {@link JFXPanel} in a {@link SwingJavaFXDialog}.
-   * This method must be called on the Swing EDT thread.
+   * Displays the contents of the {@link JFXPanel} in a {@link SwingJavaFXDialog}. This method must
+   * be called on the Swing EDT thread.
    *
    * @param panel the panel to display in the dialog.
    * @param controller the controller class for the dialog.
    */
   private void showEDT(JFXPanel panel, SwingJavaFXDialogController controller) {
     if (!SwingUtilities.isEventDispatchThread()) {
-      throw new AssertionError("MacroLibrariesDialog.showEDT() can only be called on the Swing thread.");
+      throw new AssertionError(
+          "MacroLibrariesDialog.showEDT() can only be called on the Swing thread.");
     }
     dialog =
         new SwingJavaFXDialog(
@@ -67,23 +63,24 @@ public class MacroLibrariesDialog {
           controller.registerEventHandler(this::closeDialog);
           controller.init();
         });
-    dialog.addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosed(WindowEvent e) {
-        controller.deregisterEventHandler(MacroLibrariesDialog.this::closeDialog);
-        e.getWindow().dispose();
-      }
-    });
+    dialog.addWindowListener(
+        new WindowAdapter() {
+          @Override
+          public void windowClosed(WindowEvent e) {
+            controller.deregisterEventHandler(MacroLibrariesDialog.this::closeDialog);
+            e.getWindow().dispose();
+          }
+        });
     dialog.showDialog();
   }
 
   /**
-   * This method closes the dialog.
-   * It is safe to call this method on any thread.
+   * This method closes the dialog. It is safe to call this method on any thread.
+   *
    * @param controller the controller for the JavaFX gui.
    */
   private void closeDialog(SwingJavaFXDialogController controller) {
-    if (SwingUtilities.isEventDispatchThread())  {
+    if (SwingUtilities.isEventDispatchThread()) {
       closeDialogEDT(controller);
     } else {
       SwingUtilities.invokeLater(() -> closeDialogEDT(controller));
@@ -91,13 +88,14 @@ public class MacroLibrariesDialog {
   }
 
   /**
-   * This method closes the dialog
-   * It must be called only on the Swing EDT thread.
+   * This method closes the dialog It must be called only on the Swing EDT thread.
+   *
    * @param controller the controller for the JavaFX gui.
    */
   private void closeDialogEDT(SwingJavaFXDialogController controller) {
     if (!SwingUtilities.isEventDispatchThread()) {
-      throw new AssertionError("MacroLibrariesDialog.showEDT() can only be called on the Swing thread.");
+      throw new AssertionError(
+          "MacroLibrariesDialog.showEDT() can only be called on the Swing thread.");
     }
     dialog.closeDialog();
   }

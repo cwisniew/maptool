@@ -12,15 +12,23 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.macro.libraries;
+package net.rptools.maptool.webapi.macrolibrary;
 
-public class DataValue {
+import static io.undertow.servlet.Servlets.servlet;
 
-  public enum DataType {
-    JSON,
-    STRING,
-    NUMBER
+import io.undertow.servlet.api.ServletInfo;
+import java.util.Arrays;
+import java.util.Collection;
+
+public class MacroLibraryServletServer {
+
+  private final ServletInfo[] servlets = {
+      servlet("MacroLibraryServlet", MacroLibraryServlet.class)
+          .addMapping("/frameworks/*")
+  };
+
+  public Collection<ServletInfo> getServlets() {
+    return Arrays.asList(servlets);
   }
 
-  public static final DataValue UNDEFINED = new DataValue();
 }

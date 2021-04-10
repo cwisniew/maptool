@@ -278,7 +278,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                       if (alreadyExists) {
                         String tokenName = token.getName();
-                        if (MapTool.getPlayer().isGM() &&  !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
+                        if (MapTool.getPlayer().isGM()
+                            && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
                           tokenName = tokenName + "(" + token.getGMName() + ")";
                         }
                         alreadyExists =
@@ -301,7 +302,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                   }
                   if (alreadyExists) {
                     String tokenName = token.getName();
-                    if (MapTool.getPlayer().isGM() && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
+                    if (MapTool.getPlayer().isGM()
+                        && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
                       tokenName += "(" + token.getGMName() + ")";
                     }
                     alreadyExists =
@@ -358,7 +360,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               List<MacroButtonProperties> toAdd = new ArrayList<>(newButtonProps.size());
               int nextIndex = token.getMacroNextIndex();
               String tokenName = token.getName();
-              if (MapTool.getPlayer().isGM() && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
+              if (MapTool.getPlayer().isGM()
+                  && !Objects.requireNonNullElse(token.getGMName(), "").isEmpty()) {
                 tokenName = tokenName + "(" + token.getGMName() + ")";
               }
               for (MacroButtonProperties nextProps : newButtonProps) {

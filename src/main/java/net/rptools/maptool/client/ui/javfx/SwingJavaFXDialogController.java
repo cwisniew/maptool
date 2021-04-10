@@ -15,26 +15,25 @@
 package net.rptools.maptool.client.ui.javfx;
 
 /**
- * This interface must be implemented by all JavaFX UI Controller classes that will be loaded
- * by the {@link FXMLLoaderUtil} class.
+ * This interface must be implemented by all JavaFX UI Controller classes that will be loaded by the
+ * {@link FXMLLoaderUtil} class.
  */
 public interface SwingJavaFXDialogController {
 
   /**
    * Registers an event handler that will be called when the defined events occur.
+   *
    * @param handler the event handler to call.
    */
   void registerEventHandler(SwingJavaFXDialogEventHandler handler);
 
   /**
    * Registers an event handler that will be called when the defined events occur.
+   *
    * @param handler the event handler to call.
    */
   void deregisterEventHandler(SwingJavaFXDialogEventHandler handler);
 
-
-  /**
-   * Initialize the contents of the JavaFX UI.
-   */
+  /** Initialize the contents of the JavaFX UI. */
   void init();
 }

@@ -277,6 +277,10 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
+    implementation 'io.undertow:undertow-core:2.2.7.Final'
+    implementation 'io.undertow:undertow-servlet:2.2.7.Final'
+    implementation 'io.undertow:undertow-websockets-jsr:2.0.36.Final'
+
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'

@@ -45,6 +45,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
+import javax.servlet.ServletException;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
@@ -91,6 +92,7 @@ import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
+import net.rptools.maptool.webapi.WebAppServer;
 import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
@@ -1741,6 +1743,11 @@ public class MapTool {
               });
         });
     // new Thread(new HeapSpy()).start();
+    try {
+      WebAppServer.createLocalWebAppServer(8080).start();
+    } catch (ServletException se) {
+      showWarning("Error starting webapp server", se);
+    }
   }
 
   private static void loadTheme()
