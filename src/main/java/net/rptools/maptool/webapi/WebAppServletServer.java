@@ -24,10 +24,8 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import javax.servlet.ServletException;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.webapi.general.MapToolServlet;
 import net.rptools.maptool.webapi.general.MapToolServletManager;
-import net.rptools.maptool.webapi.macrolibrary.MacroLibraryServletServer;
+import net.rptools.maptool.webapi.frameworks.FrameworkLibraryServletServer;
 
 public class WebAppServletServer {
 
@@ -44,7 +42,7 @@ public class WebAppServletServer {
             .setDeploymentName(DEPLOYMENT_NAME);
 
     new MapToolServletManager().getServlets().forEach(servletBuilder::addServlet);
-    new MacroLibraryServletServer().getServlets().forEach(servletBuilder::addServlet);
+    new FrameworkLibraryServletServer().getServlets().forEach(servletBuilder::addServlet);
 
     DeploymentManager deploymentManager = defaultContainer().addDeployment(servletBuilder);
     deploymentManager.deploy();

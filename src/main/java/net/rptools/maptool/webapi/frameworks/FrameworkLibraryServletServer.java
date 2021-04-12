@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.webapi.macrolibrary;
+package net.rptools.maptool.webapi.frameworks;
 
 import static io.undertow.servlet.Servlets.servlet;
 
@@ -20,10 +20,10 @@ import io.undertow.servlet.api.ServletInfo;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class MacroLibraryServletServer {
+public class FrameworkLibraryServletServer {
 
   private final ServletInfo[] servlets = {
-      servlet("MacroLibraryServlet", MacroLibraryServlet.class)
+      servlet("MacroLibraryServlet", FrameworkLibraryServlet.class)
           .addMapping("/frameworks/*")
   };
 

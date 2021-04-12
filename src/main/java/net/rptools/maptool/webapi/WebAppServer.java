@@ -16,8 +16,6 @@ package net.rptools.maptool.webapi;
 
 import io.undertow.Undertow;
 import javax.servlet.ServletException;
-import net.rptools.maptool.webapi.general.MapToolServletManager;
-import net.rptools.maptool.webapi.macrolibrary.MacroLibraryServletServer;
 
 public class WebAppServer {
 

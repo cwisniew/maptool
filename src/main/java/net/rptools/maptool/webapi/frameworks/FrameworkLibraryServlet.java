@@ -12,12 +12,15 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.webapi.macrolibrary;
+package net.rptools.maptool.webapi.frameworks;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import javax.servlet.ServletException;
@@ -25,7 +28,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class MacroLibraryServlet extends HttpServlet {
+public class FrameworkLibraryServlet extends HttpServlet {
 
   public static final String MESSAGE = "message";
 
@@ -50,6 +53,40 @@ public class MacroLibraryServlet extends HttpServlet {
 
     writer.close();
   }
+
+  @Override
+  protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    resp.setContentType("application/json");
+
+    JsonObject response = new JsonObject();
+    JsonObject frameworkData = null;
+
+    Map<String, String[]> parameterMap = req.getParameterMap();
+    if (!parameterMap.containsKey("frameworkInfo")) {
+      response.addProperty("status", "error");
+      response.addProperty("error", "frameworkInfo missing");
+    } else if (parameterMap.get("frameworkInfo").length > 1) {
+      response.addProperty("status", "error");
+      response.addProperty("error", "Invalid frameworkInfo");
+    } else {
+      try {
+        frameworkData = JsonParser.parseString(parameterMap.get("frameworkInfo")[0])
+            .getAsJsonObject();
+        response.addProperty("status", "ok");
+      } catch(JsonSyntaxException e) {
+        response.addProperty("status", "error");
+        response.addProperty("error", "Invalid frameworkInfo");
+      }
+    }
+    PrintWriter writer = resp.getWriter();
+    writer.write(response.toString());
+    writer.close();
+    if (frameworkData != null) {
+      System.out.println(frameworkData.toString());
+    }
+  }
+
 
   @Override
   protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
