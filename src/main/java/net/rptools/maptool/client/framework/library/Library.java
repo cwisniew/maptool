@@ -22,7 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.lib.MD5Key;
 
-public class Library {
+public class Library implments {
 
   private final UUID id;
   private final String name;
