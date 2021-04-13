@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.macrolibraries;
+package net.rptools.maptool.client.ui.framework;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -27,7 +27,7 @@ import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 
 /** Concurrent hash map for listeners */
-public class MacroLibrariesController implements SwingJavaFXDialogController {
+public class FrameworkLibrariesController implements SwingJavaFXDialogController {
 
   private final KeySetView<SwingJavaFXDialogEventHandler, Boolean> eventHandlers =
       ConcurrentHashMap.newKeySet();
@@ -59,11 +59,11 @@ public class MacroLibrariesController implements SwingJavaFXDialogController {
   // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
     assert closeButton != null
-        : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+        : "fx:id=\"closeButton\" was not injected: check your FXML file 'FrameworkLibraries.fxml'.";
     assert installedLibrariesList != null
-        : "fx:id=\"installedLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+        : "fx:id=\"installedLibrariesList\" was not injected: check your FXML file 'FrameworkLibraries.fxml'.";
     assert librariesWebView != null
-        : "fx:id=\"librariesWebView\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+        : "fx:id=\"librariesWebView\" was not injected: check your FXML file 'FrameworkLibraries.fxml'.";
   }
 
   @FXML

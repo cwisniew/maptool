@@ -14,20 +14,11 @@
  */
 package net.rptools.maptool.webapi.general;
 
-import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.servlet;
 
-import io.undertow.Handlers;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.PathHandler;
-import io.undertow.servlet.Servlets;
-import io.undertow.servlet.api.DeploymentInfo;
-import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletInfo;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import javax.servlet.ServletException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.webapi.WebAppServer;
 
@@ -39,12 +30,11 @@ public class MapToolServletManager {
   static final String PARAM_MAPTOOL_VERSION = "maptoolVersion";
   static final String PARAM_WEB_APP_VERSION = "webAppVersion";
 
-
   private final ServletInfo[] servlets = {
     servlet("MapToolServlet", MapToolServlet.class)
         .addInitParam(PARAM_MAPTOOL_VERSION, MapTool.getVersion())
-      .addInitParam(PARAM_WEB_APP_VERSION, WebAppServer.getWebAppVersion())
-      .addMapping("/version")
+        .addInitParam(PARAM_WEB_APP_VERSION, WebAppServer.getWebAppVersion())
+        .addMapping("/version")
   };
 
   public Collection<ServletInfo> getServlets() {

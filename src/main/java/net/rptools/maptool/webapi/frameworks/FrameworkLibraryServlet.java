@@ -18,15 +18,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class FrameworkLibraryServlet extends HttpServlet {
 
@@ -62,28 +63,20 @@ public class FrameworkLibraryServlet extends HttpServlet {
     JsonObject response = new JsonObject();
     JsonObject frameworkData = null;
 
-    Map<String, String[]> parameterMap = req.getParameterMap();
-    if (!parameterMap.containsKey("frameworkInfo")) {
+    try {
+    String reqBody = req.getReader().readLine();
+      frameworkData = JsonParser.parseString(reqBody).getAsJsonObject();
+      response.addProperty("status", "ok");
+    } catch (Exception e) {
+      System.out.println("Error: invalid framework info");
       response.addProperty("status", "error");
-      response.addProperty("error", "frameworkInfo missing");
-    } else if (parameterMap.get("frameworkInfo").length > 1) {
-      response.addProperty("status", "error");
-      response.addProperty("error", "Invalid frameworkInfo");
-    } else {
-      try {
-        frameworkData = JsonParser.parseString(parameterMap.get("frameworkInfo")[0])
-            .getAsJsonObject();
-        response.addProperty("status", "ok");
-      } catch(JsonSyntaxException e) {
-        response.addProperty("status", "error");
-        response.addProperty("error", "Invalid frameworkInfo");
-      }
+      response.addProperty("error", "invalid frameworkInfo");
     }
     PrintWriter writer = resp.getWriter();
     writer.write(response.toString());
     writer.close();
     if (frameworkData != null) {
-      System.out.println(frameworkData.toString());
+       // TODO: CD
     }
   }
 

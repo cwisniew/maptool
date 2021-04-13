@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.macrolibraries;
+package net.rptools.maptool.client.ui.framework;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -26,9 +26,9 @@ import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.language.I18N;
 
 /** Class that displays and manages the dialog for Macro libraries. */
-public class MacroLibrariesDialog {
+public class FrameworkLibrariesDialog {
   /** The path of the FXML file for the dialog. */
-  private static final String FXML_PATH = "/net/rptools/maptool/client/ui/fxml/MacroLibraries.fxml";
+  private static final String FXML_PATH = "/net/rptools/maptool/client/ui/fxml/FrameworkLibraries.fxml";
   /** The {@link SwingJavaFXDialog} used to display the dialog. */
   private SwingJavaFXDialog dialog;
 
@@ -67,7 +67,7 @@ public class MacroLibrariesDialog {
         new WindowAdapter() {
           @Override
           public void windowClosed(WindowEvent e) {
-            controller.deregisterEventHandler(MacroLibrariesDialog.this::closeDialog);
+            controller.deregisterEventHandler(FrameworkLibrariesDialog.this::closeDialog);
             e.getWindow().dispose();
           }
         });

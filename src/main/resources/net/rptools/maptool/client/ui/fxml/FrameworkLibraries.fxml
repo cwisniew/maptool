@@ -14,7 +14,7 @@
 <?import javafx.scene.web.WebView?>
 
 
-<BorderPane prefHeight="800.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.macrolibraries.MacroLibrariesController">
+<BorderPane prefHeight="800.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.framework.FrameworkLibrariesController">
    <center>
       <AnchorPane>
          <children>

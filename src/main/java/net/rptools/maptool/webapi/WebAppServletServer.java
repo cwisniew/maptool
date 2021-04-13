@@ -15,7 +15,6 @@
 package net.rptools.maptool.webapi;
 
 import static io.undertow.servlet.Servlets.defaultContainer;
-import static io.undertow.servlet.Servlets.servlet;
 
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -24,8 +23,8 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import javax.servlet.ServletException;
-import net.rptools.maptool.webapi.general.MapToolServletManager;
 import net.rptools.maptool.webapi.frameworks.FrameworkLibraryServletServer;
+import net.rptools.maptool.webapi.general.MapToolServletManager;
 
 public class WebAppServletServer {
 

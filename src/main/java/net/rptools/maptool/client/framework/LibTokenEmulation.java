@@ -12,7 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.macro.libraries;
+package net.rptools.maptool.client.framework;
+
+import net.rptools.maptool.client.framework.library.DataValue;
+import net.rptools.maptool.client.framework.library.Library;
+import net.rptools.maptool.client.framework.library.LibraryFunction;
 
 import java.util.Collection;
 import java.util.Collections;
