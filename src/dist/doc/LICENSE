@@ -10,9 +10,9 @@ and the GPL/LGPL only adds compatible requirements).  This license simply states
 if someone distributes binaries created from this source code, they must make the
 source code itself (with their modifications) available.  See the detailed text, below.
 
-The Apache license requires credit where credit is due, so each library has a "readme"
+The Apache license requires credit where credit is due, so each frameworkLibrary has a "readme"
 file that is part of the source distribution (and is included in the deployment packages)
-specifying the details for the relevant library.
+specifying the details for the relevant frameworkLibrary.
 
 The RPTools team originally felt that the "forced redistribution of source code" was too
 onerous, but in this day of ubiquitous high speed Internet connections, free web site

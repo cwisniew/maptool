@@ -14,27 +14,22 @@
  */
 package net.rptools.maptool.client.framework.library;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import net.rptools.lib.MD5Key;
+import net.rptools.lib.memento.Originator;
 
-public class Library implments {
+public class FrameworkLibrary implements Originator<FrameworkLibraryMemento> {
 
   private final UUID id;
   private final String name;
+  private final String namespace;
   private final String version;
   private final String gitHubUrl;
 
   private final Map<String, String> definedFunctions = new ConcurrentHashMap<>();
 
   private final Map<String, DataValue> dataValues = new ConcurrentHashMap<>();
-  private final Map<String, LibraryFunction> libraryFunctions = new ConcurrentHashMap<>();
-
-  private final Map<String, MD5Key> assetMap = new ConcurrentHashMap<>();
 
   private final boolean compatibilityMode;
 
@@ -45,12 +40,22 @@ public class Library implments {
    * @param name the name of the {@code Library}.
    * @param version the version of the {@code Library}.
    */
-  public Library(UUID id, String name, String version, String gitHubUrl, boolean compatible) {
+  public FrameworkLibrary(UUID id, String name, String namespace, String version, String gitHubUrl, boolean compatible) {
     this.id = id;
     this.name = name;
+    this.namespace = namespace;
     this.version = version;
     this.gitHubUrl = gitHubUrl;
     this.compatibilityMode = compatible;
+  }
+
+  public FrameworkLibrary(FrameworkLibraryMemento state) {
+    this(state.id(), state.name(), state.namespace(), state.version(), state.gitHubUrl(),
+        state.compatibilityMode());
+    definedFunctions.clear();
+    definedFunctions.putAll(state.definedFunctions());
+    dataValues.clear();
+    dataValues.putAll(state.dataValues());
   }
 
   public UUID getId() {
@@ -83,18 +88,16 @@ public class Library implments {
     definedFunctions.put(name, path);
   }
 
-  /**
-   * Returns the function at the specified path.
-   *
-   * @param path the path of the function.
-   * @return the function at the specified path/
-   */
-  public Optional<LibraryFunction> getFunction(String path) {
-    return Optional.ofNullable(libraryFunctions.get(path));
-  }
-
   public DataValue getData(String path) {
     return dataValues.getOrDefault(path, DataValue.UNDEFINED);
+  }
+
+  /**
+   * Returns the namespace of the library.
+   * @return the namespace of the library.
+   */
+  public String getNamespace() {
+    return namespace;
   }
 
   public void setData(String path, DataValue value) {
@@ -104,23 +107,18 @@ public class Library implments {
     dataValues.put(path, value);
   }
 
-  public Collection<String> getAssetPaths() {
-    return Collections.unmodifiableCollection(assetMap.keySet());
-  }
-
-  public Collection<MD5Key> getAssetKeys() {
-    return Collections.unmodifiableCollection(assetMap.values());
-  }
-
-  public void addLibraryFunction(String path, LibraryFunction function) {
-    libraryFunctions.put(path, function);
-  }
-
-  public void addAsset(String path, MD5Key key) {
-    assetMap.put(path, key);
-  }
-
   public boolean isStaticData(String path) {
     return path.startsWith("static.");
   }
+
+  @Override
+  public FrameworkLibraryMemento getState() {
+    FrameworkLibraryMementoBuilder builder = new FrameworkLibraryMementoBuilder();
+    builder.setId(id).setName(name).setNamespace(namespace).setVersion(version)
+        .setCompatibilityMode(compatibilityMode).setGitHubUrl(gitHubUrl)
+        .setDataValues(dataValues).setDefinedFunctions(definedFunctions);
+
+    return builder.build();
+  }
+
 }

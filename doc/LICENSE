@@ -13,9 +13,9 @@ this source code, they must make the source code itself (with their
 modifications) available.  See the detailed text, below.
 
 The Apache license requires credit where credit is due, so each
-library has a "readme" file that is part of the source distribution
+frameworkLibrary has a "readme" file that is part of the source distribution
 (and is included in the deployment packages) specifying the details
-for the relevant library.
+for the relevant frameworkLibrary.
 
 The original RPTools team felt that the "forced redistribution of
 source code" was too onerous, but in this day of ubiquitous high
@@ -29,7 +29,7 @@ at https://github.com/RPTools/ for more information on our team's
 current software projects.
 
 Included herein are summaries of each license; see the specified readme
-file for a particular library for details.
+file for a particular frameworkLibrary for details.
 
 ============================================================================
 The Apache Software License, Version 2.0

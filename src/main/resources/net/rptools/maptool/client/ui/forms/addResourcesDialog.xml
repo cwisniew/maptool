@@ -1422,7 +1422,7 @@
                               </at>
                               <at name="width">844</at>
                               <at name="name"/>
-                              <at name="text">Label.library</at>
+                              <at name="text">Label.frameworkLibrary</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>

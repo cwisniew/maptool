@@ -106,7 +106,7 @@ the following:
        manner specified by section 6 of the GNU GPL for conveying
        Corresponding Source.
 
-       1) Use a suitable shared library mechanism for linking with the
+       1) Use a suitable shared frameworkLibrary mechanism for linking with the
        Library.  A suitable mechanism is one that (a) uses at run time
        a copy of the Library already present on the user's computer
        system, and (b) will operate properly with a modified version
@@ -127,17 +127,17 @@ the following:
 
   5. Combined Libraries.
 
-  You may place library facilities that are a work based on the
-Library side by side in a single library together with other library
+  You may place frameworkLibrary facilities that are a work based on the
+Library side by side in a single frameworkLibrary together with other frameworkLibrary
 facilities that are not Applications and are not covered by this
-License, and convey such a combined library under terms of your
+License, and convey such a combined frameworkLibrary under terms of your
 choice, if you do both of the following:
 
-   a) Accompany the combined library with a copy of the same work based
-   on the Library, uncombined with any other library facilities,
+   a) Accompany the combined frameworkLibrary with a copy of the same work based
+   on the Library, uncombined with any other frameworkLibrary facilities,
    conveyed under the terms of this License.
 
-   b) Give prominent notice with the combined library that part of it
+   b) Give prominent notice with the combined frameworkLibrary that part of it
    is a work based on the Library, and explaining where to find the
    accompanying uncombined form of the same work.
 

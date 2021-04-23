@@ -28,6 +28,7 @@ import java.util.Set;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.framework.library.FrameworkLibraryManager;
 import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
@@ -97,6 +98,9 @@ public class Campaign {
 
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
+
+
+  private transient FrameworkLibraryManager frameworkLibraryManager;
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -712,5 +716,16 @@ public class Campaign {
 
   public CampaignExportDialog getExportCampaignDialog() {
     return campaignExportDialog;
+  }
+
+  /**
+   * Gets the {@link FrameworkLibraryManager} for the campaign.
+   * @return the {@link FrameworkLibraryManager} for the campaign.
+   */
+  synchronized public FrameworkLibraryManager getFrameworkLibraryManager() {
+    if (frameworkLibraryManager == null) {
+      frameworkLibraryManager = new FrameworkLibraryManager();
+    }
+    return frameworkLibraryManager;
   }
 }

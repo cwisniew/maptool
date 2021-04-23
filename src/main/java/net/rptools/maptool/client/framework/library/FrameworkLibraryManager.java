@@ -14,16 +14,22 @@
  */
 package net.rptools.maptool.client.framework.library;
 
+import java.util.Collections;
 import net.rptools.maptool.client.framework.LibTokenEmulation;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class LibraryManager {
-  private final Set<Library> libraries = new HashSet<>();
+public class FrameworkLibraryManager {
+  private final Set<FrameworkLibrary> libraries = new HashSet<>();
   private final Set<LibTokenEmulation> libTokenEmulations = new HashSet<>();
 
-  public void addLibrary(Library library) {
-    libraries.add(library);
+
+  public void addLibrary(FrameworkLibrary frameworkLibrary) {
+    libraries.add(frameworkLibrary);
+  }
+
+  public Set<FrameworkLibrary> getLibraries() {
+    return Collections.unmodifiableSet(libraries);
   }
 }

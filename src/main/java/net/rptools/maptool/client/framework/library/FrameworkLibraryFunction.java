@@ -14,4 +14,4 @@
  */
 package net.rptools.maptool.client.framework.library;
 
-public class LibraryFunction {}
+public record FrameworkLibraryFunction(String name, String text) {}

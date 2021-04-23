@@ -195,7 +195,7 @@ Total time: 2.434 secs
 ## Build MapTool with Eclipse (without Gradle)
 
 1.  You should use the previous section, **Build MapTool with Eclipse
-    (via Gradle)** at least once, since Gradle knows which library
+    (via Gradle)** at least once, since Gradle knows which frameworkLibrary
     dependencies are needed and it downloads them automatically.
 1.  Eclipse has its own build system.  By default, it incrementally
     builds all classes that are changed as you change them.  This means

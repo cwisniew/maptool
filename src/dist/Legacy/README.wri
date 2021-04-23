@@ -177,14 +177,14 @@ entries so they can be restored in case of a hard drive replacement or
 similar change.  Similarly, you can run the "Remove" script to delete
 all registry entries created by MapTool.
 
-Last, MapTool uses a third-party library known as TinyLAF (for Tiny Look
+Last, MapTool uses a third-party frameworkLibrary known as TinyLAF (for Tiny Look
 And Feel) for rendering all of the standard graphics such as buttons,
 toolbars, progress bars, text fields, and so on.  If you would like to
 try out different themes for MapTool, visit the following URL:
 http://www.muntjak.de/hans/java/tinylaf/index.html  There you will find
 a binary distribution of TinyLAF that includes the "control panel"
 application that allows interactive editing of the theme.  It will be in
-a library called "tinycp.jar" and you will execute it by either
+a frameworkLibrary called "tinycp.jar" and you will execute it by either
 double-clicking on it (in most GUIs) or running "java -jar tinycp.jar"
 from the command line.
 

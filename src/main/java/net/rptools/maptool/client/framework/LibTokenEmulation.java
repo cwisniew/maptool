@@ -15,8 +15,8 @@
 package net.rptools.maptool.client.framework;
 
 import net.rptools.maptool.client.framework.library.DataValue;
-import net.rptools.maptool.client.framework.library.Library;
-import net.rptools.maptool.client.framework.library.LibraryFunction;
+import net.rptools.maptool.client.framework.library.FrameworkLibrary;
+import net.rptools.maptool.client.framework.library.FrameworkLibraryFunction;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,19 +33,19 @@ public class LibTokenEmulation {
   private final String libTokenVersion;
   private final Map<String, String> macroFunctionMap;
   private final Map<String, String> macroPropertyMap;
-  private final Library library;
+  private final FrameworkLibrary frameworkLibrary;
 
   public LibTokenEmulation(
       String name,
       String version,
-      Library macroLibrary,
+      FrameworkLibrary macroFrameworkLibrary,
       Map<String, String> functionMap,
       Map<String, String> propertyMap) {
     libTokenName = name;
     libTokenVersion = version;
     macroFunctionMap = Collections.unmodifiableSortedMap(new TreeMap<>(functionMap));
     macroPropertyMap = Collections.unmodifiableSortedMap(new TreeMap<>(propertyMap));
-    library = macroLibrary;
+    frameworkLibrary = macroFrameworkLibrary;
   }
 
   public String getLibTokenName() {
@@ -57,18 +57,19 @@ public class LibTokenEmulation {
   }
 
   /**
-   * Returns the {@link LibraryFunction} for the defined MTS function.
+   * Returns the {@link FrameworkLibraryFunction} for the defined MTS function.
    *
    * @param name the name of the defined function.
    * @return the defined function.
    */
-  public Optional<LibraryFunction> getFunction(String name) {
+  public Optional<FrameworkLibraryFunction> getFunction(String name) {
     String path = macroFunctionMap.get(name);
     if (path == null) {
       return Optional.empty();
     }
 
-    return library.getFunction(path);
+    //return frameworkLibrary.getFunction(path);
+    return null; // TODO: CDW
   }
 
   public DataValue getProperty(String name) {
@@ -77,7 +78,7 @@ public class LibTokenEmulation {
       return DataValue.UNDEFINED;
     }
 
-    return library.getData(path);
+    return frameworkLibrary.getData(path);
   }
 
   public void setProperty(String name, DataValue value) {
@@ -87,7 +88,7 @@ public class LibTokenEmulation {
       macroPropertyMap.put(name, path);
     }
 
-    library.setData(path, value);
+    frameworkLibrary.setData(path, value);
   }
 
   /**

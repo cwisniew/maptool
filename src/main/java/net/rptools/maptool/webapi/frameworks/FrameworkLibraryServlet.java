@@ -16,18 +16,22 @@ package net.rptools.maptool.webapi.frameworks;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 
+import com.google.gson.JsonParser;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import net.rptools.lib.memento.Memento;
+import net.rptools.lib.memento.MementoBuilderParseException;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.framework.library.FrameworkLibrary;
+import net.rptools.maptool.client.framework.library.FrameworkLibraryMemento;
+import net.rptools.maptool.client.framework.library.FrameworkLibraryMementoBuilder;
 
 public class FrameworkLibraryServlet extends HttpServlet {
 
@@ -47,8 +51,14 @@ public class FrameworkLibraryServlet extends HttpServlet {
     switch (path) {
       case "/newFrameworkId" ->
         response.addProperty("id", UUID.randomUUID().toString());
-      default ->
-        response.add("frameworks", new JsonArray());
+      default -> {
+        JsonArray jsonArray = new JsonArray();
+        FrameworkLibraryMementoBuilder builder = new FrameworkLibraryMementoBuilder();
+        MapTool.getCampaign().getFrameworkLibraryManager().getLibraries().stream().forEach(l ->
+            jsonArray.add(builder.fromState(l.getState()).toJson())
+        );
+        response.add("frameworks", jsonArray);
+      }
     }
     writer.write(response.toString());
 
@@ -61,23 +71,25 @@ public class FrameworkLibraryServlet extends HttpServlet {
     resp.setContentType("application/json");
 
     JsonObject response = new JsonObject();
-    JsonObject frameworkData = null;
 
     try {
     String reqBody = req.getReader().readLine();
-      frameworkData = JsonParser.parseString(reqBody).getAsJsonObject();
+      JsonObject json = JsonParser.parseString(reqBody).getAsJsonObject().getAsJsonObject("frameworkInfo");
+      FrameworkLibraryMemento frameworkLibraryMemento = new FrameworkLibraryMementoBuilder().fromJson(json).build();
+      FrameworkLibrary frameworkLibrary = new FrameworkLibrary(frameworkLibraryMemento);
+      MapTool.getCampaign().getFrameworkLibraryManager().addLibrary(frameworkLibrary);
       response.addProperty("status", "ok");
     } catch (Exception e) {
-      System.out.println("Error: invalid framework info");
       response.addProperty("status", "error");
-      response.addProperty("error", "invalid frameworkInfo");
+      if (e instanceof MementoBuilderParseException pe) {
+        response.addProperty("error", String.join(", ", pe.getErrors()));
+      } else {
+        response.addProperty("error", "invalid frameworkInfo");
+      }
     }
     PrintWriter writer = resp.getWriter();
     writer.write(response.toString());
     writer.close();
-    if (frameworkData != null) {
-       // TODO: CD
-    }
   }
 
 
