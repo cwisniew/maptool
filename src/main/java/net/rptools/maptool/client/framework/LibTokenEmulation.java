@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.framework;
 
+import net.rptools.lib.memento.Originator;
 import net.rptools.maptool.client.framework.library.DataValue;
 import net.rptools.maptool.client.framework.library.FrameworkLibrary;
 import net.rptools.maptool.client.framework.library.FrameworkLibraryFunction;
@@ -24,16 +25,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
+import net.rptools.maptool.client.framework.library.FrameworkLibraryMemento;
 
-public class LibTokenEmulation {
+public class LibTokenEmulation implements Originator<LibTokenEmulationMemento>  {
 
   private static final String UNDEFINED_PROPERTY_PATH = "data/undefined-properties/";
+
 
   private final String libTokenName;
   private final String libTokenVersion;
   private final Map<String, String> macroFunctionMap;
   private final Map<String, String> macroPropertyMap;
-  private final FrameworkLibrary frameworkLibrary;
+
+  transient private final FrameworkLibrary frameworkLibrary;
 
   public LibTokenEmulation(
       String name,
@@ -47,6 +51,7 @@ public class LibTokenEmulation {
     macroPropertyMap = Collections.unmodifiableSortedMap(new TreeMap<>(propertyMap));
     frameworkLibrary = macroFrameworkLibrary;
   }
+
 
   public String getLibTokenName() {
     return libTokenName;
@@ -102,5 +107,10 @@ public class LibTokenEmulation {
 
   public Collection<String> getPropertyNames() {
     return macroPropertyMap.keySet();
+  }
+
+  @Override
+  public LibTokenEmulationMemento getState() {
+    return null; // TODO: CDW
   }
 }

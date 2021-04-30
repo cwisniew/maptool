@@ -2,6 +2,7 @@ package net.rptools.maptool.client.framework.library;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
 
   /** Has this library been created in compatibility mode. */
   private boolean compatibilityMode;
+
 
   public FrameworkLibraryMementoBuilder() {
     super(FrameworkLibraryMemento.class);
@@ -110,6 +112,7 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
     return this;
   }
 
+
   @Override
   public FrameworkLibraryMemento build() {
     return new FrameworkLibraryMemento(
@@ -186,16 +189,43 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
       JsonArray defined = json.get("definedFunctions").getAsJsonArray();
       defined.forEach(e -> {
         JsonObject jobj = e.getAsJsonObject();
-        definedFunctions.put(jobj.get("function").getAsString(), jobj.get("path").getAsString());
+        definedFunctions.put(jobj.get("name").getAsString(), jobj.get("path").getAsString());
       });
     }
 
     dataValues.clear();
     if (json.has("dataValues")) {
       JsonArray data = json.get("dataValues").getAsJsonArray();
-     /* TODO: dataValues.forEach(e -> {
+     /* TODO: CDW dataValues.forEach(e -> {
 
       });*/
+    }
+
+    if (json.has("libToken")) {
+      JsonObject libToken = json.getAsJsonObject("libToken");
+      String libTokenName = "";
+      if (libToken.has("name")) {
+        libTokenName = libToken.get("name").getAsString();
+      } else {
+        errors.add("LibToken must have a name field");
+      }
+
+      String libTokenVersion = "";
+      if (libToken.has("version")) {
+        libTokenVersion = libToken.get("version").getAsString();
+      } else {
+        errors.add("LibToken must have a version");
+      }
+
+      Map<String, String> libTokenFunctionMap = new HashMap<>();
+      if (libToken.has("definedFunctions")) {
+        JsonArray funcs = libToken.getAsJsonArray("definedFunctions");
+        funcs.forEach(f -> {
+          JsonObject def = f.getAsJsonObject();
+          libTokenFunctionMap.put(def.get("name").getAsString(), def.get("path").getAsString());
+        });
+      }
+
     }
 
     if (!errors.isEmpty()) {

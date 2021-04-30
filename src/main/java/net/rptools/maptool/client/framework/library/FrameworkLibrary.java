@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.lib.memento.Originator;
+import net.rptools.maptool.client.framework.LibTokenEmulation;
 
 public class FrameworkLibrary implements Originator<FrameworkLibraryMemento> {
 

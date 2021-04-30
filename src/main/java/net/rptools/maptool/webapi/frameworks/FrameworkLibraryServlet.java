@@ -73,7 +73,8 @@ public class FrameworkLibraryServlet extends HttpServlet {
     JsonObject response = new JsonObject();
 
     try {
-    String reqBody = req.getReader().readLine();
+      String reqBody = req.getReader().readLine();
+      System.out.println(reqBody);
       JsonObject json = JsonParser.parseString(reqBody).getAsJsonObject().getAsJsonObject("frameworkInfo");
       FrameworkLibraryMemento frameworkLibraryMemento = new FrameworkLibraryMementoBuilder().fromJson(json).build();
       FrameworkLibrary frameworkLibrary = new FrameworkLibrary(frameworkLibraryMemento);

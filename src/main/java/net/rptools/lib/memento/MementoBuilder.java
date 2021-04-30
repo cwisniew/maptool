@@ -24,7 +24,7 @@ public abstract class MementoBuilder <T extends Memento<?>>{
   }
 
   public String toJsonString() {
-    return new Gson().toJson(this);
+    return new Gson().toJson(toJson());
   }
 
   public JsonObject toJson() {
