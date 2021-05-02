@@ -14,22 +14,33 @@
  */
 package net.rptools.maptool.client.framework.library;
 
-import java.util.Collections;
-import net.rptools.maptool.client.framework.LibTokenEmulation;
+import java.util.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulation;
 
 public class FrameworkLibraryManager {
-  private final Set<FrameworkLibrary> libraries = new HashSet<>();
-  private final Set<LibTokenEmulation> libTokenEmulations = new HashSet<>();
-
+  private final Map<UUID, FrameworkLibrary> libraries = new HashMap<>();
+  private final Map<UUID, Set<LibTokenEmulation>> libTokenEmulations = new HashMap<>();
 
   public void addLibrary(FrameworkLibrary frameworkLibrary) {
-    libraries.add(frameworkLibrary);
+    UUID id = frameworkLibrary.getId();
+    libraries.remove(id);
+    libTokenEmulations.remove(id);
+
+    libraries.put(id, frameworkLibrary);
+  }
+
+  public void addLibTokenEmulation(FrameworkLibrary frameworkLibrary, LibTokenEmulation libTokenEmulation) {
+    UUID id = frameworkLibrary.getId();
+    libTokenEmulations.computeIfAbsent(id, k ->  new HashSet<>());
+    libTokenEmulations.get(id).add(libTokenEmulation);
+  }
+
+  public void addLibTokenEmulation(FrameworkLibrary frameworkLibrary, Set<LibTokenEmulation> libTokenEmulationSet) {
+    libTokenEmulationSet.forEach(lt -> addLibTokenEmulation(frameworkLibrary, lt));
   }
 
   public Set<FrameworkLibrary> getLibraries() {
-    return Collections.unmodifiableSet(libraries);
+    return Set.copyOf(libraries.values());
   }
 }

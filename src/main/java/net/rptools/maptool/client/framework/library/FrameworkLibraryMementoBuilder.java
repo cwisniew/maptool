@@ -1,15 +1,21 @@
 package net.rptools.maptool.client.framework.library;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.HashMap;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 import net.rptools.lib.memento.MementoBuilder;
 import net.rptools.lib.memento.MementoBuilderParseException;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulation;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulationMementoBuilder;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulationMemento;
 
 public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibraryMemento> {
 
@@ -33,6 +39,8 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
 
   /** Has this library been created in compatibility mode. */
   private boolean compatibilityMode;
+
+  transient private Set<LibTokenEmulationMemento> libTokenEmulation = ConcurrentHashMap.newKeySet();
 
 
   public FrameworkLibraryMementoBuilder() {
@@ -90,7 +98,8 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
   }
 
   public FrameworkLibraryMementoBuilder setDefinedFunctions(Map<String, String> definedFunctions) {
-    this.definedFunctions = definedFunctions;
+    this.definedFunctions.clear();
+    this.definedFunctions.putAll(definedFunctions);
     return this;
   }
 
@@ -99,7 +108,22 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
   }
 
   public FrameworkLibraryMementoBuilder setDataValues(Map<String, DataValue> dataValues) {
-    this.dataValues = dataValues;
+    this.dataValues.clear();
+    this.dataValues.putAll(dataValues);
+    return this;
+  }
+
+  public Set<LibTokenEmulationMemento> getLibTokenEmulation() {
+    return libTokenEmulation;
+  }
+
+  public FrameworkLibraryMementoBuilder setLibTokenEmulation(Set<LibTokenEmulation> libTokenEmulations) {
+    this.libTokenEmulation.clear();
+    var builder = new LibTokenEmulationMementoBuilder();
+    libTokenEmulations.forEach(lte -> {
+      var state = builder.fromState(lte.getState()).build();
+      this.libTokenEmulation.add(state);
+    });
     return this;
   }
 
@@ -116,7 +140,7 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
   @Override
   public FrameworkLibraryMemento build() {
     return new FrameworkLibraryMemento(
-        id, name, namespace, version, gitHubUrl, definedFunctions, dataValues, compatibilityMode
+        id, name, namespace, version, gitHubUrl, definedFunctions, dataValues, compatibilityMode, libTokenEmulation
     );
   }
 
@@ -132,7 +156,7 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
     dataValues.clear();
     dataValues.putAll(state.dataValues());
     compatibilityMode = state.compatibilityMode();
-
+    libTokenEmulation.addAll(state.libTokenEmulationMementos());
     return this;
   }
 
@@ -201,31 +225,13 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
       });*/
     }
 
-    if (json.has("libToken")) {
-      JsonObject libToken = json.getAsJsonObject("libToken");
-      String libTokenName = "";
-      if (libToken.has("name")) {
-        libTokenName = libToken.get("name").getAsString();
-      } else {
-        errors.add("LibToken must have a name field");
+    libTokenEmulation.clear();
+    if (json.has("libTokens")) {
+      JsonArray libTokens = json.getAsJsonArray("libTokens");
+      LibTokenEmulationMementoBuilder builder = new LibTokenEmulationMementoBuilder();
+      for (JsonElement lt : libTokens) {
+        libTokenEmulation.add(builder.fromJson(lt.getAsJsonObject()).build());
       }
-
-      String libTokenVersion = "";
-      if (libToken.has("version")) {
-        libTokenVersion = libToken.get("version").getAsString();
-      } else {
-        errors.add("LibToken must have a version");
-      }
-
-      Map<String, String> libTokenFunctionMap = new HashMap<>();
-      if (libToken.has("definedFunctions")) {
-        JsonArray funcs = libToken.getAsJsonArray("definedFunctions");
-        funcs.forEach(f -> {
-          JsonObject def = f.getAsJsonObject();
-          libTokenFunctionMap.put(def.get("name").getAsString(), def.get("path").getAsString());
-        });
-      }
-
     }
 
     if (!errors.isEmpty()) {
@@ -234,4 +240,16 @@ public class FrameworkLibraryMementoBuilder extends MementoBuilder<FrameworkLibr
 
     return this;
   }
+
+
+  public JsonObject toJson() {
+    JsonObject json = new Gson().toJsonTree(this).getAsJsonObject();
+    JsonArray jsonArray = new JsonArray();
+    json.add("libTokens", jsonArray);
+    LibTokenEmulationMementoBuilder builder = new LibTokenEmulationMementoBuilder();
+    libTokenEmulation.forEach(lte -> jsonArray.add( builder.fromState(lte).toJson()));
+
+    return json;
+  }
+
 }

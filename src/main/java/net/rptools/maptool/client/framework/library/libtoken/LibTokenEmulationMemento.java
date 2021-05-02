@@ -1,4 +1,4 @@
-package net.rptools.maptool.client.framework;
+package net.rptools.maptool.client.framework.library.libtoken;
 
 import java.util.Map;
 import net.rptools.lib.memento.Memento;
@@ -6,7 +6,8 @@ import net.rptools.lib.memento.Memento;
 public record LibTokenEmulationMemento(
     String name,
     String version,
-    Map<String, String> definedFunctions
+    Map<String, String> definedFunctions,
+    Map<String, String> properties
 ) implements Memento<LibTokenEmulation> {
 
 

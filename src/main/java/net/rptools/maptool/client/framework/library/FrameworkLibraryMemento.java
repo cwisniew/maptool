@@ -1,9 +1,11 @@
 package net.rptools.maptool.client.framework.library;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+
 import net.rptools.lib.memento.Memento;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulation;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulationMementoBuilder;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulationMemento;
 
 public record FrameworkLibraryMemento(
     UUID id,
@@ -13,7 +15,8 @@ public record FrameworkLibraryMemento(
     String gitHubUrl,
     Map<String, String> definedFunctions,
     Map<String, DataValue> dataValues,
-    boolean compatibilityMode
+    boolean compatibilityMode,
+    Set<LibTokenEmulationMemento> libTokenEmulationMementos
 ) implements Memento<FrameworkLibrary> {
 
   public FrameworkLibraryMemento(
@@ -24,7 +27,8 @@ public record FrameworkLibraryMemento(
       String gitHubUrl,
       Map<String, String> definedFunctions,
       Map<String, DataValue> dataValues,
-      boolean compatibilityMode
+      boolean compatibilityMode,
+      Set<LibTokenEmulationMemento> libTokenEmulationMementos
   ) {
     this.id = Objects.requireNonNull(id);
     this.name = Objects.requireNonNull(name);
@@ -34,6 +38,7 @@ public record FrameworkLibraryMemento(
     this.definedFunctions = Map.copyOf(definedFunctions);
     this.dataValues = Map.copyOf(dataValues);
     this.compatibilityMode = compatibilityMode;
+    this.libTokenEmulationMementos = Set.copyOf(libTokenEmulationMementos);
   }
 
 
@@ -42,4 +47,14 @@ public record FrameworkLibraryMemento(
     return FrameworkLibrary.class;
   }
 
+
+  public Set<LibTokenEmulation> libTokenEmulation() {
+    Set<LibTokenEmulation> libTokens = new HashSet<>();
+    LibTokenEmulationMementoBuilder builder = new LibTokenEmulationMementoBuilder();
+    libTokenEmulationMementos.forEach(lte -> {
+      libTokens.add(new LibTokenEmulation(builder.fromState(lte).build()));
+    });
+
+    return libTokens;
+  }
 }

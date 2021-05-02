@@ -26,10 +26,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.UUID;
-import net.rptools.lib.memento.Memento;
+
 import net.rptools.lib.memento.MementoBuilderParseException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.framework.library.FrameworkLibrary;
+import net.rptools.maptool.client.framework.library.FrameworkLibraryManager;
 import net.rptools.maptool.client.framework.library.FrameworkLibraryMemento;
 import net.rptools.maptool.client.framework.library.FrameworkLibraryMementoBuilder;
 
@@ -54,7 +55,7 @@ public class FrameworkLibraryServlet extends HttpServlet {
       default -> {
         JsonArray jsonArray = new JsonArray();
         FrameworkLibraryMementoBuilder builder = new FrameworkLibraryMementoBuilder();
-        MapTool.getCampaign().getFrameworkLibraryManager().getLibraries().stream().forEach(l ->
+        MapTool.getCampaign().getFrameworkLibraryManager().getLibraries().forEach(l ->
             jsonArray.add(builder.fromState(l.getState()).toJson())
         );
         response.add("frameworks", jsonArray);
@@ -78,7 +79,10 @@ public class FrameworkLibraryServlet extends HttpServlet {
       JsonObject json = JsonParser.parseString(reqBody).getAsJsonObject().getAsJsonObject("frameworkInfo");
       FrameworkLibraryMemento frameworkLibraryMemento = new FrameworkLibraryMementoBuilder().fromJson(json).build();
       FrameworkLibrary frameworkLibrary = new FrameworkLibrary(frameworkLibraryMemento);
-      MapTool.getCampaign().getFrameworkLibraryManager().addLibrary(frameworkLibrary);
+
+      FrameworkLibraryManager frameworkLibraryManager = MapTool.getCampaign().getFrameworkLibraryManager();
+      frameworkLibraryManager.addLibrary(frameworkLibrary);
+
       response.addProperty("status", "ok");
     } catch (Exception e) {
       response.addProperty("status", "error");

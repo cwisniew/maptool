@@ -12,11 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.framework;
+package net.rptools.maptool.client.framework.library.libtoken;
 
 import net.rptools.lib.memento.Originator;
-import net.rptools.maptool.client.framework.library.DataValue;
-import net.rptools.maptool.client.framework.library.FrameworkLibrary;
 import net.rptools.maptool.client.framework.library.FrameworkLibraryFunction;
 
 import java.util.Collection;
@@ -24,8 +22,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.UUID;
-import net.rptools.maptool.client.framework.library.FrameworkLibraryMemento;
 
 public class LibTokenEmulation implements Originator<LibTokenEmulationMemento>  {
 
@@ -37,19 +33,20 @@ public class LibTokenEmulation implements Originator<LibTokenEmulationMemento>  
   private final Map<String, String> macroFunctionMap;
   private final Map<String, String> macroPropertyMap;
 
-  transient private final FrameworkLibrary frameworkLibrary;
-
   public LibTokenEmulation(
       String name,
       String version,
-      FrameworkLibrary macroFrameworkLibrary,
       Map<String, String> functionMap,
       Map<String, String> propertyMap) {
     libTokenName = name;
     libTokenVersion = version;
     macroFunctionMap = Collections.unmodifiableSortedMap(new TreeMap<>(functionMap));
     macroPropertyMap = Collections.unmodifiableSortedMap(new TreeMap<>(propertyMap));
-    frameworkLibrary = macroFrameworkLibrary;
+  }
+
+
+  public LibTokenEmulation(LibTokenEmulationMemento state) {
+    this(state.name(), state.version(), state.definedFunctions(), state.properties());
   }
 
 
@@ -77,25 +74,6 @@ public class LibTokenEmulation implements Originator<LibTokenEmulationMemento>  
     return null; // TODO: CDW
   }
 
-  public DataValue getProperty(String name) {
-    String path = macroPropertyMap.get(name);
-    if (path == null) {
-      return DataValue.UNDEFINED;
-    }
-
-    return frameworkLibrary.getData(path);
-  }
-
-  public void setProperty(String name, DataValue value) {
-    String path = macroPropertyMap.get(name);
-    if (path == null) {
-      path = UNDEFINED_PROPERTY_PATH + UUID.randomUUID();
-      macroPropertyMap.put(name, path);
-    }
-
-    frameworkLibrary.setData(path, value);
-  }
-
   /**
    * Returns the names of the functions defined for MTScript.
    *
@@ -111,6 +89,11 @@ public class LibTokenEmulation implements Originator<LibTokenEmulationMemento>  
 
   @Override
   public LibTokenEmulationMemento getState() {
-    return null; // TODO: CDW
+    return new LibTokenEmulationMementoBuilder()
+            .setName(libTokenName)
+            .setVersion(libTokenVersion)
+            .setDefinedFunctions(macroFunctionMap)
+            .setProperties(macroPropertyMap)
+            .build();
   }
 }

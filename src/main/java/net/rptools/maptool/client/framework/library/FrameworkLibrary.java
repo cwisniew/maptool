@@ -14,11 +14,14 @@
  */
 package net.rptools.maptool.client.framework.library;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 import net.rptools.lib.memento.Originator;
-import net.rptools.maptool.client.framework.LibTokenEmulation;
+import net.rptools.maptool.client.framework.library.libtoken.LibTokenEmulation;
 
 public class FrameworkLibrary implements Originator<FrameworkLibraryMemento> {
 
@@ -34,6 +37,8 @@ public class FrameworkLibrary implements Originator<FrameworkLibraryMemento> {
 
   private final boolean compatibilityMode;
 
+  private transient Set<LibTokenEmulation> libTokenEmulation = new HashSet<>();
+
   /**
    * Creates a new {@code Library} object.
    *
@@ -41,21 +46,20 @@ public class FrameworkLibrary implements Originator<FrameworkLibraryMemento> {
    * @param name the name of the {@code Library}.
    * @param version the version of the {@code Library}.
    */
-  public FrameworkLibrary(UUID id, String name, String namespace, String version, String gitHubUrl, boolean compatible) {
+  public FrameworkLibrary(UUID id, String name, String namespace, String version, String gitHubUrl, boolean compatible, Set<LibTokenEmulation> libTokenEmulationSet) {
     this.id = id;
     this.name = name;
     this.namespace = namespace;
     this.version = version;
     this.gitHubUrl = gitHubUrl;
     this.compatibilityMode = compatible;
+    this.libTokenEmulation.addAll(libTokenEmulationSet);
   }
 
   public FrameworkLibrary(FrameworkLibraryMemento state) {
-    this(state.id(), state.name(), state.namespace(), state.version(), state.gitHubUrl(),
-        state.compatibilityMode());
-    definedFunctions.clear();
+    this(state.id(), state.name(), state.namespace(), state.version(), state.gitHubUrl(), state.compatibilityMode(), state.libTokenEmulation());
+
     definedFunctions.putAll(state.definedFunctions());
-    dataValues.clear();
     dataValues.putAll(state.dataValues());
   }
 
@@ -117,7 +121,8 @@ public class FrameworkLibrary implements Originator<FrameworkLibraryMemento> {
     FrameworkLibraryMementoBuilder builder = new FrameworkLibraryMementoBuilder();
     builder.setId(id).setName(name).setNamespace(namespace).setVersion(version)
         .setCompatibilityMode(compatibilityMode).setGitHubUrl(gitHubUrl)
-        .setDataValues(dataValues).setDefinedFunctions(definedFunctions);
+        .setDataValues(dataValues).setDefinedFunctions(definedFunctions)
+        .setLibTokenEmulation(libTokenEmulation);
 
     return builder.build();
   }

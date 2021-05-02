@@ -1,6 +1,5 @@
-package net.rptools.maptool.client.framework;
+package net.rptools.maptool.client.framework.library.libtoken;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,15 +9,15 @@ import java.util.UUID;
 import net.rptools.lib.memento.MementoBuilder;
 import net.rptools.lib.memento.MementoBuilderParseException;
 
-public class LibTokenEmulationBuilder extends MementoBuilder<LibTokenEmulationMemento> {
+public class LibTokenEmulationMementoBuilder extends MementoBuilder<LibTokenEmulationMemento> {
 
   private String name;
   private String version;
   private Map<String, String> definedFunctions = new HashMap<>();
-  private UUID frameworkId;
+  private Map<String, String> properties = new HashMap<>();
 
 
-  public LibTokenEmulationBuilder() {
+  public LibTokenEmulationMementoBuilder() {
     super(LibTokenEmulationMemento.class);
   }
 
@@ -26,7 +25,7 @@ public class LibTokenEmulationBuilder extends MementoBuilder<LibTokenEmulationMe
     return name;
   }
 
-  public LibTokenEmulationBuilder setName(String name) {
+  public LibTokenEmulationMementoBuilder setName(String name) {
     this.name = name;
     return this;
   }
@@ -35,7 +34,7 @@ public class LibTokenEmulationBuilder extends MementoBuilder<LibTokenEmulationMe
     return version;
   }
 
-  public LibTokenEmulationBuilder setVersion(String version) {
+  public LibTokenEmulationMementoBuilder setVersion(String version) {
     this.version = version;
     return this;
   }
@@ -44,34 +43,47 @@ public class LibTokenEmulationBuilder extends MementoBuilder<LibTokenEmulationMe
     return Map.copyOf(definedFunctions);
   }
 
-  public LibTokenEmulationBuilder clearDefinedFunctions() {
+  public LibTokenEmulationMementoBuilder clearDefinedFunctions() {
     definedFunctions.clear();
     return this;
   }
 
-  public LibTokenEmulationBuilder setDefinedFunctions(Map<String, String> functions) {
+  public LibTokenEmulationMementoBuilder setDefinedFunctions(Map<String, String> functions) {
     definedFunctions.clear();
     definedFunctions.putAll(functions);
     return this;
   }
 
-  public LibTokenEmulationBuilder addDefinedFunction(String name, String path) {
+  public LibTokenEmulationMementoBuilder addDefinedFunction(String name, String path) {
     definedFunctions.put(name, path);
     return this;
   }
 
-  public UUID getFrameworkId() {
-    return frameworkId;
+
+  public Map<String, String> getProperties() {
+    return Map.copyOf(properties);
   }
 
-  public LibTokenEmulationBuilder setFrameworkId(UUID frameworkId) {
-    this.frameworkId = frameworkId;
+  public LibTokenEmulationMementoBuilder clearProperties() {
+    properties.clear();
     return this;
   }
 
+  public LibTokenEmulationMementoBuilder setProperties(Map<String, String> properties) {
+    this.properties.clear();
+    this.properties.putAll(properties);
+    return this;
+  }
+
+  public LibTokenEmulationMementoBuilder addProperties(String name, String path) {
+    properties.put(name, path);
+    return this;
+  }
+
+
   @Override
   public LibTokenEmulationMemento build() {
-    return new LibTokenEmulationMemento(name, version, definedFunctions);
+    return new LibTokenEmulationMemento(name, version, definedFunctions, properties);
   }
 
   @Override
@@ -123,7 +135,7 @@ public class LibTokenEmulationBuilder extends MementoBuilder<LibTokenEmulationMe
     return this;
   }
 
-  public JsonObject toJson() {
+  /*TODO: CDW public JsonObject toJson() {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("name", name);
     jsonObject.addProperty("version", version);
@@ -136,5 +148,5 @@ public class LibTokenEmulationBuilder extends MementoBuilder<LibTokenEmulationMe
       funcs.add(fn);
     });
     return jsonObject;
-  }
+  }*/
 }
