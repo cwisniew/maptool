@@ -3113,8 +3113,6 @@ public class AppActions {
         }
       };
 
-
-
   public static final Action EXIT =
       new DefaultClientAction() {
         {

@@ -12,7 +12,6 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.macrolibraries;
 
 import java.net.URL;
@@ -27,13 +26,11 @@ import javafx.scene.web.WebView;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 
-/**
- * Concurrent hash map for listeners
- */
+/** Concurrent hash map for listeners */
 public class MacroLibrariesController implements SwingJavaFXDialogController {
 
-  private final KeySetView<SwingJavaFXDialogEventHandler, Boolean> eventHandlers = ConcurrentHashMap
-      .newKeySet();
+  private final KeySetView<SwingJavaFXDialogEventHandler, Boolean> eventHandlers =
+      ConcurrentHashMap.newKeySet();
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
 
@@ -59,17 +56,15 @@ public class MacroLibrariesController implements SwingJavaFXDialogController {
   private WebView librariesWebView; // Value injected by FXMLLoader
 
   @FXML
-    // This method is called by the FXMLLoader when initialization is complete
+  // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
-    assert closeButton
-        != null : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert installedLibrariesList
-        != null : "fx:id=\"installedLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-    assert librariesWebView
-        != null : "fx:id=\"librariesWebView\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
-
+    assert closeButton != null
+        : "fx:id=\"closeButton\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert installedLibrariesList != null
+        : "fx:id=\"installedLibrariesList\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
+    assert librariesWebView != null
+        : "fx:id=\"librariesWebView\" was not injected: check your FXML file 'MacroLibraries.fxml'.";
   }
-
 
   @FXML
   void closeButtonAction(ActionEvent event) {

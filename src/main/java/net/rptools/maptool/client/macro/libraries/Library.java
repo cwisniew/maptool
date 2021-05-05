@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.macro.libraries;
 
 import java.util.Collection;
@@ -26,6 +40,7 @@ public class Library {
 
   /**
    * Creates a new {@code Library} object.
+   *
    * @param id the id of the {@code Library}.
    * @param name the name of the {@code Library}.
    * @param version the version of the {@code Library}.
@@ -60,6 +75,7 @@ public class Library {
 
   /**
    * Defines a macro function that can be called from MTScript.
+   *
    * @param name The name of the function.
    * @param path The path of the text file in the library.
    */
@@ -67,9 +83,9 @@ public class Library {
     definedFunctions.put(name, path);
   }
 
-
   /**
    * Returns the function at the specified path.
+   *
    * @param path the path of the function.
    * @return the function at the specified path/
    */
@@ -77,12 +93,9 @@ public class Library {
     return Optional.ofNullable(libraryFunctions.get(path));
   }
 
-
-
   public DataValue getData(String path) {
     return dataValues.getOrDefault(path, DataValue.UNDEFINED);
   }
-
 
   public void setData(String path, DataValue value) {
     if (isStaticData(path)) {
@@ -106,7 +119,6 @@ public class Library {
   public void addAsset(String path, MD5Key key) {
     assetMap.put(path, key);
   }
-
 
   public boolean isStaticData(String path) {
     return path.startsWith("static.");

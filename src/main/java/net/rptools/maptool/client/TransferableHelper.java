@@ -290,7 +290,7 @@ public class TransferableHelper extends TransferHandler {
     for (Object working : assets) {
       if (working instanceof Asset) {
         Asset asset = (Asset) working;
-        if (!asset.getId().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
+        if (!asset.getMD5Key().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
           if (!AssetManager.hasAsset(asset)) {
             AssetManager.putAsset(asset);
           }
