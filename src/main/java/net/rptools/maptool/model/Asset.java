@@ -42,7 +42,9 @@ public final class Asset {
     /** The {@code Asset} is a HTML string. */
     HTML(true, "html", Asset::createHTMLAsset),
     /** The {@code Asset} is some generic data. */
-    DATA(false, "data", Asset::createUnknownAssetType);
+    DATA(false, "data", Asset::createUnknownAssetType),
+    /** The {@code Asset} is framework archive. */
+    FRAMEWORK(false, "framework", Asset::createFrameworkArchiveAsset);
 
     /** Does it make sense to use this {@code Asset} as a {@link String}. */
     private final boolean stringType;
@@ -195,6 +197,17 @@ public final class Asset {
    * @return an {@code Asset} that represents the data.
    */
   public static Asset createAsset(String name, byte[] data) {
+    return new Asset(null, name, data != null ? data : new byte[] {}, false);
+  }
+
+  /**
+   * Creates a Framework Archive {@code Asset}.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param data The data for the {@code Asset}.
+   * @return the HTML {@code Asset}.
+   */
+  public static Asset createFrameworkArchiveAsset(String name, byte[] data) {
     return new Asset(null, name, data != null ? data : new byte[] {}, false);
   }
 

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
@@ -59,6 +60,7 @@ public class AppMenuBar extends JMenuBar {
     add(createMapMenu());
     add(createViewMenu());
     add(createToolsMenu());
+    add(createFrameworkMenu());
     add(createWindowMenu());
     Map<String, File> themes = AppUtil.getUIThemeNames();
     if (themes.size() > 0) {
@@ -201,14 +203,21 @@ public class AppMenuBar extends JMenuBar {
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ENFORCE_NOTIFICATION, menu));
 
     menu.add(new JSeparator());
-    menu.add(new JMenuItem(AppActions.MACRO_LIBRARIES));
-    menu.add(new JSeparator());
 
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_COLLECT_PROFILING_DATA, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LOG_CONSOLE, menu));
 
     return menu;
   }
+
+  private Component createFrameworkMenu() {
+    JMenu menu = I18N.createMenu("menu.frameworks");
+    menu.add(new JMenuItem(AppActions.FRAMEWORKS));
+    menu.add(new JMenuItem(AppActions.IMPORT_FRAMEWORK_FROM_FILE));
+
+    return menu;
+  }
+
 
   protected JMenu createEditMenu() {
     JMenu menu = I18N.createMenu("menu.edit");

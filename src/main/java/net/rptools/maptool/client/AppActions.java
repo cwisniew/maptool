@@ -1341,10 +1341,10 @@ public class AppActions {
         }
       };
 
-  public static final Action MACRO_LIBRARIES =
+  public static final Action FRAMEWORKS =
       new DefaultClientAction() {
         {
-          init("action.macroLibraries");
+          init("action.frameworks");
         }
 
         @Override
@@ -1352,6 +1352,18 @@ public class AppActions {
           new MacroLibrariesDialog().show();
         }
       };
+
+  public static final Action IMPORT_FRAMEWORK_FROM_FILE =
+      new DefaultClientAction() {
+        {
+          init("action.importFrameworkFromFile");
+        }
+
+        @Override
+        protected void executeAction() { /* TODO: CDW */ }
+      };
+
+
 
   /** This is the menu option that forces the player view to continuously track the GM view. */
   public static final Action TOGGLE_LINK_PLAYER_VIEW =
