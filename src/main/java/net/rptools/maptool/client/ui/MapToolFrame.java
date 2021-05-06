@@ -207,6 +207,10 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final FileFilter dungeonDraftFilter =
       new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
+
+  private final FileFilter frameworkFilter =
+      new MTFileFilter("mfw", I18N.getText("file.ext.framework"));
+
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -786,6 +790,15 @@ public class MapToolFrame extends DefaultDockableHolder
    */
   public FileFilter getDungeonDraftFilter() {
     return dungeonDraftFilter;
+  }
+
+  /**
+   * Returns the {@link FileFilter} for framework archive files.
+   *
+   * @return the {@link FileFilter} for framework archive files.
+   */
+  public FileFilter getFrameworkFilter() {
+    return frameworkFilter;
   }
 
   public JFileChooser getLoadPropsFileChooser() {

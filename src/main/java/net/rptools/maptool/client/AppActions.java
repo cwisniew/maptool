@@ -58,6 +58,7 @@ import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.framework.library.FrameworkLoader;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
@@ -1359,8 +1360,29 @@ public class AppActions {
           init("action.importFrameworkFromFile");
         }
 
-        @Override
-        protected void executeAction() { /* TODO: CDW */ }
+          @Override
+          public boolean isAvailable() {
+              return MapTool.isHostingServer()
+                      || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+          }
+
+          @Override
+          protected void executeAction() {
+              boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
+              JFileChooser chooser = new FrameworkFileChooser();
+              chooser.setDialogTitle(I18N.getText("action.import.framework.dialog.title"));
+              chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+              chooser.setFileFilter(MapTool.getFrame().getFrameworkFilter());
+
+              if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                  File ddFile = chooser.getSelectedFile();
+                  try {
+                      new FrameworkLoader().load(ddFile);
+                  } catch (IOException ioException) {
+                      MapTool.showError("framework.import.ioError", ioException);
+                  }
+              }
+          }
       };
 
 
@@ -2837,6 +2859,21 @@ public class AppActions {
           }
         }
       };
+
+  private static class FrameworkFileChooser extends PreviewPanelFileChooser {
+    FrameworkFileChooser() {
+      super();
+      addChoosableFileFilter(MapTool.getFrame().getFrameworkFilter());
+    }
+
+    @Override
+    protected File getImageFileOfSelectedFile() {
+      if (getSelectedFile() == null) {
+        return null;
+      }
+      return null; // TODO: CDW grab preview file
+    }
+  }
 
   private static class MapPreviewFileChooser extends PreviewPanelFileChooser {
     MapPreviewFileChooser() {
