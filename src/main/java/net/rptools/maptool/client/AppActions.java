@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -1368,7 +1369,6 @@ public class AppActions {
 
           @Override
           protected void executeAction() {
-              boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
               JFileChooser chooser = new FrameworkFileChooser();
               chooser.setDialogTitle(I18N.getText("action.import.framework.dialog.title"));
               chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -2868,10 +2868,17 @@ public class AppActions {
 
     @Override
     protected File getImageFileOfSelectedFile() {
+      File defaultIconFile = null;
+      try {
+        defaultIconFile = new File(getClass().getResource("/net/rptools/maptool/client/image/framework-icon.png").toURI());
+      } catch (URISyntaxException e) {
+        throw new AssertionError("Unable to find framework icon file", e); // This should not happen!
+      }
+
       if (getSelectedFile() == null) {
         return null;
       }
-      return null; // TODO: CDW grab preview file
+      return defaultIconFile; // TODO: CDW grab preview file
     }
   }
 

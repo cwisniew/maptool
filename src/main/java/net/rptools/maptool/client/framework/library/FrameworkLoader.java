@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.rptools.lib.memento.MementoBuilderParseException;
+import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.model.Asset;
 
 public class FrameworkLoader {
