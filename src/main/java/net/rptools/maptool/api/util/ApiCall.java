@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.api.util;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import javax.swing.SwingUtilities;
@@ -40,12 +41,35 @@ public class ApiCall<T extends ApiData> {
     }
   }
 
+  public CompletableFuture<ApiListResult<T>> runOnSwingThreadList(Callable<Collection<T>> callable) {
+    try {
+      if (SwingUtilities.isEventDispatchThread()) {
+        return CompletableFuture.completedFuture(doListCall(callable));
+      } else {
+        return CompletableFuture.supplyAsync(() -> doListCall(callable));
+      }
+    } catch (Exception e) {
+      log.error(e);
+      return CompletableFuture.completedFuture(
+          new ApiListResult<>(new ApiException("err.internal", e)));
+      }
+  }
+
+  private ApiListResult<T> doListCall(Callable<Collection<T>> callable) {
+    try {
+      return new ApiListResult<T>(callable.call());
+    } catch (Exception e) {
+      return new ApiListResult<T>(new ApiException("err.internal", e));
+    }
+  }
+
+
   private ApiResult<T> doCall(Callable<T> callable) {
     try {
       return new ApiResult<T>(callable.call());
     } catch (Exception e) {
       log.error(e);
-      return new ApiResult<>(new ApiException("err.internal", e));
+      return new ApiResult<T>(new ApiException("err.internal", e));
     }
   }
 }
