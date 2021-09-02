@@ -54,6 +54,10 @@ public class ApiResult<T extends ApiData> {
     }
   }
 
+  public ApiException getException() {
+    return exception;
+  }
+
   public JsonObject asJsonObject() {
     JsonObject json = new JsonObject();
     if (data != null) {

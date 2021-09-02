@@ -7,6 +7,7 @@ import net.rptools.maptool.api.util.ApiCall;
 import net.rptools.maptool.api.util.ApiListResult;
 import net.rptools.maptool.api.util.ApiResult;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +15,7 @@ public class LibTokenApi {
   private static final Logger log = LogManager.getLogger(LibTokenApi.class);
 
 
-  public CompletableFuture<ApiListResult<LibTokenInfo>> getLibTokens() {
+  public CompletableFuture<Set<LibTokenInfo>> getLibTokens() {
     return new ApiCall<LibTokenInfo>().runOnSwingThreadList(this::doGetLibTokens);
   }
 
@@ -23,6 +24,17 @@ public class LibTokenApi {
     return new ApiCall<LibTokenInfo>().runOnSwingThread(() ->
       doGetLibTokens().stream().filter(lti -> name.equals(lti.name())).findFirst().orElse(null)
     );
+  }
+
+  public CompletableFuture<ApiListResult<MacroButtonInfo>> getMacro(LibTokenInfo libToken, String name) {
+
+  }
+
+
+  private Token getLibToken(LibTokenInfo libToken) {
+    for (var  zr : MapTool.getFrame().getZoneRenderers()) {
+      zr.
+    }
   }
 
   private Set<LibTokenInfo> doGetLibTokens() {

@@ -21,9 +21,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.api.frameworks.LibTokenApi;
+import net.rptools.maptool.api.frameworks.LibTokenInfo;
+import net.rptools.maptool.api.util.ApiResult;
+import net.rptools.maptool.api.util.ApiResultStatus;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.util.ImageManager;
 
@@ -41,8 +45,13 @@ public class LibTokenURLStreamHandler extends URLStreamHandler {
 
   private static class LibTokenURLConnection extends URLConnection {
 
+    private String libTokenName;
+    private String location;
+
     public LibTokenURLConnection(URL url) {
       super(url);
+      libTokenName = url.getHost();
+      location = url.getPath();
     }
 
     @Override
@@ -54,7 +63,20 @@ public class LibTokenURLStreamHandler extends URLStreamHandler {
     public InputStream getInputStream() throws IOException {
       // TODO CDW: break up URL like
       // lib:<tokenName>/<macroName>
-      new LibTokenApi().getLibToken()
+      LibTokenInfo libTokenInfo;
+      try {
+        ApiResult<LibTokenInfo> result = new LibTokenApi().getLibToken(libTokenName).get();
+        if (result.getStatus() == ApiResultStatus.ERROR) {
+          throw new IOException(result.getException());
+        } else if (result.getStatus() == ApiResultStatus.NONE) {
+          throw new IOException(url.toExternalForm() + " not found");
+        }
+
+        if (!libTokenInfo.macroNames().contains())
+
+      } catch (InterruptedException | ExecutionException e) {
+        throw new IOException(e);
+      }
       LibTo
       String id = url.getHost();
       if (url.getQuery() == null) {
