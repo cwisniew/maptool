@@ -16,36 +16,28 @@ package net.rptools.maptool.api.util;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import javax.swing.SwingUtilities;
-import net.rptools.maptool.api.ApiData;
-import net.rptools.maptool.api.ApiException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ApiCall<T extends ApiData> {
+public class ApiCallHelper<T> {
 
-  private static final Logger log = LogManager.getLogger(ApiCall.class);
+  private static final Logger log = LogManager.getLogger(ApiCallHelper.class);
 
-  public CompletableFuture<ApiResult<T>> runOnSwingThread(Callable<T> callable) {
-    try {
-      if (SwingUtilities.isEventDispatchThread()) {
-        return CompletableFuture.completedFuture(doCall(callable));
-      } else {
-        return CompletableFuture.supplyAsync(() -> doCall(callable));
-      }
-    } catch (Exception e) {
-      log.error(e);
-      return CompletableFuture.completedFuture(
-          new ApiResult<>(new ApiException("err.internal", e)));
+  public CompletableFuture<T> runOnSwingThread(Callable<T> callable) {
+    if (SwingUtilities.isEventDispatchThread()) {
+      return CompletableFuture.completedFuture(doCall(callable));
+    } else {
+      return CompletableFuture.supplyAsync(() -> doCall(callable));
     }
   }
 
-  private ApiResult<T> doCall(Callable<T> callable) {
+  private T doCall(Callable<T> callable) {
     try {
-      return new ApiResult<T>(callable.call());
+      return callable.call();
     } catch (Exception e) {
-      log.error(e);
-      return new ApiResult<>(new ApiException("err.internal", e));
+      throw new CompletionException(e);
     }
   }
 }

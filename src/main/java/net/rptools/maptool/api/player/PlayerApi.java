@@ -17,14 +17,12 @@ package net.rptools.maptool.api.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
-import net.rptools.maptool.api.ApiException;
-import net.rptools.maptool.api.util.ApiCall;
-import net.rptools.maptool.api.util.ApiListResult;
-import net.rptools.maptool.api.util.ApiResult;
+import net.rptools.maptool.api.util.ApiCallHelper;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
@@ -37,12 +35,12 @@ public class PlayerApi {
 
   private static final Logger log = LogManager.getLogger(PlayerApi.class);
 
-  public CompletableFuture<ApiResult<PlayerInfo>> getPlayer(String name) {
-    return new ApiCall<PlayerInfo>().runOnSwingThread(() -> getPlayerInfo(name));
+  public CompletableFuture<PlayerInfo> getPlayer(String name) {
+    return new ApiCallHelper<PlayerInfo>().runOnSwingThread(() -> getPlayerInfo(name));
   }
 
-  public CompletableFuture<ApiResult<PlayerInfo>> getPlayer() {
-    return new ApiCall<PlayerInfo>()
+  public CompletableFuture<PlayerInfo> getPlayer() {
+    return new ApiCallHelper<PlayerInfo>()
         .runOnSwingThread(
             () -> {
               Player player = MapTool.getPlayer();
@@ -50,41 +48,19 @@ public class PlayerApi {
             });
   }
 
-  public CompletableFuture<ApiListResult<PlayerInfo>> getConnectedPlayers() {
+  public CompletableFuture<Set<PlayerInfo>> getConnectedPlayers() {
     return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return new ApiListResult<>(
-                getPlayersInfo().stream()
-                    .filter(PlayerInfo::connected)
-                    .collect(Collectors.toList()));
-          } catch (InterruptedException
-              | InvocationTargetException
-              | NoSuchAlgorithmException
-              | InvalidKeySpecException e) {
-            log.error(e);
-            return new ApiListResult<>(new ApiException("err.internal", e));
-          }
-        });
+        () -> getPlayersInfo().stream()
+            .filter(PlayerInfo::connected)
+            .collect(Collectors.toSet()));
   }
 
-  public CompletableFuture<ApiListResult<PlayerInfo>> getDatabasePlayers() {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return new ApiListResult<>(getPlayersInfo());
-          } catch (InterruptedException
-              | InvocationTargetException
-              | NoSuchAlgorithmException
-              | InvalidKeySpecException e) {
-            log.error(e);
-            return new ApiListResult<>(new ApiException("err.internal", e));
-          }
-        });
+  public CompletableFuture<Set<PlayerInfo>> getDatabasePlayers() {
+    return CompletableFuture.supplyAsync(this::getPlayersInfo);
   }
 
-  public CompletableFuture<ApiResult<PlayerDatabaseInfo>> getDatabaseCapabilities() {
-    return CompletableFuture.supplyAsync(() -> new ApiResult<>(getPlayerDatabaseInfo()));
+  public CompletableFuture<PlayerDatabaseInfo> getDatabaseCapabilities() {
+    return CompletableFuture.supplyAsync(this::getPlayerDatabaseInfo);
   }
 
   /*
@@ -143,13 +119,15 @@ public class PlayerApi {
     return new PlayerInfo(name, role, blocked, blockedReason, connected);
   }
 
-  private List<PlayerInfo> getPlayersInfo()
-      throws InterruptedException, InvocationTargetException, NoSuchAlgorithmException,
-          InvalidKeySpecException {
-    List<PlayerInfo> players = new ArrayList<>();
+  private Set<PlayerInfo> getPlayersInfo() {
+    Set<PlayerInfo> players = new HashSet<>();
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    for (Player p : playerDatabase.getAllPlayers()) {
-      players.add(getPlayerInfo(p.getName()));
+    try {
+      for (Player p : playerDatabase.getAllPlayers()) {
+        players.add(getPlayerInfo(p.getName()));
+      }
+    } catch (InterruptedException | InvocationTargetException | NoSuchAlgorithmException  | InvalidKeySpecException e) {
+      throw new CompletionException(e);
     }
 
     return players;
