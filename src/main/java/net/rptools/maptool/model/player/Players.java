@@ -567,5 +567,9 @@ public class Players {
         propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_REMOVED, oldInfo, null);
       }
     }
+
+    public String getPersistedDatabaseNames() {
+
+    }
   }
 }
