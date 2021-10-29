@@ -19,7 +19,9 @@ import com.google.inject.Injector;
 import net.rptools.maptool.model.framework.FrameworkModule;
 
 /**
- * This class is used to locate the services that packages im the MapTool code base implement.
+ * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+ * See https://github.com/RPTools/maptool/issues/3123 for more details.
+ *
  *
  * <p>This is far from ideal, but it is a step -- hopefully -- in the right direction. The idea is
  * to move all the calls to static classes into one place so that we can eventually start the
@@ -28,6 +30,7 @@ import net.rptools.maptool.model.framework.FrameworkModule;
  * <p>As it currently stands this is very difficult to do as teh Swing code is so tightly coupled
  * with everything else that trying to instantiate the main MapTool class with the injector results
  * in a long list of dialogs that wont open and other general weirdness.
+ *
  */
 public class MapToolServiceLocator {
 
