@@ -457,6 +457,9 @@ dependencies {
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.14.3'
 
+    // Dependency Injection
+    implementation group: 'com.google.inject', name: 'guice', version: '5.0.1'
+
 }
 
 
