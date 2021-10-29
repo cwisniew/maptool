@@ -179,7 +179,6 @@ public class MapTool {
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
   private static EventDispatcher eventDispatcher;
-  private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
 
   private static final MTWebAppServer webAppServer = new MTWebAppServer();
@@ -198,24 +197,21 @@ public class MapTool {
     return THUMBNAIL_SIZE;
   }
 
-
   /**
-   * Record to hold the services used throughout the application.
-   * This is a stop gap, just one short step along the path to hopefully moving this wholes mess
-   * to dependency injection.
+   * Record to hold the services used throughout the application. This is a stop gap, just one short
+   * step along the path to hopefully moving this wholes mess to dependency injection.
    */
-  private record Services(
-      LibraryManager libraryManager
-  ) {};
+  private record Services(LibraryManager libraryManager) {}
+  ;
 
   /*
    * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
    * See https://github.com/RPTools/maptool/issues/3123 for more details.
    */
-  private static final Services services = new Services(
-      MapToolServiceLocator.getMapToolServices().getLibraryManager()
-  );
+  private static final Services services =
+      new Services(MapToolServiceLocator.getMapToolServices().getLibraryManager());
 
+  private static MapToolLineParser parser = new MapToolLineParser(services.libraryManager);
   /**
    * This method looks up the message key in the properties file and returns the resultant text with
    * the detail message from the <code>Throwable</code> appended to the end.
@@ -702,7 +698,7 @@ public class MapTool {
 
     handler = new ClientMethodHandler(libraryManager);
 
-    setClientFrame(new MapToolFrame(menuBar));
+    setClientFrame(new MapToolFrame(menuBar, services.libraryManager));
 
     serverCommand = new ServerCommandClientImpl();
 
@@ -1022,7 +1018,7 @@ public class MapTool {
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     JSScriptEngine.resetContexts();
-    UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
+    new UserDefinedMacroFunctions(services.libraryManager).handleCampaignLoadMacroEvent();
   }
 
   public static void setServerPolicy(ServerPolicy policy) {
@@ -1202,7 +1198,13 @@ public class MapTool {
 
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    MapTool.startServer(null, config, new ServerPolicy(), campaign, playerDatabase, false,
+    MapTool.startServer(
+        null,
+        config,
+        new ServerPolicy(),
+        campaign,
+        playerDatabase,
+        false,
         services.libraryManager());
 
     String username = AppPreferences.getDefaultUserName();

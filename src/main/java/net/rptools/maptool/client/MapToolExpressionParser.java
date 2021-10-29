@@ -24,98 +24,114 @@ import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.client.script.javascript.api.*;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.Function;
 
 public class MapToolExpressionParser extends ExpressionParser {
 
-  /** MapTool functions to add to the parser. */
-  private static final List<Function> mapToolParserFunctions =
-      Stream.of(
-              AbortFunction.getInstance(),
-              AssertFunction.getInstance(),
-              AddAllToInitiativeFunction.getInstance(),
-              ChatFunction.getInstance(),
-              CurrentInitiativeFunction.getInstance(),
-              DefineMacroFunction.getInstance(),
-              EvalMacroFunctions.getInstance(),
-              ExecFunction.getInstance(),
-              FindTokenFunctions.getInstance(),
-              HasImpersonated.getInstance(),
-              InitiativeRoundFunction.getInstance(),
-              InputFunction.getInstance(),
-              IsTrustedFunction.getInstance(),
-              JSONMacroFunctions.getInstance(),
-              LookupTableFunction.getInstance(),
-              MacroArgsFunctions.getInstance(),
-              MacroDialogFunctions.getInstance(),
-              MacroFunctions.getInstance(),
-              MacroLinkFunction.getInstance(),
-              MapFunctions.getInstance(),
-              MiscInitiativeFunction.getInstance(),
-              PlayerNameFunctions.getInstance(),
-              RemoveAllFromInitiativeFunction.getInstance(),
-              ReturnFunction.getInstance(),
-              SoundFunctions.getInstance(),
-              StateImageFunction.getInstance(),
-              BarImageFunction.getInstance(),
-              StringFunctions.getInstance(),
-              StrListFunctions.getInstance(),
-              StrPropFunctions.getInstance(),
-              SwitchTokenFunction.getInstance(),
-              TokenBarFunction.getInstance(),
-              TokenCopyDeleteFunctions.getInstance(),
-              TokenGMNameFunction.getInstance(),
-              TokenHaloFunction.getInstance(),
-              TokenImage.getInstance(),
-              TokenInitFunction.getInstance(),
-              TokenInitHoldFunction.getInstance(),
-              TokenLabelFunction.getInstance(),
-              TokenLightFunctions.getInstance(),
-              TokenLocationFunctions.getInstance(),
-              TokenNameFunction.getInstance(),
-              TokenPropertyFunctions.getInstance(),
-              TokenRemoveFromInitiativeFunction.getInstance(),
-              TokenSelectionFunctions.getInstance(),
-              TokenSightFunctions.getInstance(),
-              TokenSpeechFunctions.getInstance(),
-              TokenStateFunction.getInstance(),
-              TokenVisibleFunction.getInstance(),
-              isVisibleFunction.getInstance(),
-              getInfoFunction.getInstance(),
-              TokenMoveFunctions.getInstance(),
-              FogOfWarFunctions.getInstance(),
-              Topology_Functions.getInstance(),
-              ZoomFunctions.getInstance(),
-              ParserPropertyFunctions.getInstance(),
-              MathFunctions.getInstance(),
-              MacroJavaScriptBridge.getInstance(),
-              DrawingGetterFunctions.getInstance(),
-              DrawingSetterFunctions.getInstance(),
-              DrawingMiscFunctions.getInstance(),
-              ExportDataFunctions.getInstance(),
-              RESTfulFunctions.getInstance(),
-              HeroLabFunctions.getInstance(),
-              LogFunctions.getInstance(),
-              LastRolledFunction.getInstance(),
-              Base64Functions.getInstance(),
-              TokenTerrainModifierFunctions.getInstance(),
-              TestFunctions.getInstance(),
-              TextLabelFunctions.getInstance(),
-              TokenSpeechNameFunction.getInstance(),
-              new MarkDownFunctions(),
-              new PlayerFunctions(),
-              new LibraryFunctions())
-          .collect(Collectors.toList());
+  private static List<Function> mapToolParserFunctions(LibraryManager libraryManager) {
+    return Stream.of(
+            AbortFunction.getInstance(),
+            AssertFunction.getInstance(),
+            AddAllToInitiativeFunction.getInstance(),
+            ChatFunction.getInstance(),
+            CurrentInitiativeFunction.getInstance(),
+            DefineMacroFunction.getInstance(),
+            EvalMacroFunctions.getInstance(),
+            ExecFunction.getInstance(),
+            FindTokenFunctions.getInstance(),
+            HasImpersonated.getInstance(),
+            InitiativeRoundFunction.getInstance(),
+            InputFunction.getInstance(),
+            IsTrustedFunction.getInstance(),
+            JSONMacroFunctions.getInstance(),
+            LookupTableFunction.getInstance(),
+            MacroArgsFunctions.getInstance(),
+            new MacroDialogFunctions(libraryManager),
+            MacroFunctions.getInstance(),
+            new MacroLinkFunction(libraryManager),
+            MapFunctions.getInstance(),
+            MiscInitiativeFunction.getInstance(),
+            PlayerNameFunctions.getInstance(),
+            RemoveAllFromInitiativeFunction.getInstance(),
+            ReturnFunction.getInstance(),
+            SoundFunctions.getInstance(),
+            StateImageFunction.getInstance(),
+            BarImageFunction.getInstance(),
+            StringFunctions.getInstance(),
+            StrListFunctions.getInstance(),
+            StrPropFunctions.getInstance(),
+            SwitchTokenFunction.getInstance(),
+            TokenBarFunction.getInstance(),
+            TokenCopyDeleteFunctions.getInstance(),
+            TokenGMNameFunction.getInstance(),
+            TokenHaloFunction.getInstance(),
+            TokenImage.getInstance(),
+            TokenInitFunction.getInstance(),
+            TokenInitHoldFunction.getInstance(),
+            TokenLabelFunction.getInstance(),
+            TokenLightFunctions.getInstance(),
+            TokenLocationFunctions.getInstance(),
+            TokenNameFunction.getInstance(),
+            new TokenPropertyFunctions(libraryManager),
+            TokenRemoveFromInitiativeFunction.getInstance(),
+            TokenSelectionFunctions.getInstance(),
+            TokenSightFunctions.getInstance(),
+            TokenSpeechFunctions.getInstance(),
+            TokenStateFunction.getInstance(),
+            TokenVisibleFunction.getInstance(),
+            isVisibleFunction.getInstance(),
+            getInfoFunction.getInstance(),
+            TokenMoveFunctions.getInstance(),
+            FogOfWarFunctions.getInstance(),
+            Topology_Functions.getInstance(),
+            ZoomFunctions.getInstance(),
+            ParserPropertyFunctions.getInstance(),
+            MathFunctions.getInstance(),
+            new MacroJavaScriptBridge(libraryManager),
+            DrawingGetterFunctions.getInstance(),
+            DrawingSetterFunctions.getInstance(),
+            DrawingMiscFunctions.getInstance(),
+            ExportDataFunctions.getInstance(),
+            RESTfulFunctions.getInstance(),
+            HeroLabFunctions.getInstance(),
+            LogFunctions.getInstance(),
+            LastRolledFunction.getInstance(),
+            Base64Functions.getInstance(),
+            TokenTerrainModifierFunctions.getInstance(),
+            TestFunctions.getInstance(),
+            TextLabelFunctions.getInstance(),
+            TokenSpeechNameFunction.getInstance(),
+            new MarkDownFunctions(),
+            new PlayerFunctions(),
+            new LibraryFunctions(libraryManager))
+        .collect(Collectors.toList());
+    }
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
 
   public MapToolExpressionParser() {
-    super.getParser().addFunctions(mapToolParserFunctions);
+    super.getParser().addFunctions(mapToolParserFunctions(libraryManager));
   }
 
   public static List<Function> getMacroFunctions() {
-    return mapToolParserFunctions;
+    /*
+     * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+     * See https://github.com/RPTools/maptool/issues/3123 for more details.
+     */
+    LibraryManager libraryManager =
+        MapToolServiceLocator.getMapToolServices().getLibraryManager();
+    return mapToolParserFunctions(libraryManager);
   }
 
   /**
@@ -157,12 +173,12 @@ public class MapToolExpressionParser extends ExpressionParser {
       // check javascript UDFs first.
       if (functionName.startsWith("js.") || functionName.startsWith("ujs.")) {
         if (JSMacro.isFunctionDefined(functionName)) {
-          return JSMacro.getInstance();
+          return new JSMacro(libraryManager);
         }
       }
 
       // check user defined functions next
-      UserDefinedMacroFunctions userFunctions = UserDefinedMacroFunctions.getInstance();
+      UserDefinedMacroFunctions userFunctions = new UserDefinedMacroFunctions(libraryManager);
       if (userFunctions.isFunctionDefined(functionName)) return userFunctions;
 
       // let parser do its thing

@@ -21,9 +21,17 @@ import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
 import org.graalvm.polyglot.HostAccess;
 
 public class JSAPIClientInfo implements MapToolJSAPIInterface {
+
+  private final LibraryManager libraryManager;
+
+  public JSAPIClientInfo(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
+  }
+
   @Override
   public String serializeToString() {
     return "MapTool.ClientInfo";
@@ -89,7 +97,7 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String[] userDefinedFunctions() {
-    return UserDefinedMacroFunctions.getInstance().getAliases();
+    return new UserDefinedMacroFunctions(libraryManager).getAliases();
   }
 
   @HostAccess.Export

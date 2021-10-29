@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import net.rptools.maptool.model.framework.LibraryManager;
 
 /** Represents the JPanel holding the HTML pane. */
 public class HTMLPanel extends JPanel implements HTMLPanelInterface {
@@ -36,8 +37,9 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
    *
    * @param container The container that will hold the HTML panel
    * @param scrollBar whether panel have scroll bars or not
+   * @param libraryManager the library manager.
    */
-  HTMLPanel(final HTMLPanelContainer container, boolean scrollBar) {
+  HTMLPanel(final HTMLPanelContainer container, boolean scrollBar, LibraryManager libraryManager) {
     setLayout(new BorderLayout());
 
     if (scrollBar) {

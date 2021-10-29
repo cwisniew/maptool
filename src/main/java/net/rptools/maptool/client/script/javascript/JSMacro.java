@@ -18,6 +18,7 @@ import java.util.*;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.script.javascript.api.*;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -25,23 +26,21 @@ import net.rptools.parser.function.AbstractFunction;
 import org.graalvm.polyglot.*;
 
 public class JSMacro extends AbstractFunction {
-  private static JSMacro instance = new JSMacro();
   private static HashMap<String, JSAPIRegisteredMacro> macros = new HashMap<>();
 
   public static void registerMacro(String name, JSAPIRegisteredMacro macro) {
     macros.put(name, macro);
   }
 
-  public static JSMacro getInstance() {
-    return instance;
-  }
-
   public static void clear() {
     macros.clear();
   }
 
-  private JSMacro() {
+  public final LibraryManager libraryManager;
+
+  public JSMacro(LibraryManager libraryManager) {
     super(0, UNLIMITED_PARAMETERS);
+    this.libraryManager = libraryManager;
   }
 
   public static boolean isFunctionDefined(String functionName) {
@@ -58,9 +57,10 @@ public class JSMacro extends AbstractFunction {
     Object ret = JSScriptEngine.getJSScriptEngine().applyFunction(macro, aargs);
     if (ret != null) {
       if (ret instanceof Value val) {
-        return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList());
+        return new MacroJavaScriptBridge(libraryManager).ValueToMTScriptType(val, new ArrayList());
       }
-      return MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList());
+      return new MacroJavaScriptBridge(libraryManager).HostObjectToMTScriptType(ret,
+          new ArrayList());
     }
     return "";
   }

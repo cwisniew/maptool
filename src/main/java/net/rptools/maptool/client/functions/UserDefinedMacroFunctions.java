@@ -54,8 +54,6 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       new HashMap<String, FunctionRedefinition>();
   private final Stack<String> currentFunction = new Stack<String>();
 
-  private static UserDefinedMacroFunctions instance = new UserDefinedMacroFunctions();
-
   private static String ON_LOAD_CAMPAIGN_CALLBACK = "onCampaignLoad";
 
   private static int nameCounter = 0;
@@ -81,11 +79,14 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     Function function;
   }
 
-  public static UserDefinedMacroFunctions getInstance() {
-    return instance;
-  }
+  private LibraryManager libraryManager;
 
-  private UserDefinedMacroFunctions() {}
+  /**
+   * Creates a new instance of UserDefinedMacroFunctions
+   */
+  public UserDefinedMacroFunctions(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
+  }
 
   @Override
   public void checkParameters(String functionName, List<Object> parameters) {
@@ -378,7 +379,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       } else {
         // token macro
         try {
-          var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+          var lib = libraryManager.getLibrary(macroLocation.substring(4));
           if (lib.isEmpty()) {
             return I18N.getText("msg.error.udf.tooltip.loading", theDef.macroName);
           }

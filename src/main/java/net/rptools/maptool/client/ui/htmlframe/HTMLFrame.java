@@ -33,6 +33,8 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.ParserException;
 
@@ -62,6 +64,14 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
   /** Is the panel HTML5 or HTML3.2. */
   private boolean isHTML5;
+
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
 
   /**
    * Runs a javascript on a frame.
@@ -202,9 +212,9 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager(libraryManager));
     } else {
-      panel = new HTMLPanel(this, true);
+      panel = new HTMLPanel(this, true, libraryManager);
     }
     panel.addToContainer(this);
     panel.addActionListener(this);

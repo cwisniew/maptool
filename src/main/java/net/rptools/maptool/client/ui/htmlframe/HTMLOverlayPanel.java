@@ -37,6 +37,7 @@ import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.framework.LibraryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,9 +64,12 @@ public class HTMLOverlayPanel extends JFXPanel {
   /** The Region used to catch the clicks on the overlays. */
   private Region front;
 
+  private final LibraryManager libraryManager;
+
   /** Creates a new HTMLJFXPanel. */
-  public HTMLOverlayPanel() {
+  public HTMLOverlayPanel(LibraryManager libraryManager) {
     super();
+    this.libraryManager = libraryManager;
     addMouseListeners(); // mouse listeners to transmit to the ZR
     setBackground(new Color(0, 0, 0, 0)); // transparent overlay
 
@@ -256,7 +260,7 @@ public class HTMLOverlayPanel extends JFXPanel {
               needsSorting = true;
             }
           } else {
-            overlayManager = new HTMLOverlayManager(name, zOrder);
+            overlayManager = new HTMLOverlayManager(name, zOrder, libraryManager);
             overlayManager.setupWebView(new WebView());
             overlays.add(overlayManager);
             root.getChildren().add(overlayManager.getWebView());

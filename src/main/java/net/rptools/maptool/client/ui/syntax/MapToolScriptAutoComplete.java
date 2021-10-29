@@ -21,6 +21,8 @@ import net.rptools.maptool.client.functions.AdditionalFunctionDescription;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -53,7 +55,13 @@ public class MapToolScriptAutoComplete {
           new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
 
     // Add UDFs
-    UserDefinedMacroFunctions udfManager = UserDefinedMacroFunctions.getInstance();
+    /*
+     * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+     * See https://github.com/RPTools/maptool/issues/3123 for more details.
+     */
+    LibraryManager libraryManager =
+        MapToolServiceLocator.getMapToolServices().getLibraryManager();
+    UserDefinedMacroFunctions udfManager = new UserDefinedMacroFunctions(libraryManager);
     for (String udf : udfManager.getAliases()) {
       // when the tooltip is blank, pass null through to the AutoComplete window so it can insert
       // the appropriate "No desc available" text.

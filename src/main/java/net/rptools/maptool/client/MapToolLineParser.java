@@ -84,6 +84,9 @@ public class MapToolLineParser {
   /** The dice rolls that occurred in the previous parse this one. */
   private List<Integer> rolled = new LinkedList<>();
 
+  /** The library manager. */
+  private LibraryManager libraryManager;
+
   /**
    * The dice rolls that occurred since either start of the macro or the previous time {@link
    * #getNewRolls()} was called.
@@ -132,6 +135,10 @@ public class MapToolLineParser {
     SEARCHING_FOR_QUOTE,
     SEARCHING_FOR_CLOSE_BRACKET,
     SKIP_NEXT_CHAR
+  }
+
+  public MapToolLineParser(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
   }
 
   public Map<String, String> listAllMacroFunctions() {
@@ -1206,7 +1213,7 @@ public class MapToolLineParser {
       macroBody = mbp.getCommand();
     } else { // Search for a token called macroLocation (must start with "Lib:")
       try {
-        var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+        var lib = libraryManager.getLibrary(macroLocation.substring(4));
         if (lib.isEmpty()) {
           throw new ParserException(I18N.getText("lineParser.unknownLibToken", macroLocation));
         }
@@ -1462,7 +1469,8 @@ public class MapToolLineParser {
     return retval;
   }
 
-  public static final MapToolExpressionParser expressionParser = new MapToolExpressionParser();
+  public static final MapToolExpressionParser expressionParser =
+      new MapToolExpressionParser();
 
   private String rollString(Collection<String> options, String text) {
     return rollString(options, null, text);

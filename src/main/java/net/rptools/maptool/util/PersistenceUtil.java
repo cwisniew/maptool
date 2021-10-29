@@ -72,6 +72,7 @@ import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -108,6 +109,14 @@ public class PersistenceUtil {
   private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
   private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
   private static final ModelVersionManager tokenVersionManager = new ModelVersionManager();
+
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
 
   static {
     PackedFile.init(AppUtil.getAppHome("tmp")); // $NON-NLS-1$
@@ -727,7 +736,6 @@ public class PersistenceUtil {
    * @throws IOException if there is a problem reading the add-o library information.
    */
   private static void loadAddOnLibraries(PackedFile packedFile) throws IOException {
-    var libraryManager = new LibraryManager();
     libraryManager.removeAddOnLibraries();
     if (!packedFile.hasFile(DROP_IN_LIBRARY_LIST_FILE)) {
       return; // No Libraries to import
@@ -762,7 +770,7 @@ public class PersistenceUtil {
 
     AddOnLibraryListDto dto = null;
     try {
-      dto = new LibraryManager().addOnLibrariesToDto().get();
+      dto = libraryManager.addOnLibrariesToDto().get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }

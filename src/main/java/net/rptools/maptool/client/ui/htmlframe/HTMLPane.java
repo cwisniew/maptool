@@ -60,7 +60,11 @@ public class HTMLPane extends JEditorPane {
   /** The default rule for the span tag. */
   private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
-  public HTMLPane() {
+  /** The library manager for libraries. */
+  private final LibraryManager libraryManager;
+
+  public HTMLPane(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
     editorKit = new HTMLPaneEditorKit(this);
     setEditorKit(editorKit);
     setContentType("text/html");
@@ -310,7 +314,7 @@ public class HTMLPane extends JEditorPane {
             return;
           }
           try {
-            var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+            var lib = libraryManager.getLibrary(vals[1].substring(4));
             if (lib.isPresent()) {
               var library = lib.get();
               var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();

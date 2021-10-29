@@ -28,6 +28,8 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.FunctionUtil;
 
 /**
@@ -73,6 +75,15 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   public Map<String, String> macroCallbacks() {
     return macroCallbacks;
   }
+
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
 
   /**
    * Return whether the frame is visible or not.
@@ -175,9 +186,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean scrollBar, boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager(libraryManager));
     } else {
-      panel = new HTMLPanel(this, scrollBar);
+      panel = new HTMLPanel(this, scrollBar, libraryManager);
     }
     panel.addToContainer(this);
     panel.addActionListener(this);

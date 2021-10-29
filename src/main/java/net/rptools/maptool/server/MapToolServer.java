@@ -36,6 +36,7 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
@@ -62,7 +63,10 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb,
+  public MapToolServer(
+      ServerConfig config,
+      ServerPolicy policy,
+      PlayerDatabase playerDb,
       LibraryManager libraryManager)
       throws IOException {
     this.config = config;
@@ -314,7 +318,13 @@ public class MapToolServer {
     // This starts the server thread.
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    /*
+     * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+     * See https://github.com/RPTools/maptool/issues/3123 for more details.
+     */
+    var libraryManager = MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
     MapToolServer server =
-        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase);
+        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase, libraryManager);
   }
 }

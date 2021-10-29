@@ -177,15 +177,12 @@ public class AppActions {
   public static final int menuShortcut = getMenuShortcutKeyMask();
   private static boolean keepIdsOnPaste = false;
 
-
   /*
    * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
    * See https://github.com/RPTools/maptool/issues/3123 for more details.
    */
   private static final LibraryManager libraryManager =
       MapToolServiceLocator.getMapToolServices().getLibraryManager();
-
-
 
   private static int getMenuShortcutKeyMask() {
     int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();

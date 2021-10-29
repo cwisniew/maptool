@@ -28,6 +28,6 @@ public class MapToolServicedImpl implements MapToolServices {
 
   public LibraryManager getLibraryManager() {
     return libraryManager;
-  };
-
+  }
+  ;
 }

@@ -62,24 +62,22 @@ public class MacroLinkFunction extends AbstractFunction {
     LIST
   }
 
-  /** Singleton instance of the MacroLinkFunction class. */
-  private static final MacroLinkFunction instance = new MacroLinkFunction();
+  private final LibraryManager libraryManager;
+
+
+  /**
+   * Create the MacroLink Function handler.
+   * @param libraryManager the library manager.
+   */
+  public MacroLinkFunction(LibraryManager libraryManager) {
+    super(1, 5, "macroLink", "macroLinkText", "execLink");
+    this.libraryManager = libraryManager;
+  }
+
 
   private static final Pattern AUTOEXEC_PATTERN =
       Pattern.compile("([^:]*)://([^/]*)/([^/]*)/([^?]*)(?:\\?(.*))?");
 
-  /**
-   * Gets and instance of the MacroLinkFunction class.
-   *
-   * @return an instance of MacroLinkFunction.
-   */
-  public static MacroLinkFunction getInstance() {
-    return instance;
-  }
-
-  private MacroLinkFunction() {
-    super(1, 5, "macroLink", "macroLinkText", "execLink");
-  }
 
   @Override
   public Object childEvaluate(
@@ -640,7 +638,7 @@ public class MacroLinkFunction extends AbstractFunction {
       try {
         String[] parts = command.split("@");
         if (parts.length > 1) {
-          var lib = new LibraryManager().getLibrary(parts[1].substring(4));
+          var lib = libraryManager.getLibrary(parts[1].substring(4));
           if (lib.isEmpty()) {
             return false;
           }

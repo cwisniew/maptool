@@ -34,8 +34,12 @@ import net.rptools.parser.function.AbstractFunction;
 /** Class that implements player macro functions. */
 public class LibraryFunctions extends AbstractFunction {
 
+
+  /** The library manager. */
+  private LibraryManager libraryManager;
+
   /** Creates a new {@code PlayerFunctions} object. */
-  public LibraryFunctions() {
+  public LibraryFunctions(LibraryManager libraryManager) {
     super(
         0,
         1,
@@ -54,7 +58,6 @@ public class LibraryFunctions extends AbstractFunction {
 
     String fName = functionName.toLowerCase();
     try {
-      var libraryManager = new LibraryManager();
 
       switch (fName) {
         case "library.listaddonlibraries" -> {
@@ -93,7 +96,7 @@ public class LibraryFunctions extends AbstractFunction {
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
           String namespace = parameters.get(0).toString();
-          new LibraryManager().deregisterAddOnLibrary(namespace);
+          libraryManager.deregisterAddOnLibrary(namespace);
           return "";
         }
 
@@ -101,7 +104,7 @@ public class LibraryFunctions extends AbstractFunction {
           MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-          new LibraryManager().removeAddOnLibraries();
+          libraryManager.removeAddOnLibraries();
           return "";
         }
 

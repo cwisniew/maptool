@@ -30,7 +30,6 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.framework.Library;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
@@ -91,6 +90,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
   private MD5Key playerPublicKeyMD5;
 
+  private final LibraryManager libraryManager;
+
   /**
    * Creates a new {@code ServerHandshake} instance.
    *
@@ -98,9 +99,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @param playerDatabase The database of players.
    * @param libraryManager The library manager.
    */
-  public ServerHandshake(ClientConnection connection, PlayerDatabase playerDatabase, LibraryManager libraryManager) {
+  public ServerHandshake(
+      ClientConnection connection, PlayerDatabase playerDatabase, LibraryManager libraryManager) {
     this.connection = connection;
     this.playerDatabase = playerDatabase;
+    this.libraryManager = libraryManager;
   }
 
   @Override

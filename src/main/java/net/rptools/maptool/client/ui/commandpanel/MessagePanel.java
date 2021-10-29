@@ -42,6 +42,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.swing.MessagePanelEditorKit;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.MessageUtil;
 
 public class MessagePanel extends JPanel {
@@ -58,7 +59,10 @@ public class MessagePanel extends JPanel {
   public static final Pattern URL_PATTERN =
       Pattern.compile("([^:]*)://([^/]*)/([^?]*)(?:\\?(.*))?");
 
-  public MessagePanel() {
+  private final LibraryManager libraryManager;
+
+  public MessagePanel(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
     setLayout(new GridLayout());
 
     textPane = new JEditorPane();
@@ -235,7 +239,7 @@ public class MessagePanel extends JPanel {
                         Pattern.CASE_INSENSITIVE)
                     .matcher(output);
             while (m.find()) {
-              MacroLinkFunction.getInstance().processMacroLink(m.group(2));
+              new MacroLinkFunction(libraryManager).processMacroLink(m.group(2));
             }
           }
           // if rolls not being visible to this user result in an empty message, display nothing

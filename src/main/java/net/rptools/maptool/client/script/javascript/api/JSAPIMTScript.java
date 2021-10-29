@@ -26,12 +26,21 @@ import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
 /** Class used to provide an API to interact with MapTool custom scripting language. */
 public class JSAPIMTScript implements MapToolJSAPIInterface {
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
   @Override
   public String serializeToString() {
     return "MTScript";
@@ -54,12 +63,12 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public Object getVariable(String name) throws ParserException {
-    return MacroJavaScriptBridge.getInstance().getMTScriptVariable(name);
+    return new MacroJavaScriptBridge(libraryManager).getMTScriptVariable(name);
   }
 
   @HostAccess.Export
   public void setVariable(String name, Value value) throws ParserException {
-    MacroJavaScriptBridge.getInstance().setMTScriptVariable(name, value);
+    new MacroJavaScriptBridge(libraryManager).setMTScriptVariable(name, value);
   }
 
   @HostAccess.Export
@@ -91,15 +100,15 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public Object execMacro(String macro) throws ParserException {
-    Token tokenInContext = MacroJavaScriptBridge.getInstance().getTokenInContext();
+    Token tokenInContext = new MacroJavaScriptBridge(libraryManager).getTokenInContext();
     MapToolVariableResolver res = new MapToolVariableResolver(tokenInContext);
     return _evalMacro(res, tokenInContext, macro);
   }
 
   @HostAccess.Export
   public Object evalMacro(String macro) throws ParserException {
-    Token tokenInContext = MacroJavaScriptBridge.getInstance().getTokenInContext();
-    MapToolVariableResolver res = MacroJavaScriptBridge.getInstance().getVariableResolver();
+    Token tokenInContext = new MacroJavaScriptBridge(libraryManager).getTokenInContext();
+    MapToolVariableResolver res = new MacroJavaScriptBridge(libraryManager).getVariableResolver();
     return _evalMacro(res, tokenInContext, macro);
   }
 
@@ -120,6 +129,6 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public List<Object> getMTScriptCallingArgs() {
-    return MacroJavaScriptBridge.getInstance().getCallingArgs();
+    return new MacroJavaScriptBridge(libraryManager).getCallingArgs();
   }
 }

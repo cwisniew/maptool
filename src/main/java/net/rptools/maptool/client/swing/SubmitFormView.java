@@ -29,6 +29,8 @@ import javax.swing.text.html.*;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,7 +123,13 @@ public class SubmitFormView extends FormView {
    * @return the encoded data
    */
   private String getEncodedCombinedData(String formData, String linkData, String method) {
-    JsonElement jLinkData = MacroLinkFunction.getInstance().getLinkDataAsJson(linkData);
+    /*
+     * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+     * See https://github.com/RPTools/maptool/issues/3123 for more details.
+     */
+    LibraryManager libraryManager =
+        MapToolServiceLocator.getMapToolServices().getLibraryManager();
+    JsonElement jLinkData = new MacroLinkFunction(libraryManager).getLinkDataAsJson(linkData);
 
     JsonObject jobjLinkData = null;
     if (jLinkData != null && jLinkData.isJsonObject()) {

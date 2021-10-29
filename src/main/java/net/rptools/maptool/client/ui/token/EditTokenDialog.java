@@ -140,7 +140,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private boolean tokenSaved;
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
-  private final LibraryManager libraryManager = new LibraryManager();
+  private final LibraryManager libraryManager;
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
@@ -148,8 +148,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       new AutoGenerateVblSwingWorker(false, Color.BLACK);
 
   /** Create a new token notes dialog. */
-  public EditTokenDialog() {
+  public EditTokenDialog(LibraryManager libraryManager) {
     super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
+    this.libraryManager = libraryManager;
     panelInit();
   }
 

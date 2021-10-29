@@ -37,6 +37,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
@@ -72,7 +73,10 @@ public class CommandPanel extends JPanel
   /** The identity representing no impersonation. */
   private static final TokenIdentity emptyIdentity = new TokenIdentity();
 
-  public CommandPanel() {
+  private final LibraryManager libraryManager;
+
+  public CommandPanel(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createLineBorder(Color.gray));
 
@@ -790,7 +794,7 @@ public class CommandPanel extends JPanel
 
   private MessagePanel getMessagePanel() {
     if (messagePanel == null) {
-      messagePanel = new MessagePanel();
+      messagePanel = new MessagePanel(libraryManager);
       // Update whenever the preferences change
       MapTool.getEventDispatcher()
           .addListener(MapTool.PreferencesEvent.Changed, event -> messagePanel.refreshRenderer());

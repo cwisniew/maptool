@@ -43,5 +43,4 @@ public class MapToolServiceLocator {
   public static MapToolServices getMapToolServices() {
     return instance.mapToolServices;
   }
-
 }

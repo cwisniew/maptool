@@ -29,6 +29,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.framework.LibraryManager;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,7 +85,8 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   /** The map of the macro callbacks. */
   private final Map<String, String> macroCallbacks = new HashMap<>();
 
-  HTMLOverlayManager(String name, int zOrder) {
+  HTMLOverlayManager(String name, int zOrder, LibraryManager libraryManager) {
+    super(libraryManager);
     addActionListener(this); // add the action listeners for form events
     this.name = name;
     this.zOrder = zOrder;

@@ -87,7 +87,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   private LibraryManager libraryManager;
 
-  public ClientHandshake(ClientConnection connection, LocalPlayer player, LibraryManager libraryManager) {
+  public ClientHandshake(
+      ClientConnection connection, LocalPlayer player, LibraryManager libraryManager) {
     this.connection = connection;
     this.player = player;
     this.libraryManager = libraryManager;

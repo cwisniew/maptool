@@ -24,6 +24,8 @@ import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -176,8 +178,14 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
           log.debug("Adding \"" + entry + "\" macro function to syntax highlighting.");
         }
 
+        /*
+         * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+         * See https://github.com/RPTools/maptool/issues/3123 for more details.
+         */
+        LibraryManager libraryManager =
+            MapToolServiceLocator.getMapToolServices().getLibraryManager();
         // Add UDFs
-        for (var udf : UserDefinedMacroFunctions.getInstance().getAliases()) {
+        for (var udf : new UserDefinedMacroFunctions(libraryManager).getAliases()) {
           macroFunctionTokenMap.put(udf, Token.ANNOTATION);
         }
       }

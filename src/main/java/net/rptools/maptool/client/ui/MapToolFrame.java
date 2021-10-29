@@ -95,6 +95,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -217,6 +218,8 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
 
+  private final LibraryManager libraryManager;
+
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
 
@@ -337,11 +340,12 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public MapToolFrame(JMenuBar menuBar) {
+  public MapToolFrame(JMenuBar menuBar, LibraryManager libraryManager) {
     // Set up the frame
     super(AppConstants.APP_NAME);
 
     this.menuBar = menuBar;
+    this.libraryManager = libraryManager;
 
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     addWindowListener(this);
@@ -365,7 +369,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
-    overlayPanel = new HTMLOverlayPanel();
+    overlayPanel = new HTMLOverlayPanel(libraryManager);
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -413,7 +417,7 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
-    commandPanel = new CommandPanel();
+    commandPanel = new CommandPanel(libraryManager);
     MapTool.getMessageList().addObserver(commandPanel);
 
     rendererBorderPanel = new JPanel(new GridLayout());
@@ -753,7 +757,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private EditTokenDialog getTokenPropertiesDialog() {
     if (tokenPropertiesDialog == null) {
-      tokenPropertiesDialog = new EditTokenDialog();
+      tokenPropertiesDialog = new EditTokenDialog(libraryManager);
     }
     return tokenPropertiesDialog;
   }

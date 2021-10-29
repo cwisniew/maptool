@@ -41,13 +41,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       "Function '%s' requires at least %d parameters; %d were provided.";
   private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-  private static final MacroJavaScriptBridge instance = new MacroJavaScriptBridge();
 
   private MapToolVariableResolver variableResolver;
 
   private Stack<List<Object>> callingArgsStack = new Stack<>();
 
-  private MacroJavaScriptBridge() {
+  private LibraryManager libraryManager;
+
+  public MacroJavaScriptBridge(LibraryManager libraryManager) {
     super(
         1,
         UNLIMITED_PARAMETERS,
@@ -56,10 +57,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
         "js.evalURI",
         "js.removeNS",
         "js.createNS");
-  }
-
-  public static MacroJavaScriptBridge getInstance() {
-    return instance;
+    this.libraryManager = libraryManager;
   }
 
   @Override
@@ -102,7 +100,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       }
       Optional<Library> library;
       try {
-        library = new LibraryManager().getLibrary(url).get();
+        library = libraryManager.getLibrary(url).get();
         if (library.isPresent()) {
           script = library.get().readAsString(url).get();
         } else {

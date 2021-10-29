@@ -48,9 +48,12 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenPropertyFunctions extends AbstractFunction {
-  private static final TokenPropertyFunctions instance = new TokenPropertyFunctions();
 
-  private TokenPropertyFunctions() {
+
+  /** The library manager. */
+  private final LibraryManager libraryManager;
+
+  public TokenPropertyFunctions(LibraryManager libraryManager) {
     super(
         0,
         4,
@@ -115,11 +118,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setTokenSnapToGrid",
         "getAllowsURIAccess",
         "setAllowsURIAccess");
+    this.libraryManager = libraryManager;
   }
 
-  public static TokenPropertyFunctions getInstance() {
-    return instance;
-  }
 
   @Override
   public Object childEvaluate(
@@ -951,7 +952,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.setAllowsURIAccess.notLibToken", token.getName()));
       }
-      var libraryManager = new LibraryManager();
       String name = token.getName().substring(4);
       if (libraryManager.usesReservedPrefix(name)) {
         throw new ParserException(

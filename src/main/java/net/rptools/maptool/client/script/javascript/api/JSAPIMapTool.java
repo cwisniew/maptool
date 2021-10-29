@@ -15,16 +15,27 @@
 package net.rptools.maptool.client.script.javascript.api;
 
 import net.rptools.maptool.client.script.javascript.*;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
 public class JSAPIMapTool implements MapToolJSAPIInterface {
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
+
   @Override
   public String serializeToString() {
     return "MapTool";
   }
 
-  @HostAccess.Export public final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
+  @HostAccess.Export public final JSAPIClientInfo clientInfo = new JSAPIClientInfo(libraryManager);
 
   @HostAccess.Export public final JSAPIChat chat = new JSAPIChat();
 

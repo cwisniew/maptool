@@ -208,7 +208,11 @@ public class HTMLWebViewManager {
           + "for(let mutation of mutations) {if (mutation.type === 'childList') {for (let i = 0; i < mutation.addedNodes.length; i++) {MapTool.handleAddedNode(mutation.addedNodes[i]);}}}});"
           + "maptool_observer.observe(document.documentElement, { attributes: false, characterData: false, childList: true, subtree: true });";
 
-  HTMLWebViewManager() {}
+  /** The library manager for libraries. */
+  private final LibraryManager libraryManager;
+  HTMLWebViewManager(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
+  }
 
   /**
    * Setup the WebView
@@ -458,7 +462,7 @@ public class HTMLWebViewManager {
         }
         try {
 
-          var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+          var lib = libraryManager.getLibrary(vals[1].substring(4));
           if (lib.isPresent()) {
             var library = lib.get();
             var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();
@@ -679,7 +683,7 @@ public class HTMLWebViewManager {
     if (m.matches()) {
       // Separate the action from the data
       action = m.group(1);
-      linkData = MacroLinkFunction.getInstance().getLinkDataAsJson(m.group(2));
+      linkData = new MacroLinkFunction(libraryManager).getLinkDataAsJson(m.group(2));
     }
 
     // Combines and encodes the form data with the link data

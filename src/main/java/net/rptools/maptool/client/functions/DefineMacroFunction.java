@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -26,6 +27,8 @@ import net.rptools.parser.function.AbstractFunction;
 
 public class DefineMacroFunction extends AbstractFunction {
   private static final DefineMacroFunction instance = new DefineMacroFunction();
+
+  private LibraryManager libraryManager;
 
   private DefineMacroFunction() {
     super(
@@ -86,13 +89,13 @@ public class DefineMacroFunction extends AbstractFunction {
         newVariableContext = !BigDecimal.ZERO.equals(parameters.get(3));
       }
 
-      UserDefinedMacroFunctions.getInstance()
+      new UserDefinedMacroFunctions(libraryManager)
           .defineFunction(
               parser, parameters.get(0).toString(), macro, ignoreOutput, newVariableContext);
       return I18N.getText(
           "macro.function.defineFunction.functionDefined", parameters.get(0).toString());
     } else if (functionName.equalsIgnoreCase("oldFunction")) {
-      return UserDefinedMacroFunctions.getInstance()
+      return new UserDefinedMacroFunctions(libraryManager)
           .executeOldFunction(parser, resolver, parameters);
     } else if (functionName.equalsIgnoreCase("getDefinedFunctions")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
@@ -101,10 +104,11 @@ public class DefineMacroFunction extends AbstractFunction {
       if (parameters.size() > 1) {
         showFullLocations = FunctionUtil.paramAsBoolean(functionName, parameters, 1, false);
       }
-      return UserDefinedMacroFunctions.getInstance().getDefinedFunctions(delim, showFullLocations);
+      return new UserDefinedMacroFunctions(libraryManager).getDefinedFunctions(delim,
+          showFullLocations);
     } else if ("isFunctionDefined".equalsIgnoreCase(functionName)) {
 
-      if (UserDefinedMacroFunctions.getInstance().isFunctionDefined(parameters.get(0).toString())) {
+      if (new UserDefinedMacroFunctions(libraryManager).isFunctionDefined(parameters.get(0).toString())) {
         return BigDecimal.ONE;
       }
 

@@ -40,8 +40,9 @@ public class MapToolServerConnection
   private final PlayerDatabase playerDatabase;
   private final LibraryManager libraryManager;
 
-  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase,
-      LibraryManager libraryManager) throws IOException {
+  public MapToolServerConnection(
+      MapToolServer server, PlayerDatabase playerDatabase, LibraryManager libraryManager)
+      throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;

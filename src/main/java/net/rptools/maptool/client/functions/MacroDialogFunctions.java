@@ -44,9 +44,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 
 public class MacroDialogFunctions extends AbstractFunction {
-  private static final MacroDialogFunctions instance = new MacroDialogFunctions();
 
-  private MacroDialogFunctions() {
+  private final LibraryManager libraryManager;
+
+  public MacroDialogFunctions(LibraryManager libraryManager) {
     super(
         1,
         5,
@@ -68,11 +69,9 @@ public class MacroDialogFunctions extends AbstractFunction {
         "html.frame5",
         "html.dialog5",
         "html.overlay");
+    this.libraryManager = libraryManager;
   }
 
-  public static MacroDialogFunctions getInstance() {
-    return instance;
-  }
 
   @Override
   public Object childEvaluate(
@@ -188,7 +187,7 @@ public class MacroDialogFunctions extends AbstractFunction {
       throws ParserException {
     String htmlString = "";
     try {
-      Optional<Library> library = new LibraryManager().getLibrary(url).get();
+      Optional<Library> library = libraryManager.getLibrary(url).get();
       if (library.isEmpty()) {
         throw new ParserException(
             I18N.getText("macro.function.html5.invalidURI", url.toExternalForm()));

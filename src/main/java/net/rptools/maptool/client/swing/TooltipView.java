@@ -20,6 +20,8 @@ import javax.swing.text.html.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 
 public class TooltipView extends InlineView {
 
@@ -55,7 +57,13 @@ public class TooltipView extends InlineView {
         boolean isInsideChat = mlToolTips;
         boolean allowToolTipToShow = !AppPreferences.getSuppressToolTipsForMacroLinks();
         if (isInsideChat && allowToolTipToShow) {
-          return MacroLinkFunction.getInstance().macroLinkToolTip(href);
+          /*
+           * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+           * See https://github.com/RPTools/maptool/issues/3123 for more details.
+           */
+          LibraryManager libraryManager =
+              MapToolServiceLocator.getMapToolServices().getLibraryManager();
+          return new MacroLinkFunction(libraryManager).macroLinkToolTip(href);
         }
         // if we are not displaying macro link tooltips let if fall through so that any span
         // tooltips will be displayed
