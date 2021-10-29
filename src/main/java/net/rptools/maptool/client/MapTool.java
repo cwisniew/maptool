@@ -84,6 +84,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.framework.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -95,6 +96,7 @@ import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
@@ -195,6 +197,24 @@ public class MapTool {
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
   }
+
+
+  /**
+   * Record to hold the services used throughout the application.
+   * This is a stop gap, just one short step along the path to hopefully moving this wholes mess
+   * to dependency injection.
+   */
+  private record Services(
+      LibraryManager libraryManager
+  ) {};
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final Services services = new Services(
+      MapToolServiceLocator.getMapToolServices().getLibraryManager()
+  );
 
   /**
    * This method looks up the message key in the properties file and returns the resultant text with
@@ -653,7 +673,7 @@ public class MapTool {
     }
   }
 
-  private static void initialize() {
+  private static void initialize(LibraryManager libraryManager) {
     // First time
     AppSetup.install();
 
@@ -680,7 +700,7 @@ public class MapTool {
     messageList =
         new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
-    handler = new ClientMethodHandler();
+    handler = new ClientMethodHandler(libraryManager);
 
     setClientFrame(new MapToolFrame(menuBar));
 
@@ -1030,7 +1050,8 @@ public class MapTool {
       ServerPolicy policy,
       Campaign campaign,
       PlayerDatabase playerDatabase,
-      boolean copyCampaign)
+      boolean copyCampaign,
+      LibraryManager libraryManager)
       throws IOException {
     if (server != null) {
       Thread.dumpStack();
@@ -1042,7 +1063,7 @@ public class MapTool {
 
     // TODO: the client and server campaign MUST be different objects.
     // Figure out a better init method
-    server = new MapToolServer(config, policy, playerDatabase);
+    server = new MapToolServer(config, policy, playerDatabase, libraryManager);
 
     serverPolicy = server.getPolicy();
     if (copyCampaign) {
@@ -1181,7 +1202,8 @@ public class MapTool {
 
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    MapTool.startServer(null, config, new ServerPolicy(), campaign, playerDatabase, false);
+    MapTool.startServer(null, config, new ServerPolicy(), campaign, playerDatabase, false,
+        services.libraryManager());
 
     String username = AppPreferences.getDefaultUserName();
     LocalPlayer localPlayer = (LocalPlayer) playerDatabase.getPlayer(username);
@@ -1202,7 +1224,7 @@ public class MapTool {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
-    MapToolConnection clientConn = new MapToolConnection(config, player);
+    MapToolConnection clientConn = new MapToolConnection(config, player, services.libraryManager());
 
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.addDisconnectHandler(new ServerDisconnectHandler());
@@ -1781,7 +1803,7 @@ public class MapTool {
 
     EventQueue.invokeLater(
         () -> {
-          initialize();
+          initialize(MapToolServiceLocator.getMapToolServices().getLibraryManager());
           EventQueue.invokeLater(
               () -> {
                 clientFrame.setVisible(true);

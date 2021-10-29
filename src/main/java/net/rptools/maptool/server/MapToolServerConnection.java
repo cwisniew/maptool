@@ -23,6 +23,7 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import org.apache.logging.log4j.LogManager;
@@ -37,13 +38,15 @@ public class MapToolServerConnection
   private final MapToolServer server;
   private final MethodServerConnection connection;
   private final PlayerDatabase playerDatabase;
+  private final LibraryManager libraryManager;
 
-  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase)
-      throws IOException {
+  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase,
+      LibraryManager libraryManager) throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     this.playerDatabase = playerDatabase;
+    this.libraryManager = libraryManager;
     addObserver(this);
   }
 
@@ -53,7 +56,7 @@ public class MapToolServerConnection
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
   public Handshake getConnectionHandshake(ClientConnection conn) {
-    var handshake = new ServerHandshake(conn, playerDatabase);
+    var handshake = new ServerHandshake(conn, playerDatabase, libraryManager);
     handshakeMap.put(conn, handshake);
     handshake.addObserver(this);
     conn.addMessageHandler(handshake);

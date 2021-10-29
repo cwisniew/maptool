@@ -85,9 +85,12 @@ public class ClientHandshake implements Handshake, MessageHandler {
   /** The current state of the handshake process. */
   private State currentState = State.AwaitingUseAuthType;
 
-  public ClientHandshake(ClientConnection connection, LocalPlayer player) {
+  private LibraryManager libraryManager;
+
+  public ClientHandshake(ClientConnection connection, LocalPlayer player, LibraryManager libraryManager) {
     this.connection = connection;
     this.player = player;
+    this.libraryManager = libraryManager;
   }
 
   @Override
@@ -221,7 +224,6 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
       playerDb.setLocalPlayer(player);
       if (!MapTool.isPersonalServer()) {
-        var libraryManager = new LibraryManager();
         libraryManager.removeAddOnLibraries();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
           Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));

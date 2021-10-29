@@ -25,7 +25,6 @@ import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
-import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
@@ -71,7 +70,13 @@ import net.rptools.maptool.transfer.AssetHeader;
  * @author drice
  */
 public class ClientMethodHandler extends AbstractMethodHandler {
-  public ClientMethodHandler() {}
+
+  /** The library manager . */
+  private final LibraryManager libraryManager;
+
+  public ClientMethodHandler(LibraryManager libraryManager) {
+    this.libraryManager = libraryManager;
+  }
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
@@ -115,7 +120,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 Asset asset = AssetManager.getAsset(a);
                 try {
                   var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                  libraryManager.reregisterAddOnLibrary(addOnLibrary);
                 } catch (IOException e) {
                   SwingUtilities.invokeLater(
                       () -> {
@@ -128,15 +133,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         return;
 
       case removeAddOnLibrary:
-        var remLibraryManager = new LibraryManager();
         var removedNamespaces = (List<String>) parameters[0];
         for (String namespace : removedNamespaces) {
-          remLibraryManager.deregisterAddOnLibrary(namespace);
+          libraryManager.deregisterAddOnLibrary(namespace);
         }
         return;
 
       case removeAllAddOnLibraries:
-        new LibraryManager().removeAddOnLibraries();
+        libraryManager.removeAddOnLibraries();
         return;
     }
 

@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.MethodClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.server.ClientHandshake;
 import net.rptools.maptool.server.Handshake;
@@ -37,12 +38,12 @@ public class MapToolConnection {
   private Handshake handshake;
   private Runnable onCompleted;
 
-  public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
+  public MapToolConnection(ServerConfig config, LocalPlayer player, LibraryManager libraryManager) throws IOException {
 
     this.connection =
         ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new ClientHandshake(connection, player);
+    this.handshake = new ClientHandshake(connection, player, libraryManager);
     onCompleted = () -> {};
   }
 

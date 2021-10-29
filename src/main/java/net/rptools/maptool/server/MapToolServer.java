@@ -33,6 +33,7 @@ import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.transfer.AssetChunk;
@@ -61,13 +62,14 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
+  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb,
+      LibraryManager libraryManager)
       throws IOException {
     this.config = config;
     this.policy = policy;
     handler = new ServerMethodHandler(this);
     playerDatabase = playerDb;
-    conn = new MapToolServerConnection(this, playerDatabase);
+    conn = new MapToolServerConnection(this, playerDatabase, libraryManager);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();

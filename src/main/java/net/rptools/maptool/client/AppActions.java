@@ -130,6 +130,7 @@ import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.PasswordGenerator;
@@ -175,6 +176,16 @@ public class AppActions {
 
   public static final int menuShortcut = getMenuShortcutKeyMask();
   private static boolean keepIdsOnPaste = false;
+
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
+
 
   private static int getMenuShortcutKeyMask() {
     int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
@@ -2010,7 +2021,7 @@ public class AppActions {
             return;
           }
 
-          new LibraryManager().removeAddOnLibraries();
+          libraryManager.removeAddOnLibraries();
 
           Campaign campaign = CampaignFactory.createBasicCampaign();
           AppState.setCampaignFile(null);
@@ -2304,7 +2315,8 @@ public class AppActions {
                       policy,
                       campaign,
                       playerDatabase,
-                      true);
+                      true,
+                      libraryManager);
 
                   // Connect to server
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
@@ -2480,6 +2492,13 @@ public class AppActions {
         protected void executeAction() {
           if (MapTool.isHostingServer() && !MapTool.confirm("msg.confirm.hostingDisconnect"))
             return;
+          /*
+           * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+           * See https://github.com/RPTools/maptool/issues/3123 for more details.
+           */
+          LibraryManager libraryManager =
+              MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
           disconnectFromServer();
         }
       };
@@ -2490,7 +2509,7 @@ public class AppActions {
       campaign = MapTool.getCampaign();
     } else {
       campaign = CampaignFactory.createBasicCampaign();
-      new LibraryManager().removeAddOnLibraries();
+      libraryManager.removeAddOnLibraries();
     }
     ServerDisconnectHandler.disconnectExpected = true;
     LOAD_MAP.setSeenWarning(false);
@@ -3262,6 +3281,13 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
+          /*
+           * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+           * See https://github.com/RPTools/maptool/issues/3123 for more details.
+           */
+          LibraryManager libraryManager =
+              MapToolServiceLocator.getMapToolServices().getLibraryManager();
+
           JFileChooser chooser = new MapPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -3271,7 +3297,6 @@ public class AppActions {
             File libFile = chooser.getSelectedFile();
             try {
               var addOnLibrary = new AddOnLibraryImporter().importFromFile(libFile);
-              var libraryManager = new LibraryManager();
               String namespace = addOnLibrary.getNamespace().get();
               if (libraryManager.addOnLibraryExists(addOnLibrary.getNamespace().get())) {
                 if (!MapTool.confirm(I18N.getText("library.error.addOnLibraryExists", namespace))) {

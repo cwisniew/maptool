@@ -40,7 +40,7 @@ public class LibraryURLConnection extends URLConnection {
   @Override
   public InputStream getInputStream() throws IOException {
     try {
-      Optional<Library> libraryOpt = new LibraryManager().getLibrary(url).get();
+      Optional<Library> libraryOpt = new LibraryManagerImpl().getLibrary(url).get();
       if (libraryOpt.isEmpty()) {
         throw new IOException("Unable to read location " + url.toExternalForm());
       }
