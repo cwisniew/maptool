@@ -40,6 +40,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
@@ -67,6 +68,14 @@ public class MacroLinkFunction extends AbstractFunction {
 
   private static final Pattern AUTOEXEC_PATTERN =
       Pattern.compile("([^:]*)://([^/]*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   /**
    * Gets and instance of the MacroLinkFunction class.
@@ -640,7 +649,7 @@ public class MacroLinkFunction extends AbstractFunction {
       try {
         String[] parts = command.split("@");
         if (parts.length > 1) {
-          var lib = new LibraryManager().getLibrary(parts[1].substring(4));
+          var lib = libraryManager.getLibrary(parts[1].substring(4));
           if (lib.isEmpty()) {
             return false;
           }

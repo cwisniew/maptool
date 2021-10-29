@@ -37,6 +37,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
 import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,6 +60,14 @@ public class HTMLPane extends JEditorPane {
   private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
   private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   public HTMLPane() {
     editorKit = new HTMLPaneEditorKit(this);
@@ -310,7 +319,7 @@ public class HTMLPane extends JEditorPane {
             return;
           }
           try {
-            var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+            var lib = libraryManager.getLibrary(vals[1].substring(4));
             if (lib.isPresent()) {
               var library = lib.get();
               var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();

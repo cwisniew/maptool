@@ -25,6 +25,7 @@ import net.rptools.maptool.model.framework.Library;
 import net.rptools.maptool.model.framework.LibraryInfo;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.framework.LibraryType;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -33,6 +34,14 @@ import net.rptools.parser.function.AbstractFunction;
 
 /** Class that implements player macro functions. */
 public class LibraryFunctions extends AbstractFunction {
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   /** Creates a new {@code PlayerFunctions} object. */
   public LibraryFunctions() {
@@ -54,7 +63,6 @@ public class LibraryFunctions extends AbstractFunction {
 
     String fName = functionName.toLowerCase();
     try {
-      var libraryManager = new LibraryManager();
 
       switch (fName) {
         case "library.listaddonlibraries" -> {
@@ -93,7 +101,7 @@ public class LibraryFunctions extends AbstractFunction {
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
           String namespace = parameters.get(0).toString();
-          new LibraryManager().deregisterAddOnLibrary(namespace);
+          libraryManager.deregisterAddOnLibrary(namespace);
           return "";
         }
 
@@ -101,7 +109,7 @@ public class LibraryFunctions extends AbstractFunction {
           MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-          new LibraryManager().removeAddOnLibraries();
+          libraryManager.removeAddOnLibraries();
           return "";
         }
 

@@ -32,6 +32,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */
@@ -77,12 +78,8 @@ class LibraryToken implements Library {
    * @param path the path for the library (can be full path or just part of path).
    * @return if the library at the path is handled by the LibraryToken class.
    */
-  static boolean handles(URL path) {
-    if (path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL)) {
-      return !new LibraryManager().usesReservedPrefix(path.getHost());
-    } else {
-      return false;
-    }
+   private static boolean handles(URL path) {
+     return path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL);
   }
 
   /**

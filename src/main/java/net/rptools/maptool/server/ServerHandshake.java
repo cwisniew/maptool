@@ -45,6 +45,7 @@ import net.rptools.maptool.server.proto.HandshakeResponseCodeMsg;
 import net.rptools.maptool.server.proto.PlayerBlockedMsg;
 import net.rptools.maptool.server.proto.RoleDto;
 import net.rptools.maptool.server.proto.UseAuthTypeMsg;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
@@ -89,6 +90,13 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private HandshakeChallenge[] handshakeChallenges;
 
   private MD5Key playerPublicKeyMD5;
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager = MapToolServiceLocator.getServices().getLibraryManager();
+
 
   /**
    * Creates a new {@code ServerHandshake} instance.
@@ -231,7 +239,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
             .setServerPolicyDto(policy)
-            .setAddOnLibraryListDto(new LibraryManager().addOnLibrariesToDto().get());
+            .setAddOnLibraryListDto(libraryManager.addOnLibrariesToDto().get());
     var handshakeMsg =
         HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
     sendMessage(handshakeMsg);

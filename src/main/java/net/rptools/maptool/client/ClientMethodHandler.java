@@ -60,6 +60,7 @@ import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrar
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
@@ -71,6 +72,14 @@ import net.rptools.maptool.transfer.AssetHeader;
  * @author drice
  */
 public class ClientMethodHandler extends AbstractMethodHandler {
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private static final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
+
   public ClientMethodHandler() {}
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
@@ -115,7 +124,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 Asset asset = AssetManager.getAsset(a);
                 try {
                   var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                  libraryManager.reregisterAddOnLibrary(addOnLibrary);
                 } catch (IOException e) {
                   SwingUtilities.invokeLater(
                       () -> {
@@ -128,15 +137,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         return;
 
       case removeAddOnLibrary:
-        var remLibraryManager = new LibraryManager();
         var removedNamespaces = (List<String>) parameters[0];
         for (String namespace : removedNamespaces) {
-          remLibraryManager.deregisterAddOnLibrary(namespace);
+          libraryManager.deregisterAddOnLibrary(namespace);
         }
         return;
 
       case removeAllAddOnLibraries:
-        new LibraryManager().removeAddOnLibraries();
+        libraryManager.removeAddOnLibraries();
         return;
     }
 

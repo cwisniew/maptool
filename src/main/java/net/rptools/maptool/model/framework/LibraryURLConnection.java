@@ -20,8 +20,17 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 
 public class LibraryURLConnection extends URLConnection {
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   /**
    * Constructs a URL connection to the specified URL.
@@ -40,7 +49,7 @@ public class LibraryURLConnection extends URLConnection {
   @Override
   public InputStream getInputStream() throws IOException {
     try {
-      Optional<Library> libraryOpt = new LibraryManager().getLibrary(url).get();
+      Optional<Library> libraryOpt = libraryManager.getLibrary(url).get();
       if (libraryOpt.isEmpty()) {
         throw new IOException("Unable to read location " + url.toExternalForm());
       }

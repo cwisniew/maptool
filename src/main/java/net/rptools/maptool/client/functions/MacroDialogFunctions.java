@@ -34,6 +34,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.framework.Library;
 import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -45,6 +46,14 @@ import org.jsoup.parser.Tag;
 
 public class MacroDialogFunctions extends AbstractFunction {
   private static final MacroDialogFunctions instance = new MacroDialogFunctions();
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   private MacroDialogFunctions() {
     super(
@@ -188,7 +197,7 @@ public class MacroDialogFunctions extends AbstractFunction {
       throws ParserException {
     String htmlString = "";
     try {
-      Optional<Library> library = new LibraryManager().getLibrary(url).get();
+      Optional<Library> library = libraryManager.getLibrary(url).get();
       if (library.isEmpty()) {
         throw new ParserException(
             I18N.getText("macro.function.html5.invalidURI", url.toExternalForm()));

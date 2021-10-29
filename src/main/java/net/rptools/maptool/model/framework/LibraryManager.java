@@ -24,11 +24,9 @@ import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
 
 public interface LibraryManager {
 
-  boolean usesReservedPrefix(String name);
 
   boolean usesReservedName(String name);
 
-  String getReservedPrefix(String name);
 
   CompletableFuture<Optional<Library>> getLibrary(URL path);
 

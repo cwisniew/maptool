@@ -34,6 +34,7 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;
@@ -89,6 +90,14 @@ public class MapToolLineParser {
    * #getNewRolls()} was called.
    */
   private List<Integer> newRolls = new LinkedList<>();
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   private enum Output { // Mutually exclusive output formats
     NONE,
@@ -1206,7 +1215,7 @@ public class MapToolLineParser {
       macroBody = mbp.getCommand();
     } else { // Search for a token called macroLocation (must start with "Lib:")
       try {
-        var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+        var lib = libraryManager.getLibrary(macroLocation.substring(4));
         if (lib.isEmpty()) {
           throw new ParserException(I18N.getText("lineParser.unknownLibToken", macroLocation));
         }

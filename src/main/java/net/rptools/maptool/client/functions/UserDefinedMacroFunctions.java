@@ -36,6 +36,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -59,6 +60,15 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   private static String ON_LOAD_CAMPAIGN_CALLBACK = "onCampaignLoad";
 
   private static int nameCounter = 0;
+
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   private static int getNameCounter() {
     return nameCounter++;
@@ -378,7 +388,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       } else {
         // token macro
         try {
-          var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+          var lib = libraryManager.getLibrary(macroLocation.substring(4));
           if (lib.isEmpty()) {
             return I18N.getText("msg.error.udf.tooltip.loading", theDef.macroName);
           }

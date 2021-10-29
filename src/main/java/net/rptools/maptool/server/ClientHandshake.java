@@ -50,6 +50,7 @@ import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
 import net.rptools.maptool.server.proto.HandshakeResponseCodeMsg;
 import net.rptools.maptool.server.proto.RoleDto;
 import net.rptools.maptool.server.proto.UseAuthTypeMsg;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
@@ -75,6 +76,13 @@ public class ClientHandshake implements Handshake, MessageHandler {
   private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
   /** Message for any error that has occurred, {@code null} if no error has occurred. */
   private String errorMessage;
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager = MapToolServiceLocator.getServices().getLibraryManager();
+
 
   /**
    * Any exception that occurred that causes an error, {@code null} if no exception which causes an
@@ -221,7 +229,6 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
       playerDb.setLocalPlayer(player);
       if (!MapTool.isPersonalServer()) {
-        var libraryManager = new LibraryManager();
         libraryManager.removeAddOnLibraries();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
           Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));

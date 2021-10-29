@@ -104,6 +104,7 @@ import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -140,7 +141,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private boolean tokenSaved;
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
-  private final LibraryManager libraryManager = new LibraryManager();
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;

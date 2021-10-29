@@ -38,6 +38,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -49,6 +50,14 @@ import net.rptools.parser.function.AbstractFunction;
 
 public class TokenPropertyFunctions extends AbstractFunction {
   private static final TokenPropertyFunctions instance = new TokenPropertyFunctions();
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   private TokenPropertyFunctions() {
     super(
@@ -951,7 +960,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.setAllowsURIAccess.notLibToken", token.getName()));
       }
-      var libraryManager = new LibraryManager();
       String name = token.getName().substring(4);
       if (libraryManager.usesReservedPrefix(name)) {
         throw new ParserException(

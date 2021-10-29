@@ -43,7 +43,7 @@ public class MapToolServiceLocator {
     mapToolServices = injector.getInstance(MapToolServices.class);
   }
 
-  public static MapToolServices getMapToolServices() {
+  public static MapToolServices getServices() {
     return instance.mapToolServices;
   }
 }

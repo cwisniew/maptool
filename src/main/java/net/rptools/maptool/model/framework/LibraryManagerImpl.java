@@ -36,19 +36,6 @@ public class LibraryManagerImpl implements LibraryManager {
   /** Class for logging messages. */
   private static final Logger log = LogManager.getLogger(AppActions.class);
 
-  /** The reserved library name prefixes. */
-  private static final Set<String> RESERVED_PREFIXES =
-      Set.of(
-          "rptools.",
-          "maptool.",
-          "maptools.",
-          "tokentool.",
-          "net.rptools.",
-          "internal.",
-          "_",
-          "builtin.",
-          "standard.",
-          ".");
 
   /** The reserved library names. */
   private static final Set<String> RESERVED_NAMES =
@@ -57,17 +44,6 @@ public class LibraryManagerImpl implements LibraryManager {
   /** Drop in libraries */
   private static final AddOnLibraryManager addOnLibraryManager = new AddOnLibraryManager();
 
-  /**
-   * Checks to see if this library name used a reserved prefix.
-   *
-   * @param name the name of the library
-   * @return {@code true} if the name starts with a reserved prefix.
-   */
-  @Override
-  public boolean usesReservedPrefix(String name) {
-    String lowerName = name.toLowerCase();
-    return RESERVED_PREFIXES.stream().anyMatch(lowerName::startsWith);
-  }
 
   /**
    * Checks to see if this library name is reserved.
@@ -81,18 +57,7 @@ public class LibraryManagerImpl implements LibraryManager {
     return RESERVED_NAMES.stream().anyMatch(lowerName::equals);
   }
 
-  /**
-   * Returns the reserved prefix this library name starts with.
-   *
-   * @param name the name of the library.
-   * @return the reserved prefix this library starts with or {@code null} if it does not start with
-   *     a reserved prefix.
-   */
-  @Override
-  public String getReservedPrefix(String name) {
-    String lowerName = name.toLowerCase();
-    return RESERVED_PREFIXES.stream().filter(lowerName::startsWith).findFirst().orElse("");
-  }
+
 
   /**
    * Returns the {@link Library} for the specified path (e.g. lib://macro/mymacro).
@@ -120,6 +85,7 @@ public class LibraryManagerImpl implements LibraryManager {
    */
   @Override
   public CompletableFuture<Boolean> libraryExists(URL path) {
+
     if (LibraryToken.handles(path)) {
       return LibraryToken.getLibrary(path).thenApply(Optional::isPresent);
     } else {

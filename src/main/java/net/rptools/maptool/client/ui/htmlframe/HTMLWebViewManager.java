@@ -42,6 +42,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,6 +81,14 @@ public class HTMLWebViewManager {
   private final EventListener listenerA = this::fixHref;
   // Event listener for form submission.
   private final EventListener listenerSubmit = this::getDataAndSubmit;
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   /** Represents a bridge from Javascript to Java. */
   public class JavaBridge {
@@ -458,7 +467,7 @@ public class HTMLWebViewManager {
         }
         try {
 
-          var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+          var lib = libraryManager.getLibrary(vals[1].substring(4));
           if (lib.isPresent()) {
             var library = lib.get();
             var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();

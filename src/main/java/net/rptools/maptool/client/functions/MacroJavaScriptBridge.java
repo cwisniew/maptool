@@ -30,6 +30,7 @@ import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.framework.*;
+import net.rptools.maptool.servicelocator.MapToolServiceLocator;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -46,6 +47,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
   private MapToolVariableResolver variableResolver;
 
   private Stack<List<Object>> callingArgsStack = new Stack<>();
+
+  /*
+   * MapToolServiceLocator is used as a small stepping stone to decoupling the MapTool cod2
+   * See https://github.com/RPTools/maptool/issues/3123 for more details.
+   */
+  private final LibraryManager libraryManager =
+      MapToolServiceLocator.getServices().getLibraryManager();
+
 
   private MacroJavaScriptBridge() {
     super(
@@ -102,7 +111,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       }
       Optional<Library> library;
       try {
-        library = new LibraryManager().getLibrary(url).get();
+        library = libraryManager.getLibrary(url).get();
         if (library.isPresent()) {
           script = library.get().readAsString(url).get();
         } else {
