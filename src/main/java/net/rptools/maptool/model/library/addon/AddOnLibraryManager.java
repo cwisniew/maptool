@@ -91,6 +91,7 @@ public class AddOnLibraryManager {
     AddOnLibrary removed = namespaceLibraryMap.remove(namespace.toLowerCase());
     if (removed != null) {
       addOnInitialized.remove(removed);
+      removed.dispose();
     }
   }
 
@@ -159,7 +160,10 @@ public class AddOnLibraryManager {
 
   /** Remove all the add-on libraries. */
   public void removeAllLibraries() {
-    namespaceLibraryMap.clear();
+    var addOnLibraries = Set.copyOf(namespaceLibraryMap.keySet());
+    for (var addOn : addOnLibraries) {
+      deregisterLibrary(addOn);
+    }
   }
 
   /**

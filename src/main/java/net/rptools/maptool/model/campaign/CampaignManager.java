@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.campaign;
 
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.library.LibraryManager;
@@ -31,5 +32,10 @@ public class CampaignManager {
   public void clearCampaignData() {
     new LibraryManager().removeAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
+    clearJavaScriptContexts();
+  }
+
+  private void clearJavaScriptContexts() {
+    JSScriptEngine.resetContexts();
   }
 }

@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -338,7 +339,7 @@ public class AddOnLibrary implements Library {
     return new ThreadExecutionHelper<Void>()
         .runOnSwingThread(
             () -> {
-              String jsNamespace = JS_NAMESPACE_PREFIX + namespace;
+              String jsNamespace = getJavaScriptNamespace();
               if (JSScriptEngine.isContextRegistered(jsNamespace)) {
                 try {
                   JSScriptEngine.removeContext(jsNamespace, true);
@@ -531,5 +532,23 @@ public class AddOnLibrary implements Library {
           Asset asset = AssetManager.getAsset(val.getValue0());
           return DataValueFactory.fromAsset(filePath, asset);
         });
+  }
+
+  /** Disposes of any resources used by this add-on. */
+  public void dispose() {
+    SwingUtilities.invokeLater(
+        () -> {
+          try {
+            JSScriptEngine.removeContext(getJavaScriptNamespace(), true);
+          } catch (ParserException e) {
+            // Shouln't happen
+            log.error(
+                I18N.getText("library.error.jsNamespace.removing", getJavaScriptNamespace()), e);
+          }
+        });
+  }
+
+  private String getJavaScriptNamespace() {
+    return JS_NAMESPACE_PREFIX + namespace;
   }
 }
