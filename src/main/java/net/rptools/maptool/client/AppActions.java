@@ -3282,7 +3282,7 @@ public class AppActions {
                 }
                 libraryManager.deregisterAddOnLibrary(namespace);
               }
-              libraryManager.reregisterAddOnLibrary(addOnLibrary);
+              libraryManager.reregisterAddOnLibraryAndInit(addOnLibrary);
             } catch (IOException | InterruptedException | ExecutionException ioException) {
               MapTool.showError("library.import.ioError", ioException);
             }

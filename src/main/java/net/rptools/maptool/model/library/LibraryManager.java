@@ -143,9 +143,9 @@ public class LibraryManager {
   }
 
   /**
-   * Register and add-on library.
+   * Register and add-on library, this will not perform the initial of the library.
    *
-   * @param addOn the Add On to register.
+   * @param addOn the Add-On to register.
    */
   public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
@@ -161,6 +161,24 @@ public class LibraryManager {
   }
 
   /**
+   * Register and add-on library and initializes it.
+   *
+   * @param addOn the Add-On to register.
+   * @return {@code true} if the library was successfully registered and initialized.
+   */
+  public boolean registerAddOnLibraryAndInit(AddOnLibrary addOn) {
+    if (!registerAddOnLibrary(addOn)) {
+      return false;
+    }
+    return addOnLibraryManager.initializeAddOn(addOn);
+  }
+
+  /** Initializes the add-on libraries that have not yet been initialized. */
+  public void initializeUninitializedAddOns() {
+    addOnLibraryManager.initializeUninitializedAddOns();
+  }
+
+  /**
    * Deregister the add-on in library associated with the specified namespace.
    *
    * @param namespace the namespace to deregister.
@@ -173,7 +191,8 @@ public class LibraryManager {
   }
 
   /**
-   * Register a add-on in library, replacing any existing library.
+   * Register an add-on in library, replacing any existing library, this will not initialize the
+   * library.
    *
    * @param addOnLibrary the add-on in library to register.
    */
@@ -190,6 +209,19 @@ public class LibraryManager {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Register an add-on in library, replacing any existing library and running any initialization.
+   *
+   * @param addOnLibrary the add-on in library to register.
+   * @return {@code true} if the library was successfully registered and initialized.
+   */
+  public boolean reregisterAddOnLibraryAndInit(AddOnLibrary addOnLibrary) {
+    if (!reregisterAddOnLibrary(addOnLibrary)) {
+      return false;
+    }
+    return addOnLibraryManager.initializeAddOn(addOnLibrary);
   }
 
   /**
@@ -295,7 +327,4 @@ public class LibraryManager {
           return new ArrayList<>(libs);
         });
   }
-
-  /** Creates JavaScript Contexts for those libraries that support it. */
-  public void createJavaScriptContexts() {}
 }

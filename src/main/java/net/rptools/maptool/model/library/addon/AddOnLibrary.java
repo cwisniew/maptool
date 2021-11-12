@@ -201,8 +201,6 @@ public class AddOnLibrary implements Library {
 
     urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
     mtsFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
-
-    createJavaScriptNamespace().join();
   }
 
   /**
@@ -331,8 +329,12 @@ public class AddOnLibrary implements Library {
     return context == null || source.equalsIgnoreCase(namespace);
   }
 
-  @Override
-  public CompletableFuture<Void> createJavaScriptNamespace() {
+  /**
+   * Creates the javascript namespace for the library.
+   *
+   * @return the javascript namespace for the library.
+   */
+  private CompletableFuture<Void> createJavaScriptNamespace() {
     return new ThreadExecutionHelper<Void>()
         .runOnSwingThread(
             () -> {
@@ -481,6 +483,7 @@ public class AddOnLibrary implements Library {
               data.initialize()
                   .thenAccept(
                       wasInit -> {
+                        createJavaScriptNamespace().join();
                         if (wasInit) {
                           if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
                             callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
@@ -511,6 +514,12 @@ public class AddOnLibrary implements Library {
             });
   }
 
+  /**
+   * Reads the add-on library data from a "file"
+   *
+   * @param path the path to the file.
+   * @return a CompletableFuture that completes when the data has been read.
+   */
   CompletableFuture<DataValue> readFile(String path) {
     return CompletableFuture.supplyAsync(
         () -> {

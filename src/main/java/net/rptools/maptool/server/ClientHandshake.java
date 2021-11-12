@@ -242,7 +242,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
           Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));
           AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-          libraryManager.registerAddOnLibrary(addOnLibrary);
+          libraryManager.registerAddOnLibraryAndInit(addOnLibrary);
         }
       }
     }

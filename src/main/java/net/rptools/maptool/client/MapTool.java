@@ -1003,7 +1003,7 @@ public class MapTool {
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     JSScriptEngine.resetContexts();
-    new LibraryManager().createJavaScriptContexts();
+    new LibraryManager().initializeUninitializedAddOns();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 

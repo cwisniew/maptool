@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +37,9 @@ public class AddOnLibraryManager {
 
   /** The add-on libraries that are registered. */
   private final Map<String, AddOnLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
+
+  /** Has the add-on library been initialized? */
+  private final Map<AddOnLibrary, Boolean> addOnInitialized = new ConcurrentHashMap<>();
 
   /**
    * Is there a add-on library that would handle this path. This just checks the protocol and
@@ -75,8 +79,7 @@ public class AddOnLibraryManager {
     if (registeredLib != library) {
       throw new IllegalStateException("Library is already registered");
     }
-
-    library.initialize();
+    addOnInitialized.put(library, Boolean.FALSE);
   }
 
   /**
@@ -85,7 +88,10 @@ public class AddOnLibraryManager {
    * @param namespace the namespace of the library to deregister.
    */
   public void deregisterLibrary(String namespace) {
-    namespaceLibraryMap.remove(namespace.toLowerCase());
+    AddOnLibrary removed = namespaceLibraryMap.remove(namespace.toLowerCase());
+    if (removed != null) {
+      addOnInitialized.remove(removed);
+    }
   }
 
   /**
@@ -168,5 +174,30 @@ public class AddOnLibraryManager {
             namespaceLibraryMap.values().stream()
                 .filter(l -> l.getLegacyEvents().contains(eventName))
                 .collect(Collectors.toSet()));
+  }
+
+  /**
+   * Initialize the add-on library.
+   *
+   * @param addOnLibrary the add-on library to initialize.
+   * @return {@code true} if the add-on library was initialized successfully.
+   */
+  public boolean initializeAddOn(AddOnLibrary addOnLibrary) {
+    addOnLibrary.initialize();
+    addOnInitialized.put(addOnLibrary, Boolean.TRUE);
+    return true;
+  }
+
+  /** Initializes all uninitialized add-on libraries. */
+  public void initializeUninitializedAddOns() {
+    var unInit =
+        addOnInitialized.entrySet().stream()
+            .filter(e -> !e.getValue())
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
+    for (var addOnLibrary : unInit) {
+      addOnLibrary.initialize();
+      addOnInitialized.put(addOnLibrary, Boolean.TRUE);
+    }
   }
 }

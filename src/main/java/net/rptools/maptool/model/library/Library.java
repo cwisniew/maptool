@@ -189,12 +189,4 @@ public interface Library {
    * @return if the context is able to access the private values in the library.
    */
   boolean canMTScriptAccessPrivate(MapToolMacroContext context, String namespace);
-
-  /**
-   * Creates a JavaScript namespace for the library if it supports them. If the library does not
-   * support separate JavaScript namespaces then calling this method will have no effect.
-   *
-   * @return a future that will complete when the namespace is created.
-   */
-  CompletableFuture<Void> createJavaScriptNamespace();
 }

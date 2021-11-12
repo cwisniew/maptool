@@ -128,7 +128,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 Asset asset = AssetManager.getAsset(a);
                 try {
                   var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                  new LibraryManager().reregisterAddOnLibraryAndInit(addOnLibrary);
                 } catch (IOException e) {
                   SwingUtilities.invokeLater(
                       () -> {
