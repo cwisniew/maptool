@@ -295,4 +295,7 @@ public class LibraryManager {
           return new ArrayList<>(libs);
         });
   }
+
+  /** Creates JavaScript Contexts for those libraries that support it. */
+  public void createJavaScriptContexts() {}
 }

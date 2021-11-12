@@ -338,6 +338,11 @@ class LibraryToken implements Library {
     return false; // Library Tokens don't have private data
   }
 
+  @Override
+  public CompletableFuture<Void> createJavaScriptNamespace() {
+    return CompletableFuture.completedFuture(null); // Do nothing as we dont support it.
+  }
+
   /**
    * @param id the id of the token Lib:Token to get.
    * @return the Token for the library.

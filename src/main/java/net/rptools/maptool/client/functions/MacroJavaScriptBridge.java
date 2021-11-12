@@ -30,6 +30,7 @@ import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.*;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -49,13 +50,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
 
   private MacroJavaScriptBridge() {
     super(
-        1,
+        0,
         UNLIMITED_PARAMETERS,
         "js.eval",
         "js.evalNS",
         "js.evalURI",
         "js.removeNS",
-        "js.createNS");
+        "js.createNS",
+        "js.listNS");
   }
 
   public static MacroJavaScriptBridge getInstance() {
@@ -70,6 +72,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     String contextName = null;
 
     if ("js.evalNS".equalsIgnoreCase(functionName) || "js.evalURI".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
       if (args.size() < 2) {
         throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
       }
@@ -77,11 +80,13 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     }
 
     if ("js.removeNS".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 1);
       contextName = (String) args.remove(0);
       JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
       return "removed";
     }
     if ("js.createNS".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 2);
       contextName = (String) args.remove(0);
       boolean makeTrusted = MapTool.getParser().isMacroTrusted();
       if (args.size() > 0) {
@@ -90,6 +95,11 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       JSScriptEngine.registerContext(
           contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
       return "created";
+    }
+    if ("js.listNS".equalsIgnoreCase(functionName)) {
+      var arr = new JsonArray();
+      JSScriptEngine.getContextNames().forEach(arr::add);
+      return arr;
     }
 
     String script;

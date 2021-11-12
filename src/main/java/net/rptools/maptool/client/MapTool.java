@@ -84,6 +84,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -1002,6 +1003,7 @@ public class MapTool {
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     JSScriptEngine.resetContexts();
+    new LibraryManager().createJavaScriptContexts();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 

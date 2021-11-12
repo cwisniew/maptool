@@ -96,6 +96,14 @@ public class JSScriptEngine {
     return;
   }
 
+  public static Set<String> getContextNames() {
+    return new HashSet<>(contexts.keySet());
+  }
+
+  public static boolean isContextRegistered(String name) {
+    return contexts.containsKey(name);
+  }
+
   public static void resetContexts() {
     JSMacro.clear();
     contexts.clear();

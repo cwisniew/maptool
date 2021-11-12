@@ -32,6 +32,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
@@ -49,16 +50,24 @@ import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
+import net.rptools.parser.ParserException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javatuples.Pair;
 
 /** Class that implements add-on libraries. */
 public class AddOnLibrary implements Library {
+  /** Class for logging messages. */
+  private static final Logger log = LogManager.getLogger();
 
   /** The name of the event for first time initialization. */
   private static final String FIRST_INIT_EVENT = "onFirstInit";
 
   /** The name of the event for initialization. */
   private static final String INIT_EVENT = "onInit";
+
+  /** The prefix for the namespace automatically generated for the library. */
+  private static final String JS_NAMESPACE_PREFIX = "addon:";
 
   /** Record used to store information about the MacrScript functions for this library. */
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
@@ -192,6 +201,8 @@ public class AddOnLibrary implements Library {
 
     urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
     mtsFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
+
+    createJavaScriptNamespace().join();
   }
 
   /**
@@ -321,6 +332,31 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public CompletableFuture<Void> createJavaScriptNamespace() {
+    return new ThreadExecutionHelper<Void>()
+        .runOnSwingThread(
+            () -> {
+              String jsNamespace = JS_NAMESPACE_PREFIX + namespace;
+              if (JSScriptEngine.isContextRegistered(jsNamespace)) {
+                try {
+                  JSScriptEngine.removeContext(jsNamespace, true);
+                } catch (ParserException e) {
+                  // This really shouldn't happen
+                  log.error(I18N.getText("library.error.jsNamespace.removing", namespace), e);
+                }
+              }
+
+              try {
+                JSScriptEngine.registerContext(jsNamespace, true, true);
+              } catch (ParserException e) {
+                // This really shouldn't happen
+                log.error(I18N.getText("library.error.jsNamespace.creating", namespace), e);
+              }
+              return null;
+            });
+  }
+
+  @Override
   public CompletableFuture<String> getVersion() {
     return CompletableFuture.completedFuture(version);
   }
@@ -436,7 +472,7 @@ public class AddOnLibrary implements Library {
     return legacyEventNameMap.keySet();
   }
 
-  /** Run first time initialization of the add-on library. */
+  /** Run initialization of the add-on library. */
   void initialize() {
     getLibraryData()
         .thenAccept(
