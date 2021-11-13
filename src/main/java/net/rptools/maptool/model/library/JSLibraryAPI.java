@@ -23,55 +23,28 @@ import org.graalvm.polyglot.HostAccess;
 
 public class JSLibraryAPI {
 
-  static class AddOnInfo implements MapToolJSAPIInterface {
-    AddOnInfo(String namespace, String version) {
-      this.namespace = namespace;
-      this.version = version;
-    }
-
+  public static class JSAPIAddOn implements MapToolJSAPIInterface {
     @HostAccess.Export
     public String namespace;
     @HostAccess.Export
     public String version;
-
     @Override
     public String serializeToString() {
-      // this be messy and dont work :(
-      return "{ \"namespace\": " +  namespace +  ", \"version\": " +  version +  " }";
+      return String.format("AddOn(namespace=\"%s\", version=\"%s\")", namespace, version);
     }
-  }
 
-  static class AddOnInfo2 {
-    AddOnInfo2(String namespace, String version) {
-      this.namespace = namespace;
+    public JSAPIAddOn(String name, String version) {
+      this.namespace = name;
       this.version = version;
     }
 
-    @HostAccess.Export
-    public String namespace;
-    @HostAccess.Export
-    public String version;
 
   }
 
   @HostAccess.Export
-  public List<AddOnInfo> getAddonVersions() {
+  public List<JSAPIAddOn> getAddonVersions() {
      return new LibraryManager().getAddonLibraries().stream().map(l ->
-            new AddOnInfo(l.getNamespace().join(), l.getVersion().join()))
+            new JSAPIAddOn(l.getNamespace().join(), l.getVersion().join()))
                 .collect(Collectors.toList());
-  }
-
-
-  @HostAccess.Export
-  public List<AddOnInfo2> getAddonVersions2() {
-    return new LibraryManager().getAddonLibraries().stream().map(l ->
-            new AddOnInfo2(l.getNamespace().join(), l.getVersion().join()))
-        .collect(Collectors.toList());
-  }
-
-  @HostAccess.Export
-  public List<Map<String, String>> getAddonVersions1() {
-    return new LibraryManager().getAddonLibraries().stream().map(l ->
-        Map.of("namespace", l.getNamespace().join(), "version", l.getVersion().join())).toList();
   }
 }
