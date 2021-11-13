@@ -327,4 +327,12 @@ public class LibraryManager {
           return new ArrayList<>(libs);
         });
   }
+
+  /**
+   * Returns the list of add-on libraries that have been registered.
+   * @return the list of add-on libraries that have been registered.
+   */
+  public List<Library> getAddonLibraries() {
+    return addOnLibraryManager.getLibraries().stream().toList();
+  }
 }

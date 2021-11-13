@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.script.javascript.api;
 
 import net.rptools.maptool.client.script.javascript.*;
+import net.rptools.maptool.model.library.JSLibraryAPI;
 import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
@@ -29,4 +30,6 @@ public class JSAPIMapTool implements MapToolJSAPIInterface {
   @HostAccess.Export public final JSAPIChat chat = new JSAPIChat();
 
   @HostAccess.Export public final JSAPITokens tokens = new JSAPITokens();
+
+  @HostAccess.Export public final JSLibraryAPI libraries = new JSLibraryAPI();
 }
