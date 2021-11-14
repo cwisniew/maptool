@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.util.cipher;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,7 +47,10 @@ import org.apache.logging.log4j.Logger;
 public class CipherUtil {
 
   /** The algorithm to use for encoding / decoding. */
-  private static final String CIPHER_ALGORITHM = "AES";
+  private static final String CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
+
+  /** The algorithm to use for generating secret key spec. */
+  private static final String CIPHER_KEY_ALGORITHM = "AES";
 
   /** The algorithm used for turning the password into a 256 bit key. */
   private static final String MESSAGE_DIGEST_ALGORITHM = "SHA3-256";
@@ -69,9 +74,12 @@ public class CipherUtil {
   private static final String ASYNC_KEY_ALGORITHM = "RSA";
 
 
-  private static final String PUBLIC_KEY_FIRST_LINE = "====== Begin Public Key ======";
-  private static final String PUBLIC_KEY_LAST_LINE = "====== End Public Key ======";
+  private static final String PUBLIC_KEY_OLD_FIRST_LINE = "====== Begin Public Key ======";
+  private static final String PUBLIC_KEY_OLD_LAST_LINE = "====== End Public Key ======";
 
+
+  private static final String PUBLIC_KEY_FIRST_LINE = "-----BEGIN PUBLIC KEY-----";
+  private static final String PUBLIC_KEY_LAST_LINE = "-----END PUBLIC KEY-----";
 
   private final Key key;
   private final Cipher encryptionCipher;
@@ -168,9 +176,9 @@ public class CipherUtil {
             "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.privateKey.getAlgorithm());
       }
     } else {
-      if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
+      if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_KEY_ALGORITHM)) {
         throw new AssertionError(
-            "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+            "Expected Algorithm " + CIPHER_KEY_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
       }
     }
     return createCipher(Cipher.DECRYPT_MODE, key);
@@ -193,9 +201,9 @@ public class CipherUtil {
             "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.publicKey.getAlgorithm());
       }
     } else {
-      if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
+      if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_KEY_ALGORITHM)) {
         throw new AssertionError(
-            "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+            "Expected Algorithm " + CIPHER_KEY_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
       }
     }
     return createCipher(Cipher.ENCRYPT_MODE, key);
@@ -276,7 +284,8 @@ public class CipherUtil {
     KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
     SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
 
-    return new Key(new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM), salt);
+    return new Key(new SecretKeySpec(factory.generateSecret(spec).getEncoded(),
+        CIPHER_KEY_ALGORITHM), salt);
   }
 
   public Key createKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -370,7 +379,7 @@ public class CipherUtil {
   }
 
   public static SecretKeySpec decodeBase64(String encoded) {
-    return new SecretKeySpec(Base64.getDecoder().decode(encoded), CIPHER_ALGORITHM);
+    return new SecretKeySpec(Base64.getDecoder().decode(encoded), CIPHER_KEY_ALGORITHM);
   }
 
   public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
@@ -413,6 +422,8 @@ public class CipherUtil {
   private static String encodedPublicKeyText(PublicKey publicKey) {
     byte[] bytes = publicKey.getEncoded();
     String b64 = Base64.getEncoder().encodeToString(bytes);
+    b64 = String.join("\n",
+        Iterables.toArray(Splitter.fixedLength(64).split(b64), String.class));
     return b64.replaceAll("(\\S{80})", "$1\n")
         .replaceFirst("^", PUBLIC_KEY_FIRST_LINE + "\n")
         .replaceFirst("$", "\n" + PUBLIC_KEY_LAST_LINE + "\n");
@@ -421,6 +432,8 @@ public class CipherUtil {
   private static byte[] decodePublicKeyText(String pks) {
     byte[] bytes = pks.replaceFirst(PUBLIC_KEY_FIRST_LINE, "")
         .replaceFirst(PUBLIC_KEY_LAST_LINE, "")
+        .replaceFirst(PUBLIC_KEY_OLD_FIRST_LINE, "")
+        .replaceFirst(PUBLIC_KEY_OLD_LAST_LINE, "")
         .replaceAll("\\s", "")
         .getBytes(StandardCharsets.UTF_8);
     return Base64.getDecoder().decode(bytes);
