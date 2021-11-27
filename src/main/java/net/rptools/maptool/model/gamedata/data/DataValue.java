@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -35,6 +36,21 @@ public interface DataValue {
    * @return the data propertyType of the data value
    */
   DataType getDataType();
+
+  /**
+   * Returns the tags set for the data value.
+   *
+   * @return the tags set for the data value.
+   */
+  Set<String> getTags();
+
+  /**
+   * Returns a copy of the data value that has the specified tags set.
+   *
+   * @param tags the tags to set.
+   * @return a copy of the data value that has the specified tags set.
+   */
+  DataValue withTags(Set<String> tags);
 
   /**
    * checks if the data value can be converted to the specified data propertyType.

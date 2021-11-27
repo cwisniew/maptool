@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
 class DataStoreUpdateClientsProxy implements DataStore {
 
   /** Class for logging. */
-  private static final Logger log = Logger.getLogger(MemoryDataStore.class);
+  private static final Logger log = Logger.getLogger(DataStoreUpdateClientsProxy.class);
 
   @Override
   public CompletableFuture<Set<String>> getPropertyTypes() {
@@ -84,6 +84,12 @@ class DataStoreUpdateClientsProxy implements DataStore {
     return dataStore.getProperties(type, namespace);
   }
 
+  @Override
+  public CompletableFuture<Set<DataValue>> getProperties(
+      String type, String namespace, String tag) {
+    return dataStore.getProperties(type, namespace, tag);
+  }
+
   /**
    * Notifies remote clients of a change to a property.
    *
@@ -112,10 +118,46 @@ class DataStoreUpdateClientsProxy implements DataStore {
   }
 
   @Override
+  public CompletableFuture<DataValue> setPropertyAndTags(
+      String type, String namespace, DataValue value) {
+    return dataStore
+        .setPropertyAndTags(type, namespace, value)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setProperty(
+      String type, String namespace, DataValue value, Set<String> tags) {
+    return dataStore
+        .setProperty(type, namespace, value, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
   public CompletableFuture<DataValue> setLongProperty(
       String type, String namespace, String name, long value) {
     return dataStore
         .setLongProperty(type, namespace, name, value)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setLongProperty(
+      String type, String namespace, String name, long value, Set<String> tags) {
+    return dataStore
+        .setLongProperty(type, namespace, name, value, tags)
         .thenApply(
             v -> {
               notifyClientsOfDataUpdate(type, namespace, v);
@@ -136,10 +178,34 @@ class DataStoreUpdateClientsProxy implements DataStore {
   }
 
   @Override
+  public CompletableFuture<DataValue> setDoubleProperty(
+      String type, String namespace, String name, double value, Set<String> tags) {
+    return dataStore
+        .setDoubleProperty(type, namespace, name, value, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
   public CompletableFuture<DataValue> setStringProperty(
       String type, String namespace, String name, String value) {
     return dataStore
         .setStringProperty(type, namespace, name, value)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setStringProperty(
+      String type, String namespace, String name, String value, Set<String> tags) {
+    return dataStore
+        .setStringProperty(type, namespace, name, value, tags)
         .thenApply(
             v -> {
               notifyClientsOfDataUpdate(type, namespace, v);
@@ -160,10 +226,34 @@ class DataStoreUpdateClientsProxy implements DataStore {
   }
 
   @Override
+  public CompletableFuture<DataValue> setBooleanProperty(
+      String type, String namespace, String name, boolean value, Set<String> tags) {
+    return dataStore
+        .setBooleanProperty(type, namespace, name, value, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
   public CompletableFuture<DataValue> setJsonArrayProperty(
       String type, String namespace, String name, JsonArray value) {
     return dataStore
         .setJsonArrayProperty(type, namespace, name, value)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setJsonArrayProperty(
+      String type, String namespace, String name, JsonArray value, Set<String> tags) {
+    return dataStore
+        .setJsonArrayProperty(type, namespace, name, value, tags)
         .thenApply(
             v -> {
               notifyClientsOfDataUpdate(type, namespace, v);
@@ -184,10 +274,34 @@ class DataStoreUpdateClientsProxy implements DataStore {
   }
 
   @Override
+  public CompletableFuture<DataValue> setJsonObjectProperty(
+      String type, String namespace, String name, JsonObject value, Set<String> tags) {
+    return dataStore
+        .setJsonObjectProperty(type, namespace, name, value, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
   public CompletableFuture<DataValue> setAssetProperty(
       String type, String namespace, String name, Asset value) {
     return dataStore
         .setAssetProperty(type, namespace, name, value)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setAssetProperty(
+      String type, String namespace, String name, Asset value, Set<String> tags) {
+    return dataStore
+        .setAssetProperty(type, namespace, name, value, tags)
         .thenApply(
             v -> {
               notifyClientsOfDataUpdate(type, namespace, v);
@@ -251,6 +365,42 @@ class DataStoreUpdateClientsProxy implements DataStore {
   @Override
   public CompletableFuture<GameDataDto> toDto(String type, String namespace) {
     return dataStore.toDto(type, namespace);
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setTags(
+      String type, String namespace, String name, Set<String> tags) {
+    return dataStore
+        .setTags(type, namespace, name, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> addTags(
+      String type, String namespace, String name, Set<String> tags) {
+    return dataStore
+        .addTags(type, namespace, name, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> removeTags(
+      String type, String namespace, String name, Set<String> tags) {
+    return dataStore
+        .removeTags(type, namespace, name, tags)
+        .thenApply(
+            v -> {
+              notifyClientsOfDataUpdate(type, namespace, v);
+              return v;
+            });
   }
 
   @Override

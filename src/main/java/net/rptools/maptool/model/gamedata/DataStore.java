@@ -121,7 +121,18 @@ public interface DataStore {
   CompletableFuture<Set<DataValue>> getProperties(String type, String namespace);
 
   /**
-   * Sets the value of a property.
+   * Returns all the properties for a type and namespace with the specified tag.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param tag the tag of the property.
+   * @return all the properties for a type and namespace with the specified tag.
+   */
+  CompletableFuture<Set<DataValue>> getProperties(String type, String namespace, String tag);
+
+  /**
+   * Sets the value of a property. The tags in the data value parameter will be ignored, if you want
+   * to set the tags as well see {@link #setPropertyAndTags(String, String, DataValue)}.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -134,7 +145,30 @@ public interface DataStore {
   CompletableFuture<DataValue> setProperty(String type, String namespace, DataValue value);
 
   /**
-   * Sets the value of a property to a long.
+   * Sets the values and tags of a property.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param value the value of the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setPropertyAndTags(String type, String namespace, DataValue value);
+
+  /**
+   * Sets the value of a property and applies the specified tags. This will override any existing
+   * tags with those specified in the tags parameter.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setProperty(
+      String type, String namespace, DataValue value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to a long, this will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -149,7 +183,20 @@ public interface DataStore {
       String type, String namespace, String name, long value);
 
   /**
-   * Sets the value of a property to a double.
+   * Sets the value of a property to a long and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setLongProperty(
+      String type, String namespace, String name, long value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to a double. This will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -164,7 +211,20 @@ public interface DataStore {
       String type, String namespace, String name, double value);
 
   /**
-   * Sets the value of a property to a string.
+   * Sets the value of a property to a double and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setDoubleProperty(
+      String type, String namespace, String name, double value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to a string. This will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -179,7 +239,20 @@ public interface DataStore {
       String type, String namespace, String name, String value);
 
   /**
-   * Sets the value of a property to a boolean.
+   * Sets the value of a property to a string and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setStringProperty(
+      String type, String namespace, String name, String value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to a boolean. This will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -194,7 +267,20 @@ public interface DataStore {
       String type, String namespace, String name, boolean value);
 
   /**
-   * Sets the value of a property to a json array.
+   * Sets the value of a property to a boolean and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setBooleanProperty(
+      String type, String namespace, String name, boolean value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to a json array. This will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -209,7 +295,20 @@ public interface DataStore {
       String type, String namespace, String name, JsonArray value);
 
   /**
-   * Sets the value of a property to a json object.
+   * Sets the value of a property to a json array and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setJsonArrayProperty(
+      String type, String namespace, String name, JsonArray value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to a json object. This will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -225,7 +324,20 @@ public interface DataStore {
       String type, String namespace, String name, JsonObject value);
 
   /**
-   * Sets the value of a property to an asset.
+   * Sets the value of a property to a json object and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setJsonObjectProperty(
+      String type, String namespace, String name, JsonObject value, Set<String> tags);
+
+  /**
+   * Sets the value of a property to an asset. This will not alter any tags for the value.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -235,6 +347,19 @@ public interface DataStore {
    */
   CompletableFuture<DataValue> setAssetProperty(
       String type, String namespace, String name, Asset value);
+
+  /**
+   * Sets the value of a property to an asset and applies the specified tags.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that was set.
+   */
+  CompletableFuture<DataValue> setAssetProperty(
+      String type, String namespace, String name, Asset value, Set<String> tags);
 
   /**
    * Removes a property from the Data store.
@@ -290,6 +415,42 @@ public interface DataStore {
    *     data.
    */
   CompletableFuture<GameDataDto> toDto(String type, String namespace);
+
+  /**
+   * Sets the tags for a property.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that the tags were set for.
+   */
+  CompletableFuture<DataValue> setTags(
+      String type, String namespace, String name, Set<String> tags);
+
+  /**
+   * adds the tags to a property.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param tags the tags to apply to the property.
+   * @return the value that the tags were added to.
+   */
+  CompletableFuture<DataValue> addTags(
+      String type, String namespace, String name, Set<String> tags);
+
+  /**
+   * Removes the tags for a property.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param tags the tags to remove from the property.
+   * @return the value that the tags were removed from.
+   */
+  CompletableFuture<DataValue> removeTags(
+      String type, String namespace, String name, Set<String> tags);
 
   /**
    * Returns the data transfer object representation of the data in the namespace.
