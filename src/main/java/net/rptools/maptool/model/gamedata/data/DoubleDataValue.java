@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -30,27 +31,66 @@ public final class DoubleDataValue implements DataValue {
   /** Has no value been set? */
   private final boolean undefined;
 
+  /** The tags for this data value. */
+  private final Set<String> tags;
+
   /**
-   * Creates a new DoubleDataValue.
+   * Creates a new DoubleDataValue with the given value and tags.
+   *
+   * @param name the name of the value.
+   * @param value the value.
+   * @param tags the tags.
+   */
+  DoubleDataValue(String name, double value, Set<String> tags) {
+    this.name = name;
+    this.value = value;
+    this.undefined = false;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new DoubleDataValue with the given value and no tags.
    *
    * @param name the name of the value.
    * @param value the value.
    */
   DoubleDataValue(String name, double value) {
-    this.name = name;
-    this.value = value;
-    this.undefined = false;
+    this(name, value, Set.of());
   }
 
   /**
-   * Creates a new undefined DoubleDataValue.
+   * Creates a new DoubleDataValue with the given value and new tags.
+   *
+   * @param data Value the value to copy.
+   * @param tags the tags.
+   */
+  private DoubleDataValue(DoubleDataValue data, Set<String> tags) {
+    name = data.name;
+    value = data.value;
+    undefined = data.undefined;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new undefined DoubleDataValue with the given name and tags.
    *
    * @param name the name of the value.
+   * @param tags the tags.
    */
-  DoubleDataValue(String name) {
+  DoubleDataValue(String name, Set<String> tags) {
     this.name = name;
     this.value = Double.NaN;
     this.undefined = true;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new DoubleDataValue with undefined value and no tags.
+   *
+   * @param name
+   */
+  DoubleDataValue(String name) {
+    this(name, Set.of());
   }
 
   @Override
@@ -61,6 +101,16 @@ public final class DoubleDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.DOUBLE;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new DoubleDataValue(this, tags);
   }
 
   @Override

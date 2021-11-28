@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
@@ -30,14 +31,16 @@ public class AssetDataValue implements DataValue {
   private final boolean jsonObject;
   private final boolean jsonArray;
   private final boolean undefined;
+  private final Set<String> tags;
 
   /**
-   * Creates a new AssetDataValue from the given asset.
+   * Creates a new AssetDataValue from the given asset with the given tags.
    *
    * @param name the name of the value.
    * @param asset the asset to use.
+   * @param tags the tags to use.
    */
-  AssetDataValue(String name, Asset asset) {
+  AssetDataValue(String name, Asset asset, Set<String> tags) {
     this.name = name;
     this.asset = asset.getMD5Key();
     if (asset.getType() == Type.JSON) {
@@ -49,19 +52,56 @@ public class AssetDataValue implements DataValue {
       jsonArray = false;
     }
     undefined = false;
+    this.tags = Set.copyOf(tags);
   }
 
   /**
-   * Creates a new AssetDataValue with an undefined value.
+   * Creates a new AssetDataValue from the given AssetDataValue with the given tags.
+   *
+   * @param data the data to use.
+   * @param tags the tags to use.
+   */
+  private AssetDataValue(AssetDataValue data, Set<String> tags) {
+    name = data.name;
+    asset = data.asset;
+    jsonObject = data.jsonObject;
+    jsonArray = data.jsonArray;
+    undefined = data.undefined;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new AssetDataValue from the given asset with no tags.
    *
    * @param name the name of the value.
+   * @param asset the asset to use.
    */
-  AssetDataValue(String name) {
+  AssetDataValue(String name, Asset asset) {
+    this(name, asset, Set.of());
+  }
+
+  /**
+   * Creates a new AssetDataValue with an undefined value with the given tags.
+   *
+   * @param name the name of the value.
+   * @param tags the tags to use.
+   */
+  AssetDataValue(String name, Set<String> tags) {
     this.name = name;
     this.asset = null;
     undefined = true;
     jsonObject = false;
     jsonArray = false;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new AssetDataValue with and undefined value with no tags.
+   *
+   * @param name the name of the value.
+   */
+  AssetDataValue(String name) {
+    this(name, Set.of());
   }
 
   @Override
@@ -72,6 +112,16 @@ public class AssetDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.ASSET;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new AssetDataValue(this, tags);
   }
 
   @Override

@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -30,27 +31,66 @@ public final class BooleanDataValue implements DataValue {
   /** Has no value been set. */
   private final boolean undefined;
 
+  /** The tags for this data value. */
+  private final Set<String> tags;
+
   /**
-   * Creates a new BooleanDataValue with the given value.
+   * Creates a new BooleanDataValue with the given value and tags.
+   *
+   * @param name The name of the value.
+   * @param value The value.
+   * @param tags The tags for this data value.
+   */
+  BooleanDataValue(String name, boolean value, Set<String> tags) {
+    this.name = name;
+    this.value = value;
+    this.undefined = false;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new BooleanDataValue with the given value and na tags.
    *
    * @param name The name of the value.
    * @param value The value.
    */
   BooleanDataValue(String name, boolean value) {
-    this.name = name;
-    this.value = value;
-    this.undefined = false;
+    this(name, value, Set.of());
   }
 
   /**
-   * Creates a new undefined BooleanDataValue.
+   * Creates a new undefined BooleanDataValue with the specified tags.
+   *
+   * @param name The name of the value.
+   * @oaram tags The tags for this data value.
+   */
+  BooleanDataValue(String name, Set<String> tags) {
+    this.name = name;
+    this.value = false;
+    this.undefined = true;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new undefined BooleanDataValue with no tags.
    *
    * @param name The name of the value.
    */
   BooleanDataValue(String name) {
-    this.name = name;
-    this.value = false;
-    this.undefined = true;
+    this(name, Set.of());
+  }
+
+  /**
+   * Creates a new BooleanDataValue from the values of the passed in DataValue and new tags.
+   *
+   * @param data Value The DataValue to copy.
+   * @param tags The new tags for the new DataValue.
+   */
+  private BooleanDataValue(BooleanDataValue data, Set<String> tags) {
+    name = data.name;
+    value = data.value;
+    undefined = data.undefined;
+    this.tags = Set.copyOf(tags);
   }
 
   @Override
@@ -61,6 +101,16 @@ public final class BooleanDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.BOOLEAN;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new BooleanDataValue(this, tags);
   }
 
   @Override

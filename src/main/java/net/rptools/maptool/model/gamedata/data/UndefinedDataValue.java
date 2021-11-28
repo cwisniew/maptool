@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -25,13 +26,27 @@ public final class UndefinedDataValue implements DataValue {
   /** The name of the value. */
   private final String name;
 
+  /** The tags for the UndefinedDataValue. */
+  private final Set<String> tags;
+
   /**
    * Creates a new UndefinedDataValue.
    *
    * @param name the name of the value.
    */
   UndefinedDataValue(String name) {
+    this(name, Set.of());
+  }
+
+  /**
+   * Creates a new UndefinedDataValue with the given name and tags.
+   *
+   * @param name
+   * @param tags
+   */
+  UndefinedDataValue(String name, Set<String> tags) {
     this.name = name;
+    this.tags = tags;
   }
 
   @Override
@@ -42,6 +57,16 @@ public final class UndefinedDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.UNDEFINED;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new UndefinedDataValue(name, tags);
   }
 
   @Override

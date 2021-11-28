@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -30,27 +31,66 @@ public final class JsonObjectDataValue implements DataValue {
   /** Has no value been set. */
   private final boolean undefined;
 
+  /** The tag for the data value. */
+  private final Set<String> tags;
+
   /**
-   * Creates a new JsonObjectDataValue.
+   * Creates a new JsonObjectDataValue with the specified tags.
    *
    * @param name the name of the value
    * @param value the values.
+   * @param tags the tags for the data value.
    */
-  JsonObjectDataValue(String name, JsonObject value) {
+  JsonObjectDataValue(String name, JsonObject value, Set<String> tags) {
     this.name = name;
-    this.value = value.deepCopy();
+    this.value = value != null ? value.deepCopy() : new JsonObject();
     this.undefined = false;
+    this.tags = Set.copyOf(tags);
   }
 
   /**
    * Creates a new JsonObjectDataValue with an undefined value.
    *
    * @param name the name of the value
+   * @param tags the tags for the data value.
    */
-  JsonObjectDataValue(String name) {
+  JsonObjectDataValue(String name, Set<String> tags) {
     this.name = name;
     this.value = null;
     this.undefined = true;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new JsonObjectDataValue with no tags.
+   *
+   * @param name the name of the value
+   * @param value the value
+   */
+  JsonObjectDataValue(String name, JsonObject value) {
+    this(name, value, Set.of());
+  }
+
+  /**
+   * Creates a new undefined JsonObjectDataValue with no tags.
+   *
+   * @param name the name of the value
+   */
+  JsonObjectDataValue(String name) {
+    this(name, Set.of());
+  }
+
+  /**
+   * Creates a new JsonObjectDataValue with the specified value and new tags.
+   *
+   * @param data Value the value.
+   * @param tags the tags for the data value.
+   */
+  private JsonObjectDataValue(JsonObjectDataValue data, Set<String> tags) {
+    name = data.name;
+    value = data.value != null ? data.value.deepCopy() : null;
+    undefined = data.undefined;
+    this.tags = Set.copyOf(tags);
   }
 
   @Override
@@ -61,6 +101,16 @@ public final class JsonObjectDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.JSON_OBJECT;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new JsonObjectDataValue(this, tags);
   }
 
   @Override

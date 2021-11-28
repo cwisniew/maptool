@@ -18,6 +18,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -32,16 +34,20 @@ public final class JsonArrayDataValue implements DataValue {
   /** Has no value been set. */
   private final boolean undefined;
 
+  /** The tags of the value. */
+  private final Set<String> tags;
+
   /**
-   * Creates a new JsonArrayDataValue.
+   * Creates a new JsonArrayDataValue with the given value and tags.
    *
-   * @note You can't store an Assert in a JsonArray you will have to convert it to another value
+   * @note You can't store an Asset in a JsonArray you will have to convert it to another value
    *     first.
    * @param name the name of the value.
    * @param values the values.
+   * @param tags the tags.
    * @throws InvalidDataOperation if the values can not be stored in a JsonArray.
    */
-  JsonArrayDataValue(String name, Collection<DataValue> values) {
+  JsonArrayDataValue(String name, Collection<DataValue> values, Set<String> tags) {
     var array = new JsonArray();
     values.forEach(
         v -> {
@@ -58,29 +64,79 @@ public final class JsonArrayDataValue implements DataValue {
     this.name = name;
     this.values = array;
     this.undefined = false;
+    this.tags = Set.copyOf(tags);
   }
 
   /**
-   * Creates a new JsonArrayDataValue.
+   * Creates a new JsonArrayDataValue with the given value and no tags.
+   *
+   * @note You can't store an Asset in a JsonArray you will have to convert it to another value
+   *     first.
+   * @param name the name of the value.
+   * @param values the values.
+   * @throws InvalidDataOperation if the values can not be stored in a JsonArray.
+   */
+  JsonArrayDataValue(String name, Collection<DataValue> values) {
+    this(name, values, Set.of());
+  }
+
+  /**
+   * Creates a new JsonArrayDataValue with the given value and tags.
+   *
+   * @param name the name of the value.
+   * @param values the values.
+   * @param tags the tags.
+   */
+  JsonArrayDataValue(String name, JsonArray values, Set<String> tags) {
+    this.name = name;
+    this.values = values != null ? values.deepCopy() : new JsonArray();
+    this.undefined = false;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new JsonArrayDataValue with the given value and no tags.
    *
    * @param name the name of the value.
    * @param values the values.
    */
   JsonArrayDataValue(String name, JsonArray values) {
-    this.name = name;
-    this.values = values.deepCopy();
-    this.undefined = false;
+    this(name, values, Set.of());
   }
 
   /**
-   * Creates a new JsonArrayDataValue wit an undefined value.
+   * Creates a new JsonArrayDataValue wit an undefined value with the specified tags.
+   *
+   * @param name the name of the value.
+   * @param tags the tags.
+   */
+  JsonArrayDataValue(String name, Set<String> tags) {
+    this.name = name;
+    this.values = null;
+    this.undefined = true;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new JsonArrayDataValue wit an undefined value with no tags.
    *
    * @param name the name of the value.
    */
   JsonArrayDataValue(String name) {
-    this.name = name;
-    this.values = null;
-    this.undefined = true;
+    this(name, new HashSet<String>());
+  }
+
+  /**
+   * Creates a new JsonArrayDataValue with the given value and new tags.
+   *
+   * @param data Value the value.
+   * @param tags the tags.
+   */
+  private JsonArrayDataValue(JsonArrayDataValue data, Set<String> tags) {
+    name = data.name;
+    values = data.values != null ? data.values.deepCopy() : null;
+    undefined = data.undefined;
+    this.tags = Set.copyOf(tags);
   }
 
   @Override
@@ -91,6 +147,16 @@ public final class JsonArrayDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.JSON_ARRAY;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new JsonArrayDataValue(this, tags);
   }
 
   @Override

@@ -40,9 +40,6 @@ import org.apache.log4j.Logger;
 /** Class that implements the DataStore interface. */
 public class MemoryDataStore implements DataStore {
 
-  // TODO: CDW - Remove old tag mappings
-  // TODO: CDW - tag methods at bottom of file
-
   /** Lock used for accessing/updating the data store. */
   private ReentrantLock lock = new ReentrantLock();
 
@@ -70,8 +67,8 @@ public class MemoryDataStore implements DataStore {
    */
   private boolean checkPropertyNamespace(String propertyType, String namespace) {
     try {
+      lock.lock();
       if (propertyTypeNamespaceMap.containsKey(propertyType)) {
-        lock.lock();
         var propertyTypeNamespaces = propertyTypeNamespaceMap.get(propertyType);
         return propertyTypeNamespaces.contains(namespace);
       }
@@ -307,7 +304,52 @@ public class MemoryDataStore implements DataStore {
         setValue = newValue;
       }
 
+      if (overwriteTags) {
+        adjustTags(
+            type,
+            namespace,
+            value.getName(),
+            existing != null ? existing.getTags() : Set.of(),
+            value.getTags());
+      }
+
       return setValue;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  /**
+   * Adjust the tags for the given property type, namespace and name.
+   *
+   * @param type the property type.
+   * @param namespace the property namespace.
+   * @param name the property name.
+   * @param oldTags the old tags.
+   * @param newTags the new tags.
+   */
+  private void adjustTags(
+      String type, String namespace, String name, Set<String> oldTags, Set<String> newTags) {
+    try {
+      lock.lock();
+      var removeTags = new HashSet<>(oldTags);
+      removeTags.removeAll(newTags);
+
+      var addTags = new HashSet<>(newTags);
+      addTags.removeAll(oldTags);
+
+      var propertyType = new PropertyTypeNamespace(type, namespace);
+      var tagMap = tagPropertyMap.computeIfAbsent(propertyType, k -> new HashMap<>());
+      for (var tag : removeTags) {
+        if (tagMap.containsKey(tag)) {
+          tagMap.get(tag).remove(name);
+        }
+      }
+
+      for (var tag : addTags) {
+        var tagSet = tagMap.computeIfAbsent(tag, k -> new HashSet<>());
+        tagSet.add(name);
+      }
     } finally {
       lock.unlock();
     }
@@ -554,19 +596,56 @@ public class MemoryDataStore implements DataStore {
   @Override
   public CompletableFuture<DataValue> setTags(
       String type, String namespace, String name, Set<String> tags) {
-    return null;
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            lock.lock();
+            var data = getData(type, namespace, name);
+            if (data == null) {
+              throw InvalidDataOperation.createUndefined(name);
+            }
+            return setData(type, namespace, data.withTags(tags), true);
+          } finally {
+            lock.unlock();
+          }
+        });
   }
 
   @Override
   public CompletableFuture<DataValue> addTags(
       String type, String namespace, String name, Set<String> tags) {
-    return null;
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            lock.lock();
+            var data = getData(type, namespace, name);
+            if (data == null) {
+              throw InvalidDataOperation.createUndefined(name);
+            }
+            var tagSet = new HashSet<String>(data.getTags());
+            tagSet.addAll(tags);
+            return setData(type, namespace, data.withTags(tagSet), true);
+          } finally {
+            lock.unlock();
+          }
+        });
   }
 
   @Override
   public CompletableFuture<DataValue> removeTags(
       String type, String namespace, String name, Set<String> tags) {
-    return null;
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            lock.lock();
+            var data = getData(type, namespace, name);
+            var resultTags = new HashSet<>(data.getTags());
+            resultTags.removeAll(tags);
+            return setData(type, namespace, data.withTags(resultTags), true);
+          } finally {
+            lock.unlock();
+          }
+        });
   }
 
   @Override
@@ -581,87 +660,110 @@ public class MemoryDataStore implements DataStore {
    * @return The converted {@link GameDataValueDto}.
    */
   private GameDataValueDto gameValueToDto(DataValue data) {
-    var gson = new Gson();
-    var dataBuilder = GameDataValueDto.newBuilder();
-    dataBuilder.setName(data.getName());
-    switch (data.getDataType()) {
-      case LONG -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedLongValue(true);
-        } else {
-          dataBuilder.setLongValue(data.asLong());
+    try {
+      lock.lock();
+      var gson = new Gson();
+      var dataBuilder = GameDataValueDto.newBuilder();
+      dataBuilder.setName(data.getName());
+      switch (data.getDataType()) {
+        case LONG -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedLongValue(true);
+          } else {
+            dataBuilder.setLongValue(data.asLong());
+          }
         }
-      }
-      case DOUBLE -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedDoubleValue(true);
-        } else {
-          dataBuilder.setDoubleValue(data.asDouble());
+        case DOUBLE -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedDoubleValue(true);
+          } else {
+            dataBuilder.setDoubleValue(data.asDouble());
+          }
         }
-      }
-      case BOOLEAN -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedBooleanValue(true);
-        } else {
-          dataBuilder.setBooleanValue(data.asBoolean());
+        case BOOLEAN -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedBooleanValue(true);
+          } else {
+            dataBuilder.setBooleanValue(data.asBoolean());
+          }
         }
-      }
-      case STRING -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedStringValue(true);
-        } else {
-          dataBuilder.setStringValue(data.asString());
+        case STRING -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedStringValue(true);
+          } else {
+            dataBuilder.setStringValue(data.asString());
+          }
         }
-      }
-      case JSON_ARRAY -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedJsonArrayValue(true);
-        } else {
-          dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
+        case JSON_ARRAY -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedJsonArrayValue(true);
+          } else {
+            dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
+          }
         }
-      }
-      case JSON_OBJECT -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedJsonObjectValue(true);
-        } else {
-          dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
+        case JSON_OBJECT -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedJsonObjectValue(true);
+          } else {
+            dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
+          }
         }
-      }
-      case ASSET -> {
-        if (data.isUndefined()) {
-          dataBuilder.setUndefinedAssetValue(true);
-        } else {
-          dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
+        case ASSET -> {
+          if (data.isUndefined()) {
+            dataBuilder.setUndefinedAssetValue(true);
+          } else {
+            dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
+          }
         }
+        case UNDEFINED -> dataBuilder.setUndefinedValue(true);
       }
-      case UNDEFINED -> dataBuilder.setUndefinedValue(true);
+      dataBuilder.addAllTags(data.getTags());
+
+      return dataBuilder.build();
+    } finally {
+      lock.unlock();
     }
-    return dataBuilder.build();
   }
 
   @Override
   public CompletableFuture<Set<MD5Key>> getAssets() {
     return CompletableFuture.supplyAsync(
-        () ->
-            namespaceDataMap.values().stream()
+        () -> {
+          try {
+            lock.lock();
+            return namespaceDataMap.values().stream()
                 .flatMap(m -> m.values().stream())
                 .filter(d -> d.getDataType() == DataType.ASSET)
                 .map(a -> a.asAsset().getMD5Key())
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toSet());
+          } finally {
+            lock.unlock();
+          }
+        });
   }
 
   @Override
   public void clear() {
-    propertyTypeNamespaceMap.clear();
-    namespaceDataMap.clear();
+    try {
+      lock.lock();
+      propertyTypeNamespaceMap.clear();
+      namespaceDataMap.clear();
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
   public CompletableFuture<Void> clearNamespace(String propertyType, String namespace) {
     return CompletableFuture.supplyAsync(
         () -> {
-          namespaceDataMap.remove(new PropertyTypeNamespace(propertyType, namespace));
-          return null;
+          try {
+            lock.lock();
+            namespaceDataMap.remove(new PropertyTypeNamespace(propertyType, namespace));
+            return null;
+          } finally {
+            lock.unlock();
+          }
         });
   }
 }

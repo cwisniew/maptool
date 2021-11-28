@@ -8,6 +8,7 @@ option java_outer_classname = "GameDataProtos";
 
 message GameDataValueDto {
   string name = 1;
+  repeated string tags = 15;
   oneof value {
     string json_value = 2;
     bool boolean_value = 3;

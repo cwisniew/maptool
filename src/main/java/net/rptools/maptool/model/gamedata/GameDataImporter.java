@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.gamedata;
 
 import com.google.gson.JsonParser;
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.AssetManager;
@@ -94,6 +95,7 @@ public class GameDataImporter {
           case UNDEFINED_ASSET_VALUE -> DataValueFactory.undefined(value.getName(), DataType.ASSET);
           case UNDEFINED_VALUE, VALUE_NOT_SET -> DataValueFactory.undefined(value.getName());
         };
+    dataValue = dataValue.withTags(new HashSet<>(value.getTagsList()));
     dataStore.setProperty(type, namespace, dataValue).get();
   }
 }

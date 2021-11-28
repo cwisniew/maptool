@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -36,13 +37,17 @@ public final class StringDataValue implements DataValue {
   /** Has no value been set? */
   private final boolean undefined;
 
+  /** The tags for this data value. */
+  private final Set<String> tags;
+
   /**
-   * Creates a new StringDataValue.
+   * Creates a new StringDataValue with the specified tags.
    *
    * @param name the name of the value.
    * @param value the value.
+   * @param tags the tags for this data value.
    */
-  StringDataValue(String name, String value) {
+  StringDataValue(String name, String value, Set<String> tags) {
     this.name = name;
     this.value = value;
 
@@ -56,14 +61,56 @@ public final class StringDataValue implements DataValue {
     doubleValue = dval;
     canConvertToNumber = canConvert;
     undefined = false;
+    this.tags = Set.copyOf(tags);
   }
 
-  StringDataValue(String name) {
+  /**
+   * Creates a new StringDataValue with no tags.
+   *
+   * @param name the name of the value.
+   * @param value the value.
+   */
+  StringDataValue(String name, String value) {
+    this(name, value, Set.of());
+  }
+
+  /**
+   * Creates a new undefined StringDataValue with the specified tags.
+   *
+   * @param name The name of the value.
+   * @param tags The tags for this data value.
+   */
+  StringDataValue(String name, Set<String> tags) {
     this.name = name;
     this.value = null;
     this.canConvertToNumber = false;
     this.doubleValue = Double.NaN;
     this.undefined = true;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new undefined StringDataValue with the specified tags.
+   *
+   * @param name The name of the value.
+   */
+  StringDataValue(String name) {
+    this(name, Set.of());
+  }
+
+  /**
+   * Creates a new StringDataValue with the values of the passed in DataValue and the new tags.
+   *
+   * @param data Value the DataValue to copy.
+   * @param newTags The new tags for the new DataValue.
+   */
+  private StringDataValue(StringDataValue data, Set<String> newTags) {
+    name = data.name;
+    value = data.value;
+    canConvertToNumber = data.canConvertToNumber;
+    doubleValue = data.doubleValue;
+    undefined = data.undefined;
+    tags = Set.copyOf(newTags);
   }
 
   @Override
@@ -74,6 +121,16 @@ public final class StringDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.STRING;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new StringDataValue(this, tags);
   }
 
   @Override

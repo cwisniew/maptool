@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Set;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
@@ -30,27 +31,66 @@ public final class LongDataValue implements DataValue {
   /** Has no value been set? */
   private final boolean undefined;
 
+  /** Tags associated with the value. */
+  private final Set<String> tags;
+
   /**
-   * Creates a new LongDataValue.
+   * Creates a new LongDataValue with the given tags.
+   *
+   * @param name the name of the value.
+   * @param value the value.
+   * @param tags the tags associated with the value.
+   */
+  LongDataValue(String name, long value, Set<String> tags) {
+    this.name = name;
+    this.value = value;
+    this.undefined = false;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new LongDataValue that is undefined with the given tags.
+   *
+   * @param name the name of the value.
+   * @param tags the tags associated with the value.
+   */
+  LongDataValue(String name, Set<String> tags) {
+    this.name = name;
+    this.value = 0;
+    this.undefined = true;
+    this.tags = Set.copyOf(tags);
+  }
+
+  /**
+   * Creates a new LongDataValue with the specified value and no tags.
    *
    * @param name the name of the value.
    * @param value the value.
    */
   LongDataValue(String name, long value) {
-    this.name = name;
-    this.value = value;
-    this.undefined = false;
+    this(name, value, Set.of());
   }
 
   /**
-   * Creates a new LongDataValue that is undefined.
+   * Creates a new LongDataValue with the specified value and no tags.
    *
    * @param name the name of the value.
    */
   LongDataValue(String name) {
-    this.name = name;
-    this.value = 0;
-    this.undefined = true;
+    this(name, Set.of());
+  }
+
+  /**
+   * Creates a new LongDataValue with value of the specified LongDataValue and new tags.
+   *
+   * @param data Value the LongDataValue to copy.
+   * @param tags the tags associated with the value.
+   */
+  private LongDataValue(LongDataValue data, Set<String> tags) {
+    name = data.name;
+    value = data.value;
+    undefined = data.undefined;
+    this.tags = Set.copyOf(tags);
   }
 
   @Override
@@ -61,6 +101,16 @@ public final class LongDataValue implements DataValue {
   @Override
   public DataType getDataType() {
     return DataType.LONG;
+  }
+
+  @Override
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  @Override
+  public DataValue withTags(Set<String> tags) {
+    return new LongDataValue(this, tags);
   }
 
   @Override

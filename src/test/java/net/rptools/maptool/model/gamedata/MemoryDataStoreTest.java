@@ -1093,4 +1093,24 @@ class MemoryDataStoreTest {
                 DataType.UNDEFINED,
                 mds.getPropertyDataType("testType2", "testNamespace3", "invalid").get()));
   }
+
+  @Test
+  void setTags() {
+    // TODO: CDW: implement
+  }
+
+  @Test
+  void removeTags() {
+    // TODO: CDW: implement
+  }
+
+  @Test
+  void setDataAndTags() {
+    // TODO: CDW: implement
+  }
+
+  @Test
+  void addTags() {
+    // TODO: CDW: implement
+  }
 }
