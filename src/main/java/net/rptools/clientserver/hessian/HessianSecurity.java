@@ -37,6 +37,7 @@ public class HessianSecurity {
     allow.add("java.lang.String");
     allow.add("java.lang.Integer");
     allow.add("java.lang.BigDecimal");
+    allow.add("java.lang.Class");
 
     allow.add("java.util.ArrayList");
     allow.add("java.util.Arrays");
