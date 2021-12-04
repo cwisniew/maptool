@@ -471,7 +471,6 @@ public class PersistenceUtil {
         }
 
         new CampaignManager().clearCampaignData();
-        loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
