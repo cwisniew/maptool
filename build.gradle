@@ -1,3 +1,5 @@
+import static sun.security.util.Debug.println
+
 /*
 * For more details take a look at the Java Quickstart chapter in the Gradle
 * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
@@ -87,7 +89,14 @@ ext {
         appSemVer = defaultVersion
     } else {
         appSemVer = foundTags[0]
-        developerRelease = ""
+        println "appSemVer = " + appSemVer;
+        println "tagVersion = " + tagVersion;
+        if (appSemVer.toLowerCase().contains('alpha') || appSemVer.toLowerCase().contains('beta')
+            || appSemVer.toLowerCase().contains('rc')) {
+            developerRelease = '-test'
+        } else {
+            developerRelease = ""
+        }
     }
 
     // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
