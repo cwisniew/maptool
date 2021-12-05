@@ -89,11 +89,9 @@ ext {
         appSemVer = defaultVersion
     } else {
         appSemVer = foundTags[0]
-        println "appSemVer = " + appSemVer;
-        println "tagVersion = " + tagVersion;
-        if (appSemVer.toLowerCase().contains('alpha') || appSemVer.toLowerCase().contains('beta')
-            || appSemVer.toLowerCase().contains('rc')) {
-            developerRelease = '-test'
+        def lowerTag = tagVersion.toLowerCase()
+        if (lowerTag.contains('alpha') || lowerTag.contains('beta') || lowerTag.contains('rc')) {
+            developerRelease = '-Test'
         } else {
             developerRelease = ""
         }
