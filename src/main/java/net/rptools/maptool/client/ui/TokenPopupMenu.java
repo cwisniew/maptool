@@ -96,7 +96,9 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
     add(createHaloMenu());
     addOwnedItem(createArrangeMenu());
-    addGMItem(createChangeToMenu(Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
+    addGMItem(createChangeToMenu());
+    addGMItem(createChangeShapeMenu());
+
     add(new JSeparator());
 
     /*

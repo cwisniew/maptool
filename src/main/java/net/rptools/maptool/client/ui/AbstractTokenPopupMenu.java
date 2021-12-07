@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -58,14 +57,12 @@ import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.tokens.TokenLayerChange;
 import net.rptools.maptool.util.FileUtil;
-import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.TokenUtil;
 
 public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   private static final long serialVersionUID = -3741870412603226747L;
@@ -235,12 +232,20 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     return flipMenu;
   }
 
-  protected JMenu createChangeToMenu(Zone.Layer... types) {
+  protected JMenu createChangeToMenu() {
     JMenu changeTypeMenu = new JMenu(I18N.getText("token.popup.menu.change"));
-    for (Zone.Layer layer : types) {
+    for (var layer : TokenLayerChange.values()) {
       changeTypeMenu.add(new JMenuItem(new ChangeTypeAction(layer)));
     }
     return changeTypeMenu;
+  }
+
+  protected JMenu createChangeShapeMenu() {
+    JMenu changeShapeMenu = new JMenu(I18N.getText("token.popup.menu.changeShape"));
+    for (var shape : Token.TokenShape.values()) {
+      changeShapeMenu.add(new JMenuItem(new ChangeShapeAction(shape)));
+    }
+    return changeShapeMenu;
   }
 
   protected JMenu createArrangeMenu() {
@@ -354,10 +359,10 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   public class ChangeTypeAction extends AbstractAction {
-    private final Zone.Layer layer;
+    private final TokenLayerChange layer;
 
-    public ChangeTypeAction(Zone.Layer layer) {
-      putValue(Action.NAME, layer.toString());
+    public ChangeTypeAction(TokenLayerChange layer) {
+      putValue(Action.NAME, I18N.getText(layer.getI18NKey()));
       this.layer = layer;
     }
 
@@ -367,22 +372,32 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        token.setLayer(layer);
-        switch (layer) {
-          case BACKGROUND:
-          case OBJECT:
-            if (token.getShape() != TokenShape.FIGURE) token.setShape(TokenShape.TOP_DOWN);
-            break;
-          case TOKEN:
-            Image image = ImageManager.getImage(token.getImageAssetId());
-            if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-              token.setShape(Token.TokenShape.TOP_DOWN);
-            } else {
-              if (token.getShape() != TokenShape.FIGURE)
-                token.setShape(TokenUtil.guessTokenType(image));
-            }
-            break;
+        token.setLayer(layer.getLayer());
+        if (layer.getNewShape() != null) {
+          token.setShape(layer.getNewShape());
         }
+        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      }
+      renderer.repaint();
+      MapTool.getFrame().updateTokenTree();
+    }
+  }
+
+  public class ChangeShapeAction extends AbstractAction {
+    private final Token.TokenShape shape;
+
+    public ChangeShapeAction(Token.TokenShape shape) {
+      putValue(Action.NAME, I18N.getText("Token.TokenShape." + shape.name()));
+      this.shape = shape;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      for (GUID tokenGUID : selectedTokenSet) {
+        Token token = renderer.getZone().getToken(tokenGUID);
+        if (token == null) {
+          continue;
+        }
+        token.setShape(shape);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
       renderer.repaint();
