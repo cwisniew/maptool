@@ -247,7 +247,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      * String layer = setLayer(String layer, String tokenId: currentToken(), boolean forceShape: true, string mapName: current map)
      */
     if (functionName.equalsIgnoreCase("setLayer")) {
-      boolean forceShape = true;
+      boolean forceShape = false;
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       if (parameters.size() > 2) {
         forceShape = !BigDecimal.ZERO.equals(parameters.get(2));
