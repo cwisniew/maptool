@@ -72,7 +72,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
     initialize();
 
-    pack(); // FJE
+    pack();
   }
 
   public Status getStatus() {
@@ -756,8 +756,6 @@ public class CampaignPropertiesDialog extends JDialog {
           }
         }
         // Keep ID the same if modifying existing light
-        // TODO FJE Why? Is there some benefit to doing so? Changes to light sources require the map
-        // to be re-rendered anyway, don't they?
         if (originalLightSourcesMap.containsKey(currentGroupName)) {
           for (LightSource ls : originalLightSourcesMap.get(currentGroupName).values()) {
             if (ls.getName().equalsIgnoreCase(name)) {

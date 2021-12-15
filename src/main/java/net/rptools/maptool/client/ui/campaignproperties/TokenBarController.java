@@ -32,10 +32,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
@@ -65,6 +69,7 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
+import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.util.ImageManager;
 
 /**
@@ -88,6 +93,8 @@ public class TokenBarController
 
   /** Image file chooser used to support the browse buttons */
   private PreviewPanelFileChooser imageFileChooser;
+
+  private Map<String, List<String>> tokenTypeMap;
 
   /** Renderer used to paint the bars */
   private final StateListRenderer renderer = new StateListRenderer();
@@ -189,6 +196,31 @@ public class TokenBarController
   /** The size of the ICON faked in the list renderer */
   public static final int ICON_SIZE = 50;
 
+  /** Check box to determine if the bar is bound to a property */
+  public static final String TOKEN_BIND_CHECKBOX = "tokenBarBindProperty";
+
+  /** Combo box to select the toke property type */
+  public static final String TOKEN_TYPE_COMBO = "tokenBindPropertyType";
+
+  /** The combo box to select the token property */
+  public static final String TOKEN_PROPERTY_COMBO = "tokenBindPropertyName";
+
+  /** The combo box to select the min value */
+  public static final String TOKEN_MIN_COMBO = "tokenBindPropertyMin";
+
+  /** The combo box to select the max value */
+  public static final String TOKEN_MAX_COMBO = "tokenBindPropertyMax";
+
+  private final JComboBox<String> tokenTypeComboBox;
+
+  private final JComboBox<String> propertyComboBox;
+
+  private final JComboBox<String> minComboBox;
+
+  private final JComboBox<String> maxComboBox;
+
+  private final JCheckBox bindCheckBox;
+
   /** Each of the data entry components that can be enabled/disabled by type of bar */
   public static final String[] DATA_ENTRY_COMPONENTS = {
     COLOR,
@@ -267,6 +299,16 @@ public class TokenBarController
     panel.getButton(MOVE_UP).setEnabled(false);
     panel.getButton(MOVE_DOWN).setEnabled(false);
     panel.getButton(DELETE).setEnabled(false);
+
+    tokenTypeComboBox = panel.getComboBox(TOKEN_TYPE_COMBO);
+    propertyComboBox = panel.getComboBox(TOKEN_PROPERTY_COMBO);
+    minComboBox = panel.getComboBox(TOKEN_MIN_COMBO);
+    maxComboBox = panel.getComboBox(TOKEN_MAX_COMBO);
+    bindCheckBox = panel.getCheckBox(TOKEN_BIND_CHECKBOX);
+
+    panel
+        .getCheckBox(TOKEN_BIND_CHECKBOX)
+        .addItemListener(l -> updatePropertyCombosEnabled(bindCheckBox.isSelected()));
   }
 
   /**
@@ -674,7 +716,55 @@ public class TokenBarController
       model.addElement(overlay);
       getNames().add(overlay.getName());
     }
+    setTokenTypeMap(campaign.getTokenTypeMap());
     formPanel.getList(BARS).setModel(model);
+  }
+
+  public void setTokenTypeMap(Map<String, List<TokenProperty>> newTokenTypeMap) {
+    tokenTypeMap = new HashMap<>();
+    newTokenTypeMap
+        .keySet()
+        .forEach(
+            key -> {
+              tokenTypeMap.put(
+                  key,
+                  newTokenTypeMap.get(key).stream()
+                      .map(TokenProperty::getName)
+                      .collect(Collectors.toList()));
+            });
+    updatePropertyTypes();
+  }
+
+  private void updatePropertyCombosEnabled(boolean enabled) {
+    tokenTypeComboBox.setEnabled(enabled);
+    minComboBox.setEnabled(enabled);
+    maxComboBox.setEnabled(enabled);
+    propertyComboBox.setEnabled(enabled);
+  }
+
+  private void updatePropertyTypes() {
+    tokenTypeComboBox.removeAllItems();
+    minComboBox.removeAllItems();
+    maxComboBox.removeAllItems();
+    propertyComboBox.removeAllItems();
+    tokenTypeMap.keySet().forEach(tokenTypeComboBox::addItem);
+    setTrackableProperties();
+  }
+
+  private void setTrackableProperties() {
+
+    String tokenType =
+        Objects.requireNonNullElse(tokenTypeComboBox.getSelectedItem(), "").toString();
+    var props = tokenTypeMap.get(tokenType);
+    if (props != null && !props.isEmpty()) {
+      minComboBox.addItem("= 0");
+      minComboBox.addItem("= 1");
+      for (String prop : props) {
+        propertyComboBox.addItem(prop);
+        minComboBox.addItem(prop);
+        maxComboBox.addItem(prop);
+      }
+    }
   }
 
   /**
