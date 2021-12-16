@@ -616,6 +616,17 @@ public class TokenBarController
         formPanel.getList(IMAGES).setModel(model);
         formPanel.getList(IMAGES).repaint();
 
+        if (bar.isBoundToProperty()) {
+          bindCheckBox.setSelected(true);
+          tokenTypeComboBox.setSelectedItem(bar.getBoundTokenType());
+          propertyComboBox.setSelectedItem(bar.getBoundPropertyName());
+          minComboBox.setSelectedItem(bar.getBoundPropertyMin());
+          maxComboBox.setSelectedItem(bar.getBoundPropertyMax());
+        } else {
+          bindCheckBox.setSelected(false);
+        }
+        updatePropertyCombosEnabled(bindCheckBox.isSelected());
+
         // Set the type and change components
         formPanel.getComboBox(TYPE).setSelectedIndex(type);
         enableDataComponents();
@@ -839,6 +850,9 @@ public class TokenBarController
       to.setShowOwner(showOwner);
       to.setIncrements(increments);
       to.setSide(side);
+      if (bindCheckBox.isSelected()) {
+        to.set
+      }
     } // endif
     return to;
   }
