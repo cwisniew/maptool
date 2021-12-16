@@ -295,6 +295,12 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoEvaluated(
+      String macroName) {
+    return getMTScriptMacroInfo(macroName); // no information to be evaluated in add-ons
+  }
+
+  @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getPrivateMacroInfo(String macroName) {
     var macro = mtsFunctionAssetMap.get(macroName);
     if (macro == null) {

@@ -135,12 +135,22 @@ public interface Library {
   CompletableFuture<LibraryInfo> getLibraryInfo();
 
   /**
-   * Returns the information about MapTool Macro Script on this library.
+   * Returns the information about MapTool Macro Script on this library. None of the information
+   * will be evaluated.
    *
    * @param macroName The name of the macro.
    * @return the information about the MapTool Macro Script.
    */
   CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName);
+
+  /**
+   * Returns the information about MapTool Macro Script on this library. This will evaluate
+   * information if applicable.
+   *
+   * @param macroName The name of the macro.
+   * @return the information about the MapTool Macro Script.
+   */
+  CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoEvaluated(String macroName);
 
   /**
    * Returns the information about "non-public" MapTool Macro Script on this library. The non-public

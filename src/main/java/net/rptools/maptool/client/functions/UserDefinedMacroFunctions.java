@@ -383,7 +383,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
             return I18N.getText("msg.error.udf.tooltip.loading", theDef.macroName);
           }
           var library = lib.get();
-          var macroInfo = library.getMTScriptMacroInfo(macroName).get();
+          var macroInfo = library.getMTScriptMacroInfoEvaluated(macroName).get();
           if (macroInfo.isEmpty()) {
             return I18N.getText("msg.error.udf.tooltip.missingTarget", theDef.macroName);
           }

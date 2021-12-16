@@ -288,8 +288,8 @@ class LibraryToken implements Library {
             null));
   }
 
-  @Override
-  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
+  private CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(
+      String macroName, boolean evaluate) {
     return new ThreadExecutionHelper<Optional<MTScriptMacroInfo>>()
         .runOnSwingThread(
             () -> {
@@ -309,8 +309,19 @@ class LibraryToken implements Library {
                       buttonProps.getCommand(),
                       library.getOwners().size() == 0 || !buttonProps.getAllowPlayerEdits(),
                       !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),
-                      buttonProps.getEvaluatedToolTip()));
+                      evaluate ? buttonProps.getEvaluatedToolTip() : buttonProps.getToolTip()));
             });
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
+    return getMTScriptMacroInfo(macroName, false);
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoEvaluated(
+      String macroName) {
+    return getMTScriptMacroInfo(macroName, true);
   }
 
   @Override
