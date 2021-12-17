@@ -851,7 +851,17 @@ public class TokenBarController
       to.setIncrements(increments);
       to.setSide(side);
       if (bindCheckBox.isSelected()) {
-        to.set
+        to.setBoundTokenType(Objects.requireNonNullElse(tokenTypeComboBox.getSelectedItem(),
+            "").toString());
+        to.setBoundPropertyName(Objects.requireNonNullElse(propertyComboBox.getSelectedItem(),
+            "").toString());
+        to.setBoundPropertyMin(Objects.requireNonNullElse(minComboBox.getSelectedItem(), "").toString());
+        to.setBoundPropertyMax(Objects.requireNonNullElse(maxComboBox.getSelectedItem(), "").toString());
+      } else {
+        to.setBoundTokenType("");
+        to.setBoundPropertyName("");
+        to.setBoundPropertyMin("");
+        to.setBoundPropertyMax("");
       }
     } // endif
     return to;
