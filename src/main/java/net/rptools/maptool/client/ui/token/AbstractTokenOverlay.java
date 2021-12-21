@@ -54,20 +54,9 @@ public abstract class AbstractTokenOverlay implements Cloneable {
   /** Flag indicating that this token overlay is displayed to the owner. */
   private boolean showOwner;
 
-  /** Flag indicating that this token overlay is displayed to the everybody else. */
+  /** Flag indicating that this token overlay is displayed to everybody else. */
   private boolean showOthers;
 
-  /** The token type this is bar is bound to. */
-  private String boundTokenType = "";
-
-  /** The property name this bar is bound to. */
-  private String boundPropertyName = "";
-
-  /** The property name for the minimum value of the bar ( = 0 or = 1 for those specific values) */
-  private String boundPropertyMin = "";
-
-  /** The property name for the maximum value of the bar */
-  private String boundPropertyMax = "";
 
   /*---------------------------------------------------------------------------------------------
    * Class Variables
@@ -226,39 +215,5 @@ public abstract class AbstractTokenOverlay implements Cloneable {
   /** @see java.lang.Object#clone() */
   public abstract Object clone();
 
-  public String getBoundTokenType() {
-    return boundTokenType;
-  }
 
-  public void setBoundTokenType(String boundTokenType) {
-    this.boundTokenType = boundTokenType;
-  }
-
-  public String getBoundPropertyName() {
-    return boundPropertyName;
-  }
-
-  public void setBoundPropertyName(String boundPropertyName) {
-    this.boundPropertyName = boundPropertyName;
-  }
-
-  public String getBoundPropertyMin() {
-    return boundPropertyMin;
-  }
-
-  public void setBoundPropertyMin(String boundPropertyMin) {
-    this.boundPropertyMin = boundPropertyMin;
-  }
-
-  public String getBoundPropertyMax() {
-    return boundPropertyMax;
-  }
-
-  public void setBoundPropertyMax(String boundPropertyMax) {
-    this.boundPropertyMax = boundPropertyMax;
-  }
-
-  public boolean isBoundToProperty() {
-    return !boundTokenType.isEmpty();
-  }
 }

@@ -14,9 +14,12 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
+import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 
 /** Class for converting between GameData and MT Macro Script types. */
 public class MTScriptDataConversion {
@@ -64,5 +67,68 @@ public class MTScriptDataConversion {
     } else {
       return convertToMTScriptType(value);
     }
+  }
+
+
+  /**
+   * Returns a MTScript type coerced to a DataValue.
+   * @param name the name of the variable/property.
+   * @param value the value to coerce.
+   * @return the coerced DataValue.
+   */
+  public DataValue coerceToMTScriptType(String name, Object value) {
+    if (value == null) {
+      return DataValueFactory.undefined(name);
+    }
+
+    // First check if its a number type
+    if (value instanceof Number n) {
+      if (n.longValue() == n.floatValue()) {
+        return DataValueFactory.fromLong(name, n.intValue());
+      } else {
+        return DataValueFactory.fromDouble(name, n.intValue());
+      }
+    }
+
+    // Next check if its a JSON type
+    if (value instanceof JsonElement ele) {
+      if (ele.isJsonArray()) {
+        return DataValueFactory.fromJsonArray(name, ele.getAsJsonArray());
+      } else if (ele.isJsonObject()) {
+        return DataValueFactory.fromJsonObject(name, ele.getAsJsonObject());
+      } else if (ele.isJsonPrimitive()) {
+        var primitive = ele.getAsJsonPrimitive();
+        if (primitive.isBoolean()) {
+          return DataValueFactory.fromBoolean(name, primitive.getAsBoolean());
+        } else if (primitive.isNumber()) {
+          if (primitive.getAsDouble() == primitive.getAsLong()) {
+            return DataValueFactory.fromLong(name, primitive.getAsLong());
+          } else {
+            return DataValueFactory.fromDouble(name, primitive.getAsDouble());
+          }
+        } else {
+          return DataValueFactory.fromString(name, ele.getAsString());
+        }
+      } else {
+        return DataValueFactory.undefined(name);
+      }
+    }
+
+    // Otherwise convert to a string
+    String sval = value.toString();
+
+    // See if it's a number
+    try {
+      double dval = Double.parseDouble(sval);
+      if (dval == (long) dval) {
+        return DataValueFactory.fromLong(name, (long) dval);
+      } else {
+        return DataValueFactory.fromDouble(name, dval) ;
+      }
+    } catch (NumberFormatException e) {
+      // Do nothing, its not a number
+    }
+    return DataValueFactory.fromString(name, sval);
+
   }
 }

@@ -408,6 +408,14 @@ public class getInfoFunction extends AbstractFunction {
       bar.addProperty("isShowGM", tbo.isShowGM() ? BigDecimal.ONE : BigDecimal.ZERO);
       bar.addProperty("isShowOwner", tbo.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
       bar.addProperty("isShowOthers", tbo.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
+      if (tbo.isBoundToProperty()) {
+        JsonObject boundObject = new JsonObject();
+        boundObject.addProperty("tokenType", tbo.getBoundTokenType());
+        boundObject.addProperty("property", tbo.getBoundPropertyName());
+        boundObject.addProperty("min", tbo.getBoundPropertyMin());
+        boundObject.addProperty("max", tbo.getBoundPropertyMax());
+        bar.add("boundTo", boundObject);
+      }
 
       bgroup.add(bar);
       barinfo.add(group, bgroup);

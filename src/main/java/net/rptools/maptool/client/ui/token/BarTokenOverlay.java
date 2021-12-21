@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.token;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.Objects;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +38,18 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
 
   /** The side of the token where the bar is painted. */
   private Side side = Side.TOP;
+
+  /** The token type this is bar is bound to. */
+  private String boundTokenType = "";
+
+  /** The property name this bar is bound to. */
+  private String boundPropertyName = "";
+
+  /** The property name for the minimum value of the bar ( = 0 or = 1 for those specific values) */
+  private String boundPropertyMin = "";
+
+  /** The property name for the maximum value of the bar */
+  private String boundPropertyMax = "";
 
   /*---------------------------------------------------------------------------------------------
    * Class Variables
@@ -173,27 +186,52 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
     RIGHT;
   }
 
-  // /*---------------------------------------------------------------------------------------------
-  // * Class Methods
-  // *-------------------------------------------------------------------------------------------*/
-  //
-  // /**
-  // * Scale an asset.
-  // *
-  // * @param assetId Scale this asset
-  // * @param d To fit here.
-  // * @return The scaled asset.
-  // */
-  // public static BufferedImage getScaledImage(MD5Key assetId, Dimension d) {
-  // Asset asset = AssetManager.getAsset(assetId);
-  // if (asset == null) {
-  // LOGGER.warning("Unable to locate and asset with ID: " + assetId);
-  // return null;
-  // } // endif
-  // BufferedImage image = ImageManager.getImageAndWait(asset);
-  // Dimension size = new Dimension(image.getWidth(), image.getHeight());
-  // SwingUtil.constrainTo(size, d.width, d.height);
-  // image = ImageUtil.createCompatibleImage(image, size.width, size.height, null);
-  // return image;
-  // }
+  /**
+   * Returns type of token property is this bound to.
+   * @return the token property types.
+   */
+  public String getBoundTokenType() {
+    return boundTokenType;
+  }
+
+  /**
+   * Sets the type of property that this bar is bound to.
+   * @param boundTokenType they type of token property.
+   */
+  public void setBoundTokenType(String boundTokenType) {
+    this.boundTokenType = Objects.requireNonNullElse(boundTokenType, "");
+  }
+
+  /**
+   * Returns the name of the property that this toke is bound to.
+   * @return
+   */
+  public String getBoundPropertyName() {
+    return boundPropertyName;
+  }
+
+  public void setBoundPropertyName(String boundPropertyName) {
+    this.boundPropertyName = Objects.requireNonNullElse( boundPropertyName, "");
+  }
+
+  public String getBoundPropertyMin() {
+    return boundPropertyMin;
+  }
+
+  public void setBoundPropertyMin(String boundPropertyMin) {
+    this.boundPropertyMin = Objects.requireNonNullElse( boundPropertyMin, "");
+  }
+
+  public String getBoundPropertyMax() {
+    return boundPropertyMax;
+  }
+
+  public void setBoundPropertyMax(String boundPropertyMax) {
+    this.boundPropertyMax = Objects.requireNonNullElse(boundPropertyMax, "");
+  }
+
+  public boolean isBoundToProperty() {
+    return  boundTokenType != null && !boundTokenType.isEmpty();
+  }
+
 }

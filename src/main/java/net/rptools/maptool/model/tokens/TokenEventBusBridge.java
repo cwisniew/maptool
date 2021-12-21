@@ -24,6 +24,7 @@ import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapTool.ZoneEvent;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
@@ -60,6 +61,11 @@ public class TokenEventBusBridge implements AppEventListener {
               .collect(Collectors.toSet());
       new MapToolEventBus().getMainEventBus().post(new TokensRemovedEvent(tokens));
     }
+  }
+
+  public void changeTokenProperty(GUID id, String name, Object value) {
+
+    new TokenPropertyChangeEvent(id, name, )
   }
 
   private static class TokenModelChangeListener implements ModelChangeListener {

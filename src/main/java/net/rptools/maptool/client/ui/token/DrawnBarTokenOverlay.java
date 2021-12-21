@@ -93,6 +93,10 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     overlay.setShowGM(isShowGM());
     overlay.setShowOwner(isShowOwner());
     overlay.setShowOthers(isShowOthers());
+    overlay.setBoundTokenType(getBoundTokenType());
+    overlay.setBoundPropertyName(getBoundPropertyName());
+    overlay.setBoundPropertyMin(getBoundPropertyMin());
+    overlay.setBoundPropertyMax(getBoundPropertyMax());
     return overlay;
   }
 

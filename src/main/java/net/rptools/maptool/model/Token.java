@@ -48,6 +48,8 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.token.LibraryTokenManager.TokenEventListener;
+import net.rptools.maptool.model.tokens.TokenEventBusBridge;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
@@ -1768,6 +1770,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public void setProperty(String key, Object value) {
     getPropertyMap().put(key, value);
+    new TokenEventBusBridge().changeTokenProperty(id, key, value);
   }
 
   public Object getProperty(String key) {
