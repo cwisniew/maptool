@@ -14,9 +14,14 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
+import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 
 /** Class for converting between GameData and MT Macro Script types. */
 public class MTScriptDataConversion {
@@ -47,7 +52,7 @@ public class MTScriptDataConversion {
   }
 
   /**
-   * Converts a DataType to a MT Script type fetching the contents of an Asset and returning that
+   * Converts a DataType to an MT Script type fetching the contents of an Asset and returning that
    * instead of just and asset handle where it makes sense. If the asset is a type that can not be
    * handled in MTScript then the asset handle will be returned.
    *
@@ -64,5 +69,45 @@ public class MTScriptDataConversion {
     } else {
       return convertToMTScriptType(value);
     }
+  }
+
+  /**
+   * Converts am MT Script type to a DataValue. For Asset DataValues the asset handle is returned.
+   * Note: This will not attempt to parse the contents of a String as JSON or number.
+   *
+   * @param name The name of the data value.
+   * @param value The MT Script value to convert.
+   * @return the converted value.
+   */
+  public DataValue convertFromMTScript(String name, Object value) {
+    if (value == null) {
+      return DataValueFactory.undefined(name);
+    }
+
+    if (value instanceof String str) {
+      if (str.trim().startsWith("asset://")) {
+        var asset = AssetManager.getAsset(new MD5Key(str.substring(8)));
+        return DataValueFactory.fromAsset(name, asset);
+      }
+      return DataValueFactory.fromString(name, str);
+    }
+
+    if (value instanceof Number num) {
+      if (num.doubleValue() == num.longValue()) {
+        return DataValueFactory.fromLong(name, num.longValue());
+      } else {
+        return DataValueFactory.fromDouble(name, num.doubleValue());
+      }
+    }
+
+    if (value instanceof JsonObject jsonObject) {
+      return DataValueFactory.fromJsonObject(name, jsonObject);
+    }
+
+    if (value instanceof JsonArray jsonArray) {
+      return DataValueFactory.fromJsonArray(name, jsonArray);
+    }
+
+    return DataValueFactory.undefined(name);
   }
 }
