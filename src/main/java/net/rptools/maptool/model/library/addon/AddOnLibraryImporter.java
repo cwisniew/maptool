@@ -33,6 +33,7 @@ import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
+import net.rptools.maptool.model.library.proto.LibraryUserDefinedFunctionsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -54,6 +55,9 @@ public class AddOnLibraryImporter {
 
   /** The name of the file with event properties. */
   public static final String EVENT_PROPERTY_FILE = "events.json";
+
+  /** The name of the file with the user defined function definitions. */
+  public static final String USER_DEFINED_FUNCTIONS_FILE = "functions.json";
 
   /**
    * Returns the {@link FileFilter} for add on library files.
@@ -163,11 +167,21 @@ public class AddOnLibraryImporter {
       var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
       addAsset(asset);
 
+      // User defined functions.
+      var udfBuilder = LibraryUserDefinedFunctionsDto.newBuilder();
+      ZipEntry udfZipEntry = zip.getEntry(USER_DEFINED_FUNCTIONS_FILE);
+      if (udfZipEntry != null) {
+        JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(new InputStreamReader(zip.getInputStream(udfZipEntry)), udfBuilder);
+      }
+
       return AddOnLibrary.fromDto(
           asset.getMD5Key(),
           addOnLib,
           mtsPropBuilder.build(),
           eventPropBuilder.build(),
+          udfBuilder.build(),
           pathAssetMap);
     }
   }

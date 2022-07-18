@@ -47,6 +47,7 @@ import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
+import net.rptools.maptool.model.library.proto.LibraryUserDefinedFunctionsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import org.javatuples.Pair;
@@ -60,8 +61,13 @@ public class AddOnLibrary implements Library {
   /** The name of the event for initialization. */
   private static final String INIT_EVENT = "onInit";
 
-  /** Record used to store information about the MacrScript functions for this library. */
+  /** Record used to store information about the MacroScript functions for this library. */
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
+
+
+  /** Record used to store information about user defined functions for this library. */
+  private record UserDefinedFunctions(String name, String path, String description,
+                                      String summary, boolean ignoreOutput, boolean sameScope) {}
 
   /** The directory where the files exposed URI are stored. */
   private static final String URL_PUBLIC_DIR = "public/";
@@ -139,6 +145,7 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
+      LibraryUserDefinedFunctionsDto userDefinedFunctionsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
@@ -210,6 +217,7 @@ public class AddOnLibrary implements Library {
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param eventsDto The Events Data Transfer Object.
+   * @param userDefinedFunctionsDto the User Defined Functions Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    * @return the new Add on library.
    */
@@ -218,9 +226,11 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
+      LibraryUserDefinedFunctionsDto userDefinedFunctionsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
 
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, pathAssetMap);
+    return new AddOnLibrary(
+        libraryAssetKey, dto, mtsDto, eventsDto, userDefinedFunctionsDto, pathAssetMap);
   }
 
   @Override

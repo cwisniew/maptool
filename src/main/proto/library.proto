@@ -32,6 +32,21 @@ message MTScriptPropertiesDto {
   repeated Property properties = 1;
 }
 
+message LibraryUserDefinedFunctionsDto {
+  bool drop_namespace = 1;
+  message DefinedFunctions {
+    string name = 1;
+    string path = 2;
+    string description = 3;
+    string summary = 4;
+    bool ignore_output = 5;
+    bool sameScope = 6;
+  }
+
+  repeated DefinedFunctions defined_functions = 2;
+}
+
+
 message AddOnLibraryListDto {
   message AddOnLibraryEntryDto {
     AddOnLibraryDto details = 17;
