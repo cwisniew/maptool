@@ -64,10 +64,14 @@ public class AddOnLibrary implements Library {
   /** Record used to store information about the MacroScript functions for this library. */
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
 
-
   /** Record used to store information about user defined functions for this library. */
-  private record UserDefinedFunctions(String name, String path, String description,
-                                      String summary, boolean ignoreOutput, boolean sameScope) {}
+  private record UserDefinedFunctions(
+      String name,
+      String path,
+      String description,
+      String summary,
+      boolean ignoreOutput,
+      boolean sameScope) {}
 
   /** The directory where the files exposed URI are stored. */
   private static final String URL_PUBLIC_DIR = "public/";
@@ -129,6 +133,8 @@ public class AddOnLibrary implements Library {
   /** The mapping between MTScript function paths and non legacy events. */
   private final Map<String, String> eventNameMap = new HashMap<>();
 
+  private final Map<String, UserDefinedFunctions> udfMap = new HashMap<>();
+
   /** The ID of the asset for the whole of the add-on Library. */
   private final MD5Key assetKey;
 
@@ -184,6 +190,19 @@ public class AddOnLibrary implements Library {
     eventsDto.getLegacyEventsList().stream()
         .filter(e -> !e.getMts().isEmpty())
         .forEach(e -> legacyEventNameMap.put(e.getName(), e.getMts()));
+
+    userDefinedFunctionsDto.getDefinedFunctionsList().stream()
+        .forEach(
+            f ->
+                udfMap.put(
+                    f.getPath(),
+                    new UserDefinedFunctions(
+                        f.getName(),
+                        f.getPath(),
+                        f.getDescription(),
+                        f.getSummary(),
+                        f.getIgnoreOutput(),
+                        f.getSameScope())));
 
     for (var entry : this.pathAssetMap.entrySet()) {
       String path = entry.getKey();
@@ -526,6 +545,11 @@ public class AddOnLibrary implements Library {
             });
   }
 
+  /**
+   * Returns the add-on library data value for a given path in this add-on library.
+   *
+   * @return the add-on library data value for a given path in this add-on library.
+   */
   CompletableFuture<DataValue> readFile(String path) {
     return CompletableFuture.supplyAsync(
         () -> {
@@ -537,5 +561,14 @@ public class AddOnLibrary implements Library {
           Asset asset = AssetManager.getAsset(val.getValue0());
           return DataValueFactory.fromAsset(filePath, asset);
         });
+  }
+
+  /**
+   * Returns the User defined functions that are defined in this add-on library.
+   *
+   * @return the User defined functions that are defined in this add-on library.
+   */
+  CompletableFuture<Set<UserDefinedFunctions>> getUserDefinedFunctions() {
+    return CompletableFuture.completedFuture(new HashSet<UserDefinedFunctions>(udfMap.values()));
   }
 }

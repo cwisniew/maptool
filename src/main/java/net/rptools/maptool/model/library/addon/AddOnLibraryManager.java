@@ -79,6 +79,11 @@ public class AddOnLibraryManager {
       throw new IllegalStateException("Library is already registered");
     }
 
+    library.getUserDefinedFunctions().thenApply(
+        functions -> {
+          // TODO: CDW: Here
+        }
+
     library.initialize();
     new MapToolEventBus()
         .getMainEventBus()

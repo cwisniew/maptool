@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.data.LibraryData;
 
 /** Interface for classes that represents a framework library. */
