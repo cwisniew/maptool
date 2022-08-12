@@ -40,7 +40,14 @@ import org.apache.log4j.Logger;
 /** Class that implements the DataStore interface. */
 public class MemoryDataStore implements DataStore {
 
-  private record PropertyTypeNamespace(String propertyType, String namespace) {}
+  private record PropertyTypeNamespace(String propertyType, String namespace) {
+    public PropertyTypeNamespace(String propertyType, String namespace) {
+      Objects.requireNonNull(propertyType);
+      Objects.requireNonNull(namespace);
+      this.propertyType = propertyType.toLowerCase();
+      this.namespace = namespace.toLowerCase();
+    }
+  }
 
   /** Class used to cache definitions. */
   private final Map<String, Set<String>> propertyTypeNamespaceMap =
@@ -61,9 +68,11 @@ public class MemoryDataStore implements DataStore {
    * @return if the namespace exists for the property type.
    */
   private boolean checkPropertyNamespace(String propertyType, String namespace) {
-    if (propertyTypeNamespaceMap.containsKey(propertyType)) {
-      var propertyTypeNamespaces = propertyTypeNamespaceMap.get(propertyType);
-      return propertyTypeNamespaces.contains(namespace);
+    String lowerPropertyType = propertyType.toLowerCase();
+    String lowerNamespace = namespace.toLowerCase();
+    if (propertyTypeNamespaceMap.containsKey(lowerPropertyType)) {
+      var propertyTypeNamespaces = propertyTypeNamespaceMap.get(lowerPropertyType);
+      return propertyTypeNamespaces.contains(lowerNamespace);
     }
     return false;
   }
@@ -75,10 +84,10 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<Set<String>> getPropertyNamespaces(String type) {
-
+    String lowerType = type.toLowerCase();
     return CompletableFuture.supplyAsync(
         () -> {
-          var propertyTypeNamespace = propertyTypeNamespaceMap.get(type);
+          var propertyTypeNamespace = propertyTypeNamespaceMap.get(lowerType);
           if (propertyTypeNamespace != null) {
             return new HashSet<>(propertyTypeNamespace);
           } else {
@@ -149,6 +158,7 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<Boolean> isPropertyDefined(String type, String namespace, String name) {
+
     return CompletableFuture.supplyAsync(
         () -> {
           var data = getData(type, namespace, name);
@@ -190,6 +200,7 @@ public class MemoryDataStore implements DataStore {
    * @param value the data value.
    */
   private DataValue setData(String type, String namespace, DataValue value) {
+
     if (!checkPropertyNamespace(type, namespace)) {
       throw InvalidDataOperation.createNamespaceDoesNotExist(namespace, type);
     }
@@ -290,16 +301,19 @@ public class MemoryDataStore implements DataStore {
    */
   private void createDataNamespace(
       String propertyType, String namespace, Collection<DataValue> initialData) {
+    String lowerPropertyType = propertyType.toLowerCase();
+    String lowerNamespace = namespace.toLowerCase();
 
     Set<String> namespaces =
         propertyTypeNamespaceMap.computeIfAbsent(
-            propertyType, k -> Collections.synchronizedSet(new HashSet<>()));
+            lowerPropertyType, k -> Collections.synchronizedSet(new HashSet<>()));
 
-    namespaces.add(namespace);
+    namespaces.add(lowerNamespace);
 
     var dataMap =
         namespaceDataMap.computeIfAbsent(
-            new PropertyTypeNamespace(propertyType, namespace), k -> new ConcurrentHashMap<>());
+            new PropertyTypeNamespace(lowerPropertyType, lowerNamespace),
+            k -> new ConcurrentHashMap<>());
 
     for (var dataValue : initialData) {
       dataMap.put(dataValue.getName(), dataValue);
@@ -342,12 +356,15 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<GameDataDto> toDto(String type, String namespace) {
+    String lowerType = type.toLowerCase();
+    String lowerNamespace = namespace.toLowerCase();
+
     return CompletableFuture.supplyAsync(
         () -> {
           var builder = GameDataDto.newBuilder();
-          builder.setType(type);
-          builder.setNamespace(namespace);
-          for (var data : getProperties(type, namespace).join()) {
+          builder.setType(lowerType);
+          builder.setNamespace(lowerNamespace);
+          for (var data : getProperties(lowerType, lowerNamespace).join()) {
             var dataDto = gameValueToDto(data);
             builder.addValues(dataDto);
           }
@@ -444,9 +461,11 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<Void> clearNamespace(String propertyType, String namespace) {
+    String lowerPropertyType = propertyType.toLowerCase();
+    String lowerNamespace = namespace.toLowerCase();
     return CompletableFuture.supplyAsync(
         () -> {
-          namespaceDataMap.remove(new PropertyTypeNamespace(propertyType, namespace));
+          namespaceDataMap.remove(new PropertyTypeNamespace(lowerPropertyType, lowerNamespace));
           return null;
         });
   }
