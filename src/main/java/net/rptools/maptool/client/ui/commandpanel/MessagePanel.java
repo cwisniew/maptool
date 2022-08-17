@@ -139,6 +139,7 @@ public class MessagePanel extends JPanel {
         "body { font-family: sans-serif; font-size: " + AppPreferences.getFontSize() + "pt}");
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
+    style.addRule(".genesysRoll { font-family: \"Genesys Glyphs and Dice\"}");
     setTrustedMacroPrefixColors(
         AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
     style.addRule(MessageUtil.getMessageCss());

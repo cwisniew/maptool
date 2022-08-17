@@ -48,6 +48,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
@@ -1757,6 +1758,20 @@ public class MapTool {
     } catch (Exception e) {
       MapTool.showError("msg.error.lafSetup", e);
       System.exit(1);
+    }
+
+    try {
+      var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      var genFont = Font.createFont(Font.TRUETYPE_FONT,
+          MapTool.class.getClassLoader().getResourceAsStream(
+              "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice.ttf"));
+      genv.registerFont(genFont);
+      var swGenFont = Font.createFont(Font.TRUETYPE_FONT,
+          MapTool.class.getClassLoader().getResourceAsStream(
+              "net/rptools/maptool/client/fonts/sw-rpg-icons.ttf"));
+      genv.registerFont(swGenFont);
+    } catch (Exception e) {
+      log.error("msg.error.genesysFont", e);
     }
 
     /**
