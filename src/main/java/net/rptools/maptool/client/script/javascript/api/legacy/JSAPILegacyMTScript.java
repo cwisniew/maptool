@@ -31,7 +31,7 @@ import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MTScriptLegacy")
 /** Class used to provide an API to interact with MapTool custom scripting language. */
-public class JSAPIMTScript implements MapToolJSAPIInterface {
+public class JSAPILegacyMTScript implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
     return "MTScriptLegacy";
@@ -48,7 +48,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
       throw new ParserException(I18N.getText("macro.function.general.reservedJS", macroName));
     }
     if (trusted) {
-      new JSAPIRegisteredMacro(macroName, callable);
+      new JSAPILegacyRegisteredMacro(macroName, callable);
     }
   }
 

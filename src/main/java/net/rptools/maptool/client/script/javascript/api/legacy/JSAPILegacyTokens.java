@@ -22,7 +22,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPITokens implements MapToolJSAPIInterface {
+public class JSAPILegacyTokens implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
     return "MapToolLegacy.tokens";
@@ -48,7 +48,7 @@ public class JSAPITokens implements MapToolJSAPIInterface {
         .forEach(
             (t -> {
               if (trusted || t.isOwner(playerId)) {
-                tokens.add(new JSAPIToken(t));
+                tokens.add(new JSAPILegacyToken(t));
               }
             }));
 
@@ -56,14 +56,14 @@ public class JSAPITokens implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public JSAPIToken getTokenByName(String tokenName) {
+  public JSAPILegacyToken getTokenByName(String tokenName) {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     for (ZoneRenderer z : MapTool.getFrame().getZoneRenderers()) {
       if (trusted || z.getZone().isVisible()) {
         Token t = z.getZone().getTokenByName(tokenName);
         if (t != null && (trusted || t.isOwner(playerId))) {
-          return new JSAPIToken(t);
+          return new JSAPILegacyToken(t);
         }
       }
     }
@@ -71,27 +71,27 @@ public class JSAPITokens implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public List<JSAPIToken> getSelectedTokens() {
+  public List<JSAPILegacyToken> getSelectedTokens() {
     List<Token> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
-    List<JSAPIToken> out_tokens = new ArrayList<JSAPIToken>();
+    List<JSAPILegacyToken> out_tokens = new ArrayList<JSAPILegacyToken>();
     for (Token token : tokens) {
-      out_tokens.add(new JSAPIToken(token));
+      out_tokens.add(new JSAPILegacyToken(token));
     }
     return out_tokens;
   }
 
   @HostAccess.Export
-  public JSAPIToken getSelected() {
+  public JSAPILegacyToken getSelected() {
     List<Token> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
     if (tokens.size() > 0) {
-      return new JSAPIToken(tokens.get(0));
+      return new JSAPILegacyToken(tokens.get(0));
     }
     return null;
   }
 
   @HostAccess.Export
-  public JSAPIToken getTokenByID(String uuid) {
-    JSAPIToken token = new JSAPIToken(uuid);
+  public JSAPILegacyToken getTokenByID(String uuid) {
+    JSAPILegacyToken token = new JSAPILegacyToken(uuid);
     if (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName())) {
       return token;
     }

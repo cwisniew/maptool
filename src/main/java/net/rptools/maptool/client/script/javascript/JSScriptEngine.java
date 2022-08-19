@@ -216,7 +216,7 @@ public class JSScriptEngine {
     }
   }
 
-  public Object applyFunction(JSAPIRegisteredMacro macro, Object[] args) {
+  public Object applyFunction(JSAPILegacyRegisteredMacro macro, Object[] args) {
     contextStack.push(macro.context);
     Object[] modifiedArgs = new Object[args.length];
     for (int i = 0; i < args.length; i++) {

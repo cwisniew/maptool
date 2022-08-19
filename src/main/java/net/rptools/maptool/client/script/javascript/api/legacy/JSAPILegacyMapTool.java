@@ -14,31 +14,19 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import net.rptools.maptool.client.MapTool;
-import org.graalvm.polyglot.HostAccess;
+import net.rptools.maptool.client.script.javascript.*;
+import org.graalvm.polyglot.*;
 
-public class JSAPIChat implements MapToolJSAPIInterface {
+@MapToolJSAPIDefinition(javaScriptVariableName = "MapToolLegacy")
+public class JSAPILegacyMapTool implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
-    return "MapToolLegacy.chat";
+    return "MapToolLegacy";
   }
 
-  @HostAccess.Export
-  public void broadcast(String message) {
-    MapTool.addGlobalMessage(message);
-  }
+  @HostAccess.Export public final JSAPILegacyClientInfo clientInfo = new JSAPILegacyClientInfo();
 
-  @HostAccess.Export
-  public void broadcastTo(List<String> who, String message) {
-    MapTool.addGlobalMessage(message, who);
-  }
+  @HostAccess.Export public final JSAPILegacyChat chat = new JSAPILegacyChat();
 
-  @HostAccess.Export
-  public void broadcastToGM(String message) {
-    List<String> who = new ArrayList<>();
-    who.add("gm");
-    MapTool.addGlobalMessage(message, who);
-  }
+  @HostAccess.Export public final JSAPILegacyTokens tokens = new JSAPILegacyTokens();
 }

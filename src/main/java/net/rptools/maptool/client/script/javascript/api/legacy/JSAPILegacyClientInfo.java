@@ -23,7 +23,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIClientInfo implements MapToolJSAPIInterface {
+public class JSAPILegacyClientInfo implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
     return "MapToolLegacy.ClientInfo";

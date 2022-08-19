@@ -24,7 +24,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIToken implements MapToolJSAPIInterface {
+public class JSAPILegacyToken implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
     return token.getId().toString();
@@ -34,11 +34,11 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   private Set<String> names;
   private Iterator<String> names_iter;
 
-  public JSAPIToken(Token token) {
+  public JSAPILegacyToken(Token token) {
     this.token = token;
   }
 
-  public JSAPIToken(String tid) {
+  public JSAPILegacyToken(String tid) {
     this(MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(tid)));
   }
 

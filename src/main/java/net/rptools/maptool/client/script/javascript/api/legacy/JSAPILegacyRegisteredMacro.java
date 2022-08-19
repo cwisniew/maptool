@@ -14,19 +14,24 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import java.util.*;
+import java.util.function.Function;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.*;
-import org.graalvm.polyglot.*;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 
-@MapToolJSAPIDefinition(javaScriptVariableName = "MapToolLegacy")
-public class JSAPIMapTool implements MapToolJSAPIInterface {
-  @Override
-  public String serializeToString() {
-    return "MapToolLegacy";
+public class JSAPILegacyRegisteredMacro {
+  private MapToolVariableResolver variableResolver;
+
+  private Stack<List<Object>> callingArgsStack = new Stack<>();
+  public String name;
+  public Function callable;
+  public JSContext context;
+
+  public JSAPILegacyRegisteredMacro(String macroname, Function callable) {
+    this.name = macroname;
+    this.callable = callable;
+    this.context = JSScriptEngine.getCurrentContext();
+    JSMacro.registerMacro("js." + macroname, this);
   }
-
-  @HostAccess.Export public final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
-
-  @HostAccess.Export public final JSAPIChat chat = new JSAPIChat();
-
-  @HostAccess.Export public final JSAPITokens tokens = new JSAPITokens();
 }

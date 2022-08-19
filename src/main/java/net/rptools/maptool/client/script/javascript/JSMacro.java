@@ -26,9 +26,9 @@ import org.graalvm.polyglot.*;
 
 public class JSMacro extends AbstractFunction {
   private static JSMacro instance = new JSMacro();
-  private static HashMap<String, JSAPIRegisteredMacro> macros = new HashMap<>();
+  private static HashMap<String, JSAPILegacyRegisteredMacro> macros = new HashMap<>();
 
-  public static void registerMacro(String name, JSAPIRegisteredMacro macro) {
+  public static void registerMacro(String name, JSAPILegacyRegisteredMacro macro) {
     macros.put(name, macro);
   }
 
@@ -54,7 +54,7 @@ public class JSMacro extends AbstractFunction {
       throws ParserException {
     MapToolVariableResolver variableResolver = (MapToolVariableResolver) resolver;
     Object[] aargs = args.toArray(new Object[0]);
-    JSAPIRegisteredMacro macro = macros.get(functionName);
+    JSAPILegacyRegisteredMacro macro = macros.get(functionName);
     Object ret = JSScriptEngine.getJSScriptEngine().applyFunction(macro, aargs);
     if (ret != null) {
       if (ret instanceof Value val) {
