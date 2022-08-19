@@ -26,7 +26,7 @@ import org.graalvm.polyglot.HostAccess;
 public class JSAPIClientInfo implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
-    return "MapTool.ClientInfo";
+    return "MapToolLegacy.ClientInfo";
   }
 
   @HostAccess.Export

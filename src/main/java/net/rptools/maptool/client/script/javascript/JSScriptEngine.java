@@ -38,8 +38,32 @@ public class JSScriptEngine {
   private static final Map<String, JSContext> addOnContexts = new HashMap<String, JSContext>();
   private static final Stack<JSContext> contextStack = new Stack<>();
 
+  private static final Map<String, Set<MapToolJSAPIInterface>> JSApiInterfaces = new HashMap<>();
+
   public static JSContext getCurrentContext() {
     return contextStack.peek();
+  }
+
+  static {
+    Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
+    Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
+
+    for (Class<?> apiClass : annotated) {
+      try {
+        if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
+          var api = (MapToolJSAPIInterface) apiClass.newInstance();
+          var contexts = api.getAllowedContexts();
+          for (var context : contexts) {
+            JSApiInterfaces.putIfAbsent(context, new HashSet<>());
+            JSApiInterfaces.get(context).add(api);
+          }
+        } else {
+          log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
+        }
+      } catch (Exception e) {
+        log.error("Could not add API object " + apiClass.getName(), e);
+      }
+    }
   }
 
   public static boolean inTrustedContext() {
@@ -81,7 +105,7 @@ public class JSScriptEngine {
     if (!trusted && makeTrusted) {
       throw new ParserException("Cannot make a trusted JS context from an untrusted context");
     }
-    JSContext c = new JSContext(makeTrusted, jsScriptEngine.makeContext(), name);
+    JSContext c = new JSContext(makeTrusted, jsScriptEngine.makeContext(""), name);
     contexts.put(name, c);
     return c;
   }
@@ -106,7 +130,7 @@ public class JSScriptEngine {
   }
 
   public static JSContext registerAddOnContext(String name) {
-    JSContext c = new JSContext(true, jsScriptEngine.makeContext(), name);
+    JSContext c = new JSContext(true, jsScriptEngine.makeContext("addon"), name);
     addOnContexts.put(name, c);
     return c;
   }
@@ -127,22 +151,24 @@ public class JSScriptEngine {
     return new HashSet<>(contexts.values());
   }
 
-  public Context makeContext() {
+  public Context makeContext(String contextType) {
     Context context = cbuilder.build();
     Value bindings = context.getBindings("js");
 
-    Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
-    Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
+    Set<MapToolJSAPIInterface> apiInterfaces = new HashSet<>();
+    if (JSApiInterfaces.containsKey("*")) {
+      apiInterfaces.addAll(JSApiInterfaces.get("*"));
+    }
 
-    for (Class<?> apiClass : annotated) {
+    if (JSApiInterfaces.containsKey(contextType)) {
+      apiInterfaces.addAll(JSApiInterfaces.get(contextType));
+    }
+
+    for (MapToolJSAPIInterface api : apiInterfaces) {
       try {
-        if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
-          registerAPIObject(bindings, (MapToolJSAPIInterface) apiClass.newInstance());
-        } else {
-          log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
-        }
+        registerAPIObject(bindings, api);
       } catch (Exception e) {
-        log.error("Could not add API object " + apiClass.getName(), e);
+        log.error("Could not add API object " + api.getClass().getName(), e);
       }
     }
     return context;
@@ -207,14 +233,14 @@ public class JSScriptEngine {
 
     StringBuilder wrapped = new StringBuilder();
     wrapped
-        .append("(function() { var args = MTScript.getMTScriptCallingArgs(); ")
+        .append("(function() { var args = MTScriptLegacy.getMTScriptCallingArgs(); ")
         .append(script)
         .append("})();");
-    Context c = makeContext();
+    Context c = makeContext("");
     JSContext jc = new JSContext(MapTool.getParser().isMacroTrusted(), c, "<anonymous>");
     contextStack.push(jc);
     try {
-      return makeContext().eval("js", wrapped.toString());
+      return makeContext("").eval("js", wrapped.toString());
     } finally {
       contextStack.pop();
     }

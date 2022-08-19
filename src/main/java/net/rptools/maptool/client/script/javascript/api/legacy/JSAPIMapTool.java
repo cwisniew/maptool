@@ -17,11 +17,11 @@ package net.rptools.maptool.client.script.javascript.api;
 import net.rptools.maptool.client.script.javascript.*;
 import org.graalvm.polyglot.*;
 
-@MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
+@MapToolJSAPIDefinition(javaScriptVariableName = "MapToolLegacy")
 public class JSAPIMapTool implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
-    return "MapTool";
+    return "MapToolLegacy";
   }
 
   @HostAccess.Export public final JSAPIClientInfo clientInfo = new JSAPIClientInfo();

@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import java.util.Set;
+
 public interface MapToolJSAPIInterface {
   /**
    * Serialize the object to a String, suitable for embedding in the JSONified return of js.eval For
@@ -22,4 +24,14 @@ public interface MapToolJSAPIInterface {
    * @return the serialized output.
    */
   String serializeToString();
+
+  /**
+   * Returns the types of contexts that this API object should be created in. The string "*" should
+   * be used to specify all contexts.
+   *
+   * @return the types of contexts that this API object should be created in.
+   */
+  default Set<String> getAllowedContexts() {
+    return Set.of("*");
+  }
 }

@@ -22,7 +22,7 @@ import org.graalvm.polyglot.HostAccess;
 public class JSAPIChat implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
-    return "MapTool.chat";
+    return "MapToolLegacy.chat";
   }
 
   @HostAccess.Export

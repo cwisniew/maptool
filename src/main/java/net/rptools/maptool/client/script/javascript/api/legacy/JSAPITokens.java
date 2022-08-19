@@ -25,7 +25,7 @@ import org.graalvm.polyglot.HostAccess;
 public class JSAPITokens implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
-    return "MapTool.tokens";
+    return "MapToolLegacy.tokens";
   }
 
   @HostAccess.Export

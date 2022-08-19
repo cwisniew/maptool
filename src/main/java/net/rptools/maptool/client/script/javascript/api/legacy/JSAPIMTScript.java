@@ -29,12 +29,12 @@ import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.*;
 
-@MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
+@MapToolJSAPIDefinition(javaScriptVariableName = "MTScriptLegacy")
 /** Class used to provide an API to interact with MapTool custom scripting language. */
 public class JSAPIMTScript implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
-    return "MTScript";
+    return "MTScriptLegacy";
   }
 
   @HostAccess.Export
@@ -70,7 +70,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   @HostAccess.Export
   public void abort() throws ParserException {
     throw new AbortFunctionException(
-        I18N.getText("macro.function.abortFunction.message", "MTScript.abort()"));
+        I18N.getText("macro.function.abortFunction.message", "MTScriptLegacy.abort()"));
   }
 
   @HostAccess.Export
