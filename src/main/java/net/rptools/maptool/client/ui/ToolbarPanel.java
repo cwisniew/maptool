@@ -30,6 +30,7 @@ import net.rptools.maptool.client.tool.AI_UseVblTool;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.GridTool;
+import net.rptools.maptool.client.tool.MapMarkerTool;
 import net.rptools.maptool.client.tool.MeasureTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
@@ -274,6 +275,7 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel.add(PointerTool.class);
     panel.add(MeasureTool.class);
+    panel.add(MapMarkerTool.class);
     return panel;
   }
 

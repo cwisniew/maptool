@@ -55,6 +55,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
+import net.rptools.maptool.client.ui.zone.markers.MapMarkerRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -64,6 +65,7 @@ import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
+import net.rptools.maptool.model.map.MapMarker;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -72,6 +74,7 @@ import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
 
 /** */
@@ -109,6 +112,9 @@ public class ZoneRenderer extends JComponent
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
+
+  private final List<Pair<MapMarker, Rectangle2D>> mapMarkerBounds = new ArrayList<>();
+
   private Set<GUID> selectedTokenSet = new LinkedHashSet<GUID>();
   private boolean keepSelectedTokenSet = false;
   private final List<Set<GUID>> selectedTokenSetHistory = new ArrayList<Set<GUID>>();
@@ -128,6 +134,8 @@ public class ZoneRenderer extends JComponent
   private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
   private Token tokenUnderMouse;
+
+  private MapMarker mapMarkerUnderMouse;
 
   private ScreenPoint pointUnderMouse;
   private Zone.Layer activeLayer;
@@ -340,6 +348,14 @@ public class ZoneRenderer extends JComponent
       return;
     }
     tokenUnderMouse = token;
+    repaintDebouncer.dispatch();
+  }
+
+  public void setMouseOver(MapMarker marker) {
+    if (mapMarkerUnderMouse == marker) {
+      return;
+    }
+    mapMarkerUnderMouse = marker;
     repaintDebouncer.dispatch();
   }
 
@@ -1272,6 +1288,13 @@ public class ZoneRenderer extends JComponent
           timer.stop("tokensGM");
         }
       }
+
+      // Map Markers
+      timer.start("markers");
+      renderMarkers(g2d, view);
+      timer.stop("markers");
+
+
       List<Token> tokens = zone.getTokens(false);
       if (!tokens.isEmpty()) {
         timer.start("tokens");
@@ -1400,6 +1423,57 @@ public class ZoneRenderer extends JComponent
     if (resetClip) {
       g2d.setClip(null);
     }
+  }
+
+  /**
+   * Renders the {@link net.rptools.maptool.model.map.MapMarker}s for the zone.
+   * @param g2d The graphics context to render to.
+   * @param view The view to render the markers for.
+   */
+  private void renderMarkers(Graphics2D g2d, PlayerView view) {
+    var markers = zone.getMarkers();
+    mapMarkerBounds.clear();
+
+    if (markers.isEmpty()) {
+      return;
+    }
+
+    var markerRenderer = new MapMarkerRenderer(this, g2d);
+
+    for (var marker : markers) {
+      ZonePoint zp = new ZonePoint(marker.getIconX(), marker.getIconY());
+      if (!zone.isPointVisible(zp, view)) {
+        continue;
+      }
+      var bounds = markerRenderer.render(marker);
+      mapMarkerBounds.add(new Pair<>(marker, bounds));
+      if (mapMarkerUnderMouse != null && marker.getId().equals(mapMarkerUnderMouse.getId())) {
+        g2d.draw(bounds);
+      }
+    }
+    markerRenderer.dispose();
+  }
+
+  public MapMarker getMapMarkerAt(int x, int y) {
+    if (mapMarkerBounds.isEmpty()) {
+      return null;
+    }
+
+    var locList = new ArrayList<>(mapMarkerBounds);
+    Collections.reverse(locList);
+
+    var marker = locList.stream()
+        .filter(pair -> pair.getValue1().contains(x, y)).findFirst();
+    return marker.map(Pair::getValue0).orElse(null);
+  }
+
+
+  public Rectangle2D getMapMarkerBounds(MapMarker marker) {
+    return mapMarkerBounds.stream()
+        .filter(pair -> pair.getValue0().getId().equals(marker.getId()))
+        .findFirst()
+        .map(Pair::getValue1)
+        .orElse(null);
   }
 
   private void delayRendering(ItemRenderer renderer) {

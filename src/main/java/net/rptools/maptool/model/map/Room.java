@@ -16,7 +16,7 @@ public class Room {
   private boolean visibleToPlayers;
   private final List<Point> vertices = new ArrayList<>();
   private final Set<Encounter> encounters = new HashSet<>();
-  private Bookmark bookmark;
+  private MapMarker bookmark;
 
   public Room(String name) {
     id = UUID.randomUUID();

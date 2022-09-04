@@ -42,6 +42,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.map.MapMarker;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TopologyTypeDto;
@@ -96,7 +97,10 @@ public class Zone extends BaseModel {
     BOARD_CHANGED,
     TOKEN_EDITED, // the token was edited
     TOKEN_MACRO_CHANGED, // a token macro changed
-    TOKEN_PANEL_CHANGED // the panel appearance changed
+    TOKEN_PANEL_CHANGED, // the panel appearance changed
+    MARKER_ADDED, // A map marker was added
+    MARKER_REMOVED, // A map marker was removed
+    MARKER_CHANGED, // A map marker was changed
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
@@ -250,6 +254,8 @@ public class Zone extends BaseModel {
   private final Map<GUID, Token> tokenMap = new HashMap<GUID, Token>();
   /** Map each token GUID to its exposed area metadata */
   private Map<GUID, ExposedAreaMetaData> exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
+
+  private final Map<UUID, MapMarker> markers = new HashMap<>();
 
   /** Token list ordered by Z. */
   private final List<Token> tokenOrderedList = new LinkedList<Token>();
@@ -2171,6 +2177,41 @@ public class Zone extends BaseModel {
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
+  }
+
+
+  /**
+   * Puts a {@link MapMarker} on the map.
+   * @param mapMarker the {@link MapMarker} to add
+   */
+  public void putMarker(MapMarker mapMarker) {
+    boolean hasMarker = markers.containsKey(mapMarker.getId());
+    markers.put(mapMarker.getId(), mapMarker);
+
+    if (hasMarker) {
+      fireModelChangeEvent(new ModelChangeEvent(this, Event.MARKER_CHANGED, mapMarker));
+    } else {
+      fireModelChangeEvent(new ModelChangeEvent(this, Event.MARKER_ADDED, mapMarker));
+    }
+  }
+
+  /**
+   * Removes a {@link MapMarker} from the map.
+   * @param id the id of the {@link MapMarker} to remove.
+   */
+  public void removeMarker(UUID id) {
+    MapMarker mapMarker = markers.remove(id);
+    if (mapMarker != null) {
+      fireModelChangeEvent(new ModelChangeEvent(this, Event.MARKER_REMOVED, mapMarker));
+    }
+  }
+
+  /**
+   * Returns the {@link MapMarker}s on the map.
+   * @return a {@link Set} of {@link MapMarker}s.
+   */
+  public Set<MapMarker> getMarkers() {
+    return new HashSet<>(markers.values());
   }
 
   public static Zone fromDto(ZoneDto dto) {

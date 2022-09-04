@@ -49,6 +49,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.model.map.MapMarker;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -89,6 +90,8 @@ public class PointerTool extends DefaultTool {
   private Token tokenBeingDragged;
   private Token tokenUnderMouse;
   private Token markerUnderMouse;
+
+  private MapMarker mapMarkerUnderMouse;
   private int keysDown; // used to record whether Shift/Ctrl/Meta keys are down
 
   private final TokenStackPanel tokenStackPanel = new TokenStackPanel();
@@ -735,8 +738,11 @@ public class PointerTool extends DefaultTool {
     keysDown = e.getModifiersEx();
     renderer.setMouseOver(tokenUnderMouse);
 
+
     if (tokenUnderMouse == null) {
       statSheet = null;
+      mapMarkerUnderMouse = renderer.getMapMarkerAt(mouseX, mouseY);
+      renderer.setMouseOver(mapMarkerUnderMouse);
     }
     Token marker = renderer.getMarkerAt(mouseX, mouseY);
     if (!AppUtil.tokenIsVisible(renderer.getZone(), marker, renderer.getPlayerView())) {
@@ -1693,12 +1699,12 @@ public class PointerTool extends DefaultTool {
     if (tokenUnderMouse != null
         && !isDraggingToken
         && AppUtil.tokenIsVisible(
-            renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
+        renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
       if (AppPreferences.getPortraitSize() > 0
           && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
           && (tokenOnStatSheet == null
-              || !tokenOnStatSheet.equals(tokenUnderMouse)
-              || statSheet == null)) {
+          || !tokenOnStatSheet.equals(tokenUnderMouse)
+          || statSheet == null)) {
         tokenOnStatSheet = tokenUnderMouse;
 
         BufferedImage image = null;
@@ -1767,7 +1773,8 @@ public class PointerTool extends DefaultTool {
               resolver.flush();
               if (propertyValue != null && propertyValue.toString().length() > 0) {
                 String propName = property.getShortName();
-                if (StringUtils.isEmpty(propName)) propName = property.getName();
+                if (StringUtils.isEmpty(propName))
+                  propName = property.getName();
                 propertyMap.put(propName, propertyValue.toString());
               }
               timer.stop(property.getName());
@@ -1777,7 +1784,8 @@ public class PointerTool extends DefaultTool {
           if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
             String results = timer.toString();
             MapTool.getProfilingNoteFrame().addText(results);
-            if (log.isDebugEnabled()) log.debug(results);
+            if (log.isDebugEnabled())
+              log.debug(results);
           }
         }
         if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {
@@ -2041,6 +2049,13 @@ public class PointerTool extends DefaultTool {
       AppStyle.shadowBorder.paintWithin(g, location.x, location.y, size.width, size.height);
       // AppStyle.border.paintAround(g, location.x, location.y,
       // size.width, size.height);
+    }
+
+    if (mapMarkerUnderMouse != null) {
+      var bounds = renderer.getMapMarkerBounds(mapMarkerUnderMouse);
+      if (bounds != null) {
+        MapMarkerTool.mouseOverPopUp(mapMarkerUnderMouse, g, bounds, renderer);
+      }
     }
   }
 
