@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -44,6 +45,8 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
+import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
@@ -150,6 +153,20 @@ public class PreferencesDialog extends JDialog {
   private final JButton regeneratePublicKey;
   private final JButton copyPublicKey;
 
+  // Themes
+  private final JList<String> themeList;
+  private final JLabel themeImageLabel;
+  private final JLabel themeNameLabel;
+
+  private final ListModel<String> allThemesListModel;
+
+  private final ListModel<String> lightThemesListModel;
+
+  private final ListModel<String> darkThemesListModel;
+  private final JComboBox<LocalizedComboItem> themeFilterCombo;
+
+  private final JCheckBox useThemeForChat;
+
   // Startup
   private final JTextField jvmXmxTextField;
   private final JTextField jvmXmsTextField;
@@ -161,6 +178,8 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<String> jamLanguageOverrideComboBox;
   private final JLabel startupInfoLabel;
   private boolean jvmValuesChanged = false;
+
+  private boolean themeChanged = false;
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
@@ -191,10 +210,36 @@ public class PreferencesDialog extends JDialog {
     WalkerMetric.NO_DIAGONALS
   };
 
+  private static final LocalizedComboItem[] themeFilterComboItems = {
+    new LocalizedComboItem("All", "Preferences.combo.themes.filter.all"),
+    new LocalizedComboItem("Dark", "Preferences.combo.themes.filter.dark"),
+    new LocalizedComboItem("Light", "Preferences.combo.themes.filter.light")
+  };
+
   public PreferencesDialog() {
     super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    var lm = new DefaultListModel<String>();
+    Arrays.stream(ThemeSupport.THEMES).map(ThemeDetails::name).sorted().forEach(lm::addElement);
+    allThemesListModel = lm;
+
+    lm = new DefaultListModel<String>();
+    Arrays.stream(ThemeSupport.THEMES)
+        .filter(ThemeDetails::dark)
+        .map(ThemeDetails::name)
+        .sorted()
+        .forEach(lm::addElement);
+    darkThemesListModel = lm;
+
+    lm = new DefaultListModel<String>();
+    Arrays.stream(ThemeSupport.THEMES)
+        .filter(t -> !t.dark())
+        .map(ThemeDetails::name)
+        .sorted()
+        .forEach(lm::addElement);
+    lightThemesListModel = lm;
 
     FormPanel panel =
         new FormPanelI18N("net/rptools/maptool/client/ui/forms/preferencesDialog.xml");
@@ -228,6 +273,12 @@ public class PreferencesDialog extends JDialog {
             dispose();
           }
           MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
+          if (ThemeSupport.needsRestartForNewTheme()) {
+            MapTool.showMessage(
+                "PreferencesDialog.themeChangeWarning",
+                "PreferencesDialog.themeChangeWarningTitle",
+                JOptionPane.WARNING_MESSAGE);
+          }
         });
 
     tabbedPane = panel.getTabbedPane("TabPane");
@@ -318,6 +369,12 @@ public class PreferencesDialog extends JDialog {
     publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
     regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
     copyPublicKey = (JButton) panel.getButton("copyKey");
+
+    themeList = (JList<String>) panel.getList("themeList");
+    themeImageLabel = (JLabel) panel.getComponentByName("themeImage");
+    themeNameLabel = (JLabel) panel.getComponentByName("currentThemeName");
+    useThemeForChat = (JCheckBox) panel.getComponentByName("useThemeForChat");
+    themeFilterCombo = panel.getComboBox("themeFilterCombo");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -897,6 +954,23 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setDefaultMacroEditorTheme(
                 (String) macroEditorThemeCombo.getSelectedItem()));
 
+    themeFilterCombo.setModel(getLocalizedModel(themeFilterComboItems, "All"));
+    themeFilterCombo.addItemListener(
+        e -> {
+          String filter = ((LocalizedComboItem) themeFilterCombo.getSelectedItem()).getValue();
+          switch (filter) {
+            case "All":
+              themeList.setModel(allThemesListModel);
+              break;
+            case "Dark":
+              themeList.setModel(darkThemesListModel);
+              break;
+            case "Light":
+              themeList.setModel(lightThemesListModel);
+              break;
+          }
+        });
+
     copyPublicKey.addActionListener(
         e -> {
           Toolkit.getDefaultToolkit()
@@ -925,6 +999,7 @@ public class PreferencesDialog extends JDialog {
   public void setVisible(boolean b) {
     if (b) {
       SwingUtil.centerOver(this, MapTool.getFrame());
+      themeChanged = false;
     }
     super.setVisible(b);
   }
@@ -1082,6 +1157,29 @@ public class PreferencesDialog extends JDialog {
               () -> {
                 publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
               });
+        });
+
+    themeList.setModel(allThemesListModel);
+    themeList.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+    themeList.setSelectedValue(ThemeSupport.getThemeName(), true);
+    SwingUtilities.invokeLater(
+        () -> {
+          themeImageLabel.setIcon(ThemeSupport.getExampleImageIcon(themeImageLabel.getSize()));
+        });
+    themeList.addListSelectionListener(
+        e -> {
+          if (!e.getValueIsAdjusting()) {
+            String theme = themeList.getSelectedValue();
+            ThemeSupport.setTheme(theme);
+            themeImageLabel.setIcon(
+                ThemeSupport.getExampleImageIcon(theme, themeImageLabel.getSize()));
+          }
+        });
+    themeNameLabel.setText(ThemeSupport.getThemeName());
+    useThemeForChat.setSelected(ThemeSupport.shouldUseThemeColorsForChat());
+    useThemeForChat.addActionListener(
+        l -> {
+          ThemeSupport.setUseThemeColorsForChat(useThemeForChat.isSelected());
         });
   }
 
