@@ -59,8 +59,20 @@ public class BurstTemplate extends RadiusTemplate {
    * the radius is an even number and still stay in the squares, that case isn't allowed.
    */
   private void adjustShape() {
-    if (getZoneId() == null) return;
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    if (getZoneId() == null) {
+      return;
+    }
+
+    var zone = MapTool.getCampaign().getZone(getZoneId());
+    if (zone == null) {
+      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
+    }
+
+    if (zone == null) {
+      return;
+    }
+
+    int gridSize = zone.getGrid().getSize();
     Rectangle r = (Rectangle) vertexRenderer.getShape();
     r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
     r = (Rectangle) renderer.getShape();

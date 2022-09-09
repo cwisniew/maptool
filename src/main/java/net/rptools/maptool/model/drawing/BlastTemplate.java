@@ -62,8 +62,20 @@ public class BlastTemplate extends ConeTemplate {
    * location.
    */
   private void adjustRectangle() {
-    if (getZoneId() == null) return;
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    if (getZoneId() == null) {
+      return;
+    }
+
+    var zone = MapTool.getCampaign().getZone(getZoneId());
+    if (zone == null) {
+      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
+    }
+
+    if (zone == null) {
+      return;
+    }
+
+    int gridSize = zone.getGrid().getSize();
     int size = getRadius() * gridSize;
 
     Rectangle r = (Rectangle) renderer.getShape();

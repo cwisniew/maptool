@@ -2115,12 +2115,7 @@ public class Zone extends BaseModel {
       tokenSelection = TokenSelection.ALL;
     }
 
-    // Classes that extend Abstract template have a zone id so we need to make sure to update it
-    for (DrawnElement de : drawables) {
-      if (de.getDrawable() instanceof AbstractTemplate at) {
-        at.setZoneId(id);
-      }
-    }
+    fixDrawable();
 
     return this;
   }
@@ -2251,13 +2246,36 @@ public class Zone extends BaseModel {
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
+
+    zone.fixDrawable();
+    return zone;
+  }
+
+  private void fixDrawable() {
     // Classes that extend Abstract template have a zone id so we need to make sure to update it
-    for (DrawnElement de : zone.drawables) {
+    for (DrawnElement de : drawables) {
       if (de.getDrawable() instanceof AbstractTemplate at) {
-        at.setZoneId(zone.id);
+        at.setZoneId(id);
       }
     }
-    return zone;
+
+    for (DrawnElement de : gmDrawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(id);
+      }
+    }
+
+    for (DrawnElement de : objectDrawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(id);
+      }
+    }
+
+    for (DrawnElement de : backgroundDrawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(id);
+      }
+    }
   }
 
   public ZoneDto toDto() {
