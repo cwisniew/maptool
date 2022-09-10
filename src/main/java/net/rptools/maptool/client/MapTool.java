@@ -1776,12 +1776,12 @@ public class MapTool {
     try {
       var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
       var genFont = Font.createFont(Font.TRUETYPE_FONT,
-          MapTool.class.getClassLoader().getResourceAsStream(
-              "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice.ttf"));
+          Objects.requireNonNull(MapTool.class.getClassLoader().getResourceAsStream(
+              "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.ttf")));
       genv.registerFont(genFont);
       var swGenFont = Font.createFont(Font.TRUETYPE_FONT,
-          MapTool.class.getClassLoader().getResourceAsStream(
-              "net/rptools/maptool/client/fonts/sw-rpg-icons.ttf"));
+          Objects.requireNonNull(MapTool.class.getClassLoader().getResourceAsStream(
+              "net/rptools/maptool/client/fonts/sw-rpg-icons.ttf")));
       genv.registerFont(swGenFont);
     } catch (Exception e) {
       log.error("msg.error.genesysFont", e);
