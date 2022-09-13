@@ -456,6 +456,7 @@ public class PointerTool extends DefaultTool {
   @Override
   public void mousePressed(MouseEvent e) {
     super.mousePressed(e);
+    renderer.setSelectedMapMarker(null);
 
     if (handledByHover(e.getPoint())) return;
 
@@ -543,12 +544,15 @@ public class PointerTool extends DefaultTool {
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
-        // Starting a bound box selection
-        isDrawingSelectionBox = true;
-        selectionBoundBox = new Rectangle(e.getX(), e.getY(), 0, 0);
-      } else {
-        if (tokenUnderMouse != null) {
-          isNewTokenSelected = true;
+        renderer.setSelectedMapMarker(mapMarkerUnderMouse);
+        if (mapMarkerUnderMouse == null) {
+          // Starting a bound box selection
+          isDrawingSelectionBox = true;
+          selectionBoundBox = new Rectangle(e.getX(), e.getY(), 0, 0);
+        } else {
+          if (tokenUnderMouse != null) {
+            isNewTokenSelected = true;
+          }
         }
       }
     }
@@ -2051,12 +2055,6 @@ public class PointerTool extends DefaultTool {
       // size.width, size.height);
     }
 
-    if (mapMarkerUnderMouse != null) {
-      var bounds = renderer.getMapMarkerBounds(mapMarkerUnderMouse);
-      if (bounds != null) {
-        MapMarkerTool.mouseOverPopUp(mapMarkerUnderMouse, g, bounds, renderer);
-      }
-    }
   }
 
   private String createHoverNote(Token marker) {

@@ -43,6 +43,7 @@ import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
+import net.rptools.maptool.client.tool.MapMarkerTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
@@ -136,6 +137,7 @@ public class ZoneRenderer extends JComponent
   private Token tokenUnderMouse;
 
   private MapMarker mapMarkerUnderMouse;
+  private MapMarker selectedMapMarker;
 
   private ScreenPoint pointUnderMouse;
   private Zone.Layer activeLayer;
@@ -356,7 +358,9 @@ public class ZoneRenderer extends JComponent
       return;
     }
     mapMarkerUnderMouse = marker;
-    repaintDebouncer.dispatch();
+
+    var bounds = mapMarkerUnderMouse == null ? null : getMapMarkerBounds(mapMarkerUnderMouse);
+    MapMarkerTool.mouseOverPopUp(marker, bounds);
   }
 
   @Override
@@ -1468,7 +1472,8 @@ public class ZoneRenderer extends JComponent
       }
       var bounds = markerRenderer.render(marker);
       mapMarkerBounds.add(new Pair<>(marker, bounds));
-      if (mapMarkerUnderMouse != null && marker.getId().equals(mapMarkerUnderMouse.getId())) {
+      // TODO: CDW
+      if (selectedMapMarker != null && marker.getId().equals(selectedMapMarker.getId())) {
         g2d.draw(bounds);
       }
     }
@@ -5103,4 +5108,13 @@ public class ZoneRenderer extends JComponent
       noise = null;
     }
   }
+
+  public MapMarker getSelectedMapMarker() {
+    return selectedMapMarker;
+  }
+
+  public void setSelectedMapMarker(MapMarker selectedMapMarker) {
+    this.selectedMapMarker = selectedMapMarker;
+  }
+
 }

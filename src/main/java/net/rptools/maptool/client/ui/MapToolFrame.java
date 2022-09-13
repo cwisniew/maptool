@@ -83,6 +83,7 @@ import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
 import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
+import net.rptools.maptool.client.ui.zone.ZonePopupManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -147,6 +148,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final JPanel zoneRendererPanel;
   /** Contains the overlays that should be displayed in front of everything else. */
   private final PointerToolOverlay pointerToolOverlay;
+
+  private final ZonePopupManager zonePopupManager;
 
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
@@ -429,6 +432,12 @@ public class MapToolFrame extends DefaultDockableHolder
 
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
+
+    var popupPanel = new JPanel();
+    zoneRendererPanel.add(popupPanel, PositionalLayout.Position.CENTER, 0);
+    zonePopupManager = new ZonePopupManager(popupPanel);
+
+
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -2210,5 +2219,9 @@ public class MapToolFrame extends DefaultDockableHolder
         macroButton.getProperties().executeMacro();
       }
     }
+  }
+
+  public ZonePopupManager getZonePopupManager() {
+    return zonePopupManager;
   }
 }

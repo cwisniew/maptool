@@ -15,9 +15,7 @@
 package net.rptools.maptool.client.tool;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -35,9 +33,6 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -47,6 +42,7 @@ import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.markers.MapMarkerSummaryRenderer;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.map.MapMarker;
@@ -60,7 +56,9 @@ public class MapMarkerTool extends DefaultTool implements ZoneOverlay {
   private int dragOffsetX;
   private int dragOffsetY;
   private boolean isDragging;
+
   private boolean selectedNewLabel;
+
 
   public MapMarkerTool() {
     try {
@@ -251,7 +249,7 @@ public class MapMarkerTool extends DefaultTool implements ZoneOverlay {
     htmlRenderer.setBackground(new Color(0, 0, 0, 200));
     htmlRenderer.setForeground(Color.black);
     htmlRenderer.setOpaque(false);
-    htmlRenderer.setText(mapMarker.getDescription(), width - borderSize * 2 - padding * 2, 500);
+    htmlRenderer.setText(mapMarker.getSummary(), width - borderSize * 2 - padding * 2, 500);
     htmlRenderer.render(imgG2d, borderSize + padding, y);
     y += htmlRenderer.getMinimumSize().height + padding ;
 
@@ -264,11 +262,21 @@ public class MapMarkerTool extends DefaultTool implements ZoneOverlay {
     imgG2d.draw(sourceBounds);
 
 
-    g.drawImage(image, (int) destBounds.getX(), (int) destBounds.getY(), (int) destBounds.getMaxX(),
+    g.drawImage(image, (int) destBounds.getX(), (int) destBounds.getY(),
+        (int) destBounds.getMaxX(),
         (int) destBounds.getMaxY(), (int) sourceBounds.getX(), (int) sourceBounds.getY(),
         (int) sourceBounds.getMaxX(), (int) sourceBounds.getMaxY(), null);
 
     imgG2d.dispose();
+  }
+
+  public static void mouseOverPopUp(MapMarker mapMarker, Rectangle2D bounds) {
+    if (mapMarker == null) {
+      MapMarkerSummaryRenderer.getInstance().hideDetail();
+    } else {
+      MapMarkerSummaryRenderer.getInstance().showDetail(mapMarker, (int) bounds.getCenterX(),
+          (int) bounds.getCenterY());
+    }
   }
 
 }

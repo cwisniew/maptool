@@ -14,8 +14,13 @@ public class MapMarker {
   /** The name of the marker. */
   private String name;
 
-  /** Description of the marker. */
-  private String description = "This is a description for testing purposes.";
+  /** Summary description of the marker. */
+  private String summary = "This is a <strong>non-player</strong> description for <em>testing "
+      + "purposes</em>.";
+
+  /** Player summary of the marker. */
+  private String playerSummary = "This is a <strong>player</strong> description for <em>testing "
+      + "purposes</em>.";
 
   /** The notes of the marker. */
   private String notes;
@@ -33,6 +38,8 @@ public class MapMarker {
   private Color textColor = Color.BLACK;
 
   private Color borderColor = Color.BLACK;
+
+
 
   /** Create a new marker. */
   public MapMarker(String name, String mapKey) {
@@ -108,12 +115,21 @@ public class MapMarker {
     this.borderColor = borderColor;
   }
 
-  public String getDescription() {
-    return description;
+  public String getSummary() {
+    return summary;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
+  public void setSummary(String summary) {
+    this.summary = summary;
+  }
+
+
+  public String getPlayerSummary() {
+    return playerSummary;
+  }
+
+  public void setPlayerSummary(String summary) {
+    this.playerSummary = summary;
   }
 
   public String getNotes() {
