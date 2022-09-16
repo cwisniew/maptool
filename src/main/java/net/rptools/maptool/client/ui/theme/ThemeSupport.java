@@ -17,9 +17,13 @@ package net.rptools.maptool.client.ui.theme;
 import com.formdev.flatlaf.FlatIconColors;
 import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.IntelliJTheme.ThemeLaf;
+import com.formdev.flatlaf.ui.FlatTextBorder;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.plaf.LookAndFeelFactory;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -30,6 +34,8 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import net.rptools.maptool.client.AppConstants;
@@ -84,6 +90,7 @@ public class ThemeSupport {
     private final FlatIconColors lightIconColor;
     private final FlatIconColors darkIconColor;
 
+
     ThemeColor(
         String propertyName,
         Color defaultLightColor,
@@ -106,6 +113,12 @@ public class ThemeSupport {
   /** The path to the images detailing the theme. */
   private static final String IMAGE_PATH = "/net/rptools/maptool/client/ui/themes/image/";
 
+  /** The path to the theme CSS template file. */
+  private static final String THEME_CSS_FILE = "net/rptools/maptool/client/ui/themes/theme-css";
+
+  /** The generated CSS for this theme. */
+  private static String themeCss;
+
   /**
    * Should the the chat window use the themes colors.
    *
@@ -114,6 +127,7 @@ public class ThemeSupport {
   public static boolean shouldUseThemeColorsForChat() {
     return useThemeColorsForChat;
   }
+
 
   /**
    * Should the the chat window use the themes colors.
@@ -526,6 +540,9 @@ public class ThemeSupport {
     }
 
     new MapToolEventBus().getMainEventBus().post(new ThemeLoadedEvent(currentThemeDetails));
+
+    // TODO: CDW
+    System.out.println(getThemeCss());
   }
 
   /**
@@ -701,5 +718,67 @@ public class ThemeSupport {
 
   public static String getThemeColorHexString(ThemeColor themeColor) {
     return String.format("#%06x", getThemeColor(themeColor).getRGB() & 0x00FFFFFF);
+  }
+
+  public static String getThemeCss() {
+    if (themeCss != null) {
+      return themeCss;
+    }
+
+    try {
+      var handlebars = new Handlebars();
+      Template template = handlebars.compile(THEME_CSS_FILE);
+      var theme = new JsonObject();
+      var themeFont = new JsonObject();
+      themeFont.addProperty("name", UIManager.getFont("Label.font").getFamily());
+      themeFont.addProperty("size", UIManager.getFont("Label.font").getSize());
+      theme.add("Font", themeFont);
+
+      var themeBody = new JsonObject();
+      themeBody.addProperty("background", String.format("#%06x",
+          UIManager.getColor("Panel.background").getRGB() & 0x00FFFFFF));
+      themeBody.addProperty("foreground", String.format("#%06x",
+          UIManager.getColor("Panel.foreground").getRGB() & 0x00FFFFFF));
+      theme.add("Body", themeBody);
+
+      var themeLabel = new JsonObject();
+      themeLabel.addProperty("background", String.format("#%06x",
+          UIManager.getColor("Label.background").getRGB() & 0x00FFFFFF));
+      themeLabel.addProperty("foreground", String.format("#%06x",
+          UIManager.getColor("Label.foreground").getRGB() & 0x00FFFFFF));
+      themeLabel.addProperty("Label.disabledForeground", String.format("#%06x",
+          UIManager.getColor("Label.disabledForeground").getRGB() & 0x00FFFFFF));
+      theme.add("Label", themeLabel);
+
+      var themeButton = new JsonObject();
+      themeButton.addProperty("background", String.format("#%06x",
+          UIManager.getColor("Button.background").getRGB() & 0x00FFFFFF));
+      themeButton.addProperty("foreground", String.format("#%06x",
+          UIManager.getColor("Button.foreground").getRGB() & 0x00FFFFFF));
+      themeButton.addProperty("startForeground", String.format("#%06x",
+          UIManager.getColor("Button.foreground").getRGB() & 0x00FFFFFF));
+      themeButton.addProperty("endForeground", String.format("#%06x",
+          UIManager.getColor("Button.foreground").getRGB() & 0x00FFFFFF));
+      themeButton.addProperty("Button.disabledText", String.format("#%06x",
+          UIManager.getColor("Button.disabledText").getRGB() & 0x00FFFFFF));
+      themeButton.addProperty("Button.disabledForeground", String.format("#%06x",
+          UIManager.getColor("Button.disabledForeground").getRGB() & 0x00FFFFFF));
+      themeButton.addProperty("ActionButton.pressedBackground", String.format("#%06x",
+          UIManager.getColor("ActionButton.pressedBackground").getRGB() & 0x00FFFFFF));
+
+      var themeTextField = new JsonObject();
+      themeTextField.addProperty("TextField.background", String.format("#%06x",
+          UIManager.getColor("TextField.background").getRGB() & 0x00FFFFFF));
+      themeTextField.addProperty("TextField.foreground", String.format("#%06x",
+          UIManager.getColor("TextField.foreground").getRGB() & 0x00FFFFFF));
+      themeTextField.addProperty("TextField.border", String.format("#%06x",
+          UIManager.getColor("Component.borderColor").getRGB() & 0x00FFFFFF));
+
+
+    } catch (IOException e) {
+      throw new AssertionError("Unable to read theme-css", e);
+    }
+
+    return themeCss;
   }
 }

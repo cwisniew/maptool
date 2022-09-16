@@ -445,6 +445,10 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.14.3'
 
     implementation 'com.google.guava:guava:31.0.1-jre'
+
+    // String template engine
+    implementation 'com.github.jknack:handlebars:4.3.0'
+
 }
 
 
