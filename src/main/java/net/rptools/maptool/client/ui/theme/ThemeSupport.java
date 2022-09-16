@@ -542,7 +542,7 @@ public class ThemeSupport {
     new MapToolEventBus().getMainEventBus().post(new ThemeLoadedEvent(currentThemeDetails));
 
     // TODO: CDW
-    System.out.println(getThemeCss());
+    System.out.println(new ThemeCssBuilder().getLookAndFeelValues());
   }
 
   /**
