@@ -18,7 +18,7 @@ public class ThemeCssBuilder {
   }
 
   private enum ValueType {
-    COLOR, FONT_FAMILY, FONT_SIZE, INSETS, INT, STRING, BORDER, BOOLEAN
+    COLOR, FONT_FAMILY, FONT_SIZE, INSETS, INT, STRING, BORDER, DIMENSION, BOOLEAN
   }
 
   private record Extract(String key, String jsonProperty, ValueType type) {
@@ -32,7 +32,7 @@ public class ThemeCssBuilder {
       new Extract("CheckBox.iconTextGap", "iconTextGap", ValueType.INT),
       new Extract("CheckBox.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("CheckBox.font", "fontSize", ValueType.FONT_SIZE),
-      new Extract("CheckBox.border", "margin", ValueType.BORDER)
+      new Extract("CheckBox.border", "border", ValueType.BORDER)
   );
 
   private static final Set<Extract> COMBO_BOX_EXTRACT = Set.of(
@@ -61,7 +61,7 @@ public class ThemeCssBuilder {
       new Extract("ComboBox.maximumRowCount", "maximumRowCount", ValueType.INT),
       new Extract("ComboBox.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("ComboBox.font", "fontSize", ValueType.FONT_SIZE),
-      new Extract("ComboBox.border", "margin", ValueType.BORDER),
+      new Extract("ComboBox.border", "border", ValueType.BORDER),
       new Extract("ComboBox.buttonStyle", "buttonStyle", ValueType.STRING),
       new Extract("ComboBox.arrowType", "arrowType", ValueType.BORDER)
   );
@@ -108,7 +108,7 @@ public class ThemeCssBuilder {
       new Extract("MenuBar.underlineSelectionHeight", "underlineSelectionHeight", ValueType.INT),
       new Extract("MenuBar.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("MenuBar.font", "fontSize", ValueType.FONT_SIZE),
-      new Extract("MenuBar.border", "margin", ValueType.BORDER)
+      new Extract("MenuBar.border", "border", ValueType.BORDER)
   );
 
   private static final Set<Extract> MENU_ITEM_EXTRACT = Set.of(
@@ -135,7 +135,7 @@ public class ThemeCssBuilder {
       new Extract("MenuItem.acceleratorFont", "acceleratorFontFamily", ValueType.FONT_FAMILY),
       new Extract("MenuItem.acceleratorFont", "acceleratorFontSize", ValueType.FONT_SIZE),
       new Extract("MenuItem.acceleratorDelimiter", "acceleratorDelimiter", ValueType.STRING),
-      new Extract("MenuItem.border", "margin", ValueType.BORDER),
+      new Extract("MenuItem.border", "border", ValueType.BORDER),
       new Extract("MenuItem.opaque", "opaque", ValueType.BOOLEAN),
       new Extract("MenuItem.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("MenuItem.font", "fontSize", ValueType.FONT_SIZE),
@@ -166,7 +166,7 @@ public class ThemeCssBuilder {
       new Extract("MenuItem.acceleratorFont", "acceleratorFontFamily", ValueType.FONT_FAMILY),
       new Extract("MenuItem.acceleratorFont", "acceleratorFontSize", ValueType.FONT_SIZE),
       new Extract("MenuItem.acceleratorDelimiter", "acceleratorDelimiter", ValueType.STRING),
-      new Extract("Menu.border", "margin", ValueType.BORDER),
+      new Extract("Menu.border", "border", ValueType.BORDER),
       new Extract("Menu.opaque", "opaque", ValueType.BOOLEAN),
       new Extract("MenuItem.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("Menu.font", "fontSize", ValueType.FONT_SIZE),
@@ -197,7 +197,7 @@ public class ThemeCssBuilder {
       new Extract("MenuItem.acceleratorFont", "acceleratorFontFamily", ValueType.FONT_FAMILY),
       new Extract("MenuItem.acceleratorFont", "acceleratorFontSize", ValueType.FONT_SIZE),
       new Extract("MenuItem.acceleratorDelimiter", "acceleratorDelimiter", ValueType.STRING),
-      new Extract("CheckBoxMenuItem.border", "margin", ValueType.BORDER),
+      new Extract("CheckBoxMenuItem.border", "border", ValueType.BORDER),
       new Extract("CheckBoxMenuItem.opaque", "opaque", ValueType.BOOLEAN),
       new Extract("MenuItem.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("CheckBoxMenuItem.font", "fontSize", ValueType.FONT_SIZE),
@@ -229,7 +229,7 @@ public class ThemeCssBuilder {
       new Extract("MenuItem.acceleratorFont", "acceleratorFontFamily", ValueType.FONT_FAMILY),
       new Extract("MenuItem.acceleratorFont", "acceleratorFontSize", ValueType.FONT_SIZE),
       new Extract("MenuItem.acceleratorDelimiter", "acceleratorDelimiter", ValueType.STRING),
-      new Extract("RadioButtonMenuItem.border", "margin", ValueType.BORDER),
+      new Extract("RadioButtonMenuItem.border", "border", ValueType.BORDER),
       new Extract("RadioButtonMenuItem.opaque", "opaque", ValueType.BOOLEAN),
       new Extract("MenuItem.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("RadioButtonMenuItem.font", "fontSize", ValueType.FONT_SIZE),
@@ -301,12 +301,78 @@ public class ThemeCssBuilder {
       new Extract("Spinner.buttonSeparatorWidth", "buttonSeparatorWidth", ValueType.INT),
       new Extract("Spinner.padding", "padding", ValueType.INSETS),
       new Extract("Component.minimumWidth", "minimumWidth", ValueType.INT),
-      new Extract("Component.border", "margin", ValueType.BORDER),
+      new Extract("Component.border", "border", ValueType.BORDER),
       new Extract("Spinner.buttonStyle", "buttonStyle", ValueType.STRING),
       new Extract("Spinner.arrowType", "arrowType", ValueType.STRING),
       new Extract("Spinner.font", "fontFamily", ValueType.FONT_FAMILY),
       new Extract("Spinner.font", "fontSize", ValueType.FONT_SIZE)
   );
+
+  private static final Set<Extract> TABLE_EXTRACT = Set.of(
+      new Extract("Table.background", "background", ValueType.COLOR),
+      new Extract("Table.foreground", "foreground", ValueType.COLOR),
+      new Extract("Table.selectionForeground", "selectionForeground", ValueType.COLOR),
+      new Extract("Table.selectionBackground", "selectionBackground", ValueType.COLOR),
+      new Extract("Table.gridColor", "gridColor", ValueType.COLOR),
+      new Extract("Table.alternateRowColor", "alternateRowColor", ValueType.COLOR),
+      new Extract("Table.selectionInactiveForeground", "selectionInactiveForeground", ValueType.COLOR),
+      new Extract("Table.selectionInactiveBackground", "selectionInactiveBackground", ValueType.COLOR),
+      new Extract("Table.cellFocusColor", "cellFocusColor", ValueType.COLOR),
+      new Extract("Table.focusCellForeground", "focusCellForeground", ValueType.COLOR),
+      new Extract("Table.focusCellBackground", "focusCellBackground", ValueType.COLOR),
+      new Extract("Table.dropLineColor", "dropLineColor", ValueType.COLOR),
+      new Extract("Table.dropLineShortColor", "dropLineShortColor", ValueType.COLOR),
+      new Extract("Table.dropCellForeground", "dropCellForeground", ValueType.COLOR),
+      new Extract("Table.dropCellBackground", "dropCellBackground", ValueType.COLOR),
+      new Extract("Table.font", "fontFamily", ValueType.FONT_FAMILY),
+      new Extract("Table.font", "fontSize", ValueType.FONT_SIZE),
+      new Extract("Table.rowHeight", "rowHeight", ValueType.INT),
+      new Extract("Table.cellMargins", "cellPadding", ValueType.INSETS),
+      new Extract("Table.intercellSpacing", "intercellSpacing", ValueType.DIMENSION),
+      new Extract("Table.showHorizontalLines", "showHorizontalLines", ValueType.BOOLEAN),
+      new Extract("Table.showVerticalLines", "showVerticalLines", ValueType.BOOLEAN),
+      new Extract("Table.showCellFocusIndicator", "showCellFocusIndicator", ValueType.BOOLEAN)
+  );
+
+  private static final Set<Extract> TABLE_HEADER_EXTRACT = Set.of(
+      new Extract("TableHeader.background", "background", ValueType.COLOR),
+      new Extract("TableHeader.foreground", "foreground", ValueType.COLOR),
+      new Extract("TableHeader.separatorColor", "separatorColor", ValueType.COLOR),
+      new Extract("TableHeader.bottomSeparatorColor", "bottomSeparatorColor", ValueType.COLOR),
+      new Extract("TableHeader.sortIconColor", "sortIconColor", ValueType.COLOR),
+      new Extract("TableHeader.font", "fontFamily", ValueType.FONT_FAMILY),
+      new Extract("TableHeader.font", "fontSize", ValueType.FONT_SIZE),
+      new Extract("TableHeader.cellMargins", "cellPadding", ValueType.INSETS),
+      new Extract("TableHeader.height", "height", ValueType.INT),
+      new Extract("TableHeader.showTrailingVerticalLine", "showSortIcon", ValueType.BOOLEAN),
+      new Extract("TableHeader.arrowType", "arrowType", ValueType.STRING),
+      new Extract("TableHeader.sortIconPosition", "sortIconPosition", ValueType.STRING)
+  );
+
+  private static final Set<Extract> TEXT_AREA_EXTRACT = Set.of (
+      new Extract("TextArea.background", "background", ValueType.COLOR),
+      new Extract("TextArea.foreground", "foreground", ValueType.COLOR),
+      new Extract("TextArea.inactiveForeground", "inactiveForeground", ValueType.COLOR),
+      new Extract("TextArea.disabledBackground", "disabledBackground", ValueType.COLOR),
+      new Extract("TextArea.focusedBackground", "focusedBackground", ValueType.COLOR),
+      new Extract("TextArea.selectionForeground", "selectionForeground", ValueType.COLOR),
+      new Extract("TextArea.selectionBackground", "selectionBackground", ValueType.COLOR),
+      new Extract("TextArea.caretForeground", "caretForeground", ValueType.COLOR),
+      new Extract("TextArea.margin", "padding", ValueType.INSETS),
+      new Extract("Component.minimumWidth", "minimumWidth", ValueType.INT),
+      new Extract("TextArea.font", "fontFamily", ValueType.FONT_FAMILY),
+      new Extract("TextArea.font", "fontSize", ValueType.FONT_SIZE),
+      new Extract("TextArea.border", "border", ValueType.BORDER)
+  );
+
+  private static final Set<Extract> TOOLTIP_EXTRACT = Set.of(
+      new Extract("ToolTip.background", "background", ValueType.COLOR),
+      new Extract("ToolTip.foreground", "foreground", ValueType.COLOR),
+      new Extract("ToolTip.border", "border", ValueType.BORDER),
+      new Extract("ToolTip.font", "fontFamily", ValueType.FONT_FAMILY),
+      new Extract("ToolTip.font", "fontSize", ValueType.FONT_SIZE)
+  );
+
   ThemeCssBuilder() {
   }
 
@@ -330,6 +396,11 @@ public class ThemeCssBuilder {
     lookAndFeel.add("radioButton", extract(uiDef, RADIO_BUTTON_EXTRACT));
     lookAndFeel.add("separator", extract(uiDef, SEPARATOR_EXTRACT));
     lookAndFeel.add("spinner", extract(uiDef, SPINNER_EXTRACT));
+    lookAndFeel.add("table", extract(uiDef, TABLE_EXTRACT));
+    lookAndFeel.add("tableHeader", extract(uiDef, TABLE_HEADER_EXTRACT));
+    lookAndFeel.add("textArea", extract(uiDef, TEXT_AREA_EXTRACT));
+    lookAndFeel.add("toolTip", extract(uiDef, TOOLTIP_EXTRACT));
+
 
 
 
@@ -451,6 +522,15 @@ public class ThemeCssBuilder {
             borderJson.addProperty("innerFocusWidth", uiDef.getInt("Component.innerFocusWidth"));
 
             json.add(ex.jsonProperty(), borderJson);
+          }
+        }
+        case DIMENSION -> {
+          var dim = uiDef.getDimension(ex.key());
+          if (dim != null) {
+            var dimJson = new JsonObject();
+            dimJson.addProperty("width", String.format("%dpx", dim.width));
+            dimJson.addProperty("height", String.format("%dpx", dim.height));
+            json.add(ex.jsonProperty(), dimJson);
           }
         }
         case INT -> {
