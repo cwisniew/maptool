@@ -77,6 +77,9 @@ public class CampaignProperties {
   /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
   private boolean initiativePanelButtonsDisabled = false;
 
+  /** The zone players will start on when loading a campaign */
+  private GUID playerStartZone;
+
   public CampaignProperties() {}
 
   public CampaignProperties(CampaignProperties properties) {
@@ -111,6 +114,8 @@ public class CampaignProperties {
     for (String type : properties.characterSheets.keySet()) {
       characterSheets.put(type, properties.characterSheets.get(type));
     }
+
+    playerStartZone = properties.playerStartZone;
   }
 
   public void mergeInto(CampaignProperties properties) {
@@ -480,7 +485,30 @@ public class CampaignProperties {
               var sightType = SightType.fromDto(st);
               props.sightTypeMap.put(sightType.getName(), sightType);
             });
+
+    String szone = dto.getPlayerStartZone();
+    if (szone != null && !szone.isEmpty()) {
+      props.playerStartZone = new GUID(szone);
+    }
     return props;
+  }
+
+  /**
+   * Returns the starting zone for players.
+   *
+   * @return the starting zone for players.
+   */
+  public GUID getPlayerStartZone() {
+    return playerStartZone;
+  }
+
+  /**
+   * Sets the starting zone for players.
+   *
+   * @param playerStartZone the starting zone for players.
+   */
+  public void setPlayerStartZone(GUID playerStartZone) {
+    this.playerStartZone = playerStartZone;
   }
 
   public CampaignPropertiesDto toDto() {
@@ -518,6 +546,9 @@ public class CampaignProperties {
         lookupTableMap.values().stream().map(LookupTable::toDto).collect(Collectors.toList()));
     dto.addAllSightTypes(
         sightTypeMap.values().stream().map(SightType::toDto).collect(Collectors.toList()));
+    if (playerStartZone != null) {
+      dto.setPlayerStartZone(playerStartZone.toString());
+    }
     return dto.build();
   }
 }

@@ -462,10 +462,13 @@ public class PersistenceUtil {
         // Now load up any images that we need
         // Note that the values are all placeholders
         Set<MD5Key> allAssetIds = persistedCampaign.assetMap.keySet();
-        loadAssets(allAssetIds, pakFile);
         for (Zone zone : persistedCampaign.campaign.getZones()) {
           zone.optimize();
+          if (zone.hasImage()) {
+            allAssetIds.add(zone.getImage());
+          }
         }
+        loadAssets(allAssetIds, pakFile);
 
         new CampaignManager().clearCampaignData();
         loadGameData(pakFile);
@@ -758,7 +761,7 @@ public class PersistenceUtil {
     var dataStoreDto = builder.build();
 
     try {
-      var dataStore = new DataStoreManager().getDefaultDataStore();
+      var dataStore = new DataStoreManager().getDefaultPrivilegedDataStore();
       new GameDataImporter(dataStore).importData(dataStoreDto);
     } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);

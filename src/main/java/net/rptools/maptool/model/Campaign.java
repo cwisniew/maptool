@@ -729,6 +729,61 @@ public class Campaign {
     campaignProperties.initDefaultProperties();
   }
 
+  /**
+   * Sets the player starting zone.
+   *
+   * @param zoneId the id of the zone to set as the player start zone or null to clear the player
+   *     start zone.
+   */
+  public void setPlayerStartZone(GUID zoneId) {
+    campaignProperties.setPlayerStartZone(zoneId);
+  }
+
+  /**
+   * Returns if there is a player start zone set.
+   *
+   * @return {@code true} if there is a player start zone set, false otherwise.
+   */
+  public boolean hasPlayerStartZone() {
+    return getPlayerStartZone() != null;
+  }
+
+  /**
+   * Returns the player starting zone. If there is no player start zone set, this will check to see
+   * if there is only a single player visible zone and if so return that, otherwise it will return
+   * null to indicate that there is no player start zone set.
+   *
+   * @return the player starting zone.
+   */
+  public GUID getPlayerStartZone() {
+    var startZone = campaignProperties.getPlayerStartZone();
+    if (startZone != null) {
+      return startZone;
+    }
+    // If there is no start zone set check the zones for the campaign, if there is only a single
+    // zone that is visible to players this is the start zone.
+    var visibleZones = getZones().stream().filter(Zone::isVisible).toList();
+    if (visibleZones.size() == 1) {
+      return visibleZones.get(0).getId();
+    }
+    // Otherwise return null to indicate there is no start zone.
+    return null;
+  }
+
+  /**
+   * Returns if the player starting zone is set.
+   *
+   * @return if the player starting zone is set.
+   */
+  public boolean isPlayerStartZoneVisible() {
+    var startZone = getPlayerStartZone();
+    if (startZone == null) {
+      return false;
+    }
+    Zone zone = getZone(startZone);
+    return zone != null && zone.isVisible();
+  }
+
   public static Campaign fromDto(CampaignDto dto) {
     var campaign = new Campaign();
     campaign.id = GUID.valueOf(dto.getId());

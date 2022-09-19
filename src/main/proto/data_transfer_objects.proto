@@ -129,6 +129,7 @@ message CampaignPropertiesDto {
   repeated string remote_repositories = 11;
   repeated LookupTableDto lookup_tables = 12;
   repeated SightTypeDto sight_types = 13;
+  string player_start_zone = 14;
 }
 
 message SightTypeDto {
@@ -531,6 +532,7 @@ message ZoneDto {
   TokenSelectionDto token_selection = 35;
   int32 height = 36;
   int32 width = 37;
+  string image_asset_id = 38;
 }
 
 message InitiativeListDto {

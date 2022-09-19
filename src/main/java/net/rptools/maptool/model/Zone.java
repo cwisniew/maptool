@@ -308,6 +308,9 @@ public class Zone extends BaseModel {
 
   private transient Map<String, Integer> tokenNumberCache;
 
+  /** The image that represents the zone. */
+  private MD5Key imageAssetId;
+
   /**
    * Note: When adding new fields to this class, make sure to update all constructors, {@link
    * #imported()}, {@link #readResolve()}, and potentially {@link #optimize()}.
@@ -1655,6 +1658,10 @@ public class Zone extends BaseModel {
         idSet.add(((DrawableTexturePaint) paint).getAssetId());
       }
     }
+
+    // Zone Image
+    idSet.add(getImage());
+
     // It's easier to just remove null at the end than to do a is-null check on each asset
     idSet.remove(null);
 
@@ -2181,6 +2188,28 @@ public class Zone extends BaseModel {
     exposeFogAtWaypoints = toggle;
   }
 
+  /**
+   * Returns the image used for displaying the zone in the map chooser.
+   *
+   * @return the image used for displaying the zone in the map chooser.
+   */
+  public MD5Key getImage() {
+    return imageAssetId;
+  }
+
+  /**
+   * Sets the image used for displaying the zone in the map chooser.
+   *
+   * @param imageAssetId the image used for displaying the zone in the map chooser.
+   */
+  public void setImage(MD5Key imageAssetId) {
+    this.imageAssetId = imageAssetId;
+  }
+
+  public boolean hasImage() {
+    return imageAssetId != null;
+  }
+
   public static Zone fromDto(ZoneDto dto) {
     var zone = new Zone();
     zone.creationTime = dto.getCreationTime();
@@ -2257,6 +2286,10 @@ public class Zone extends BaseModel {
         at.setZoneId(zone.id);
       }
     }
+    String iaid = dto.getImageAssetId();
+    if (iaid != null && !iaid.isEmpty()) {
+      zone.imageAssetId = new MD5Key(iaid);
+    }
     return zone;
   }
 
@@ -2316,6 +2349,9 @@ public class Zone extends BaseModel {
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
     dto.setHeight(height);
     dto.setWidth(width);
+    if (imageAssetId != null) {
+      dto.setImageAssetId(imageAssetId.toString());
+    }
     return dto.build();
   }
 }

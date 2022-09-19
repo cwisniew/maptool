@@ -19,7 +19,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppPreferences;
@@ -56,6 +58,8 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox usePasswordFile;
   private JCheckBox useEasyConnect;
 
+  private JLabel warningLabel;
+
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
     panelInit();
@@ -84,6 +88,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     lockTokenEditOnStartup = (JCheckBox) getComponent("@lockTokenEditOnStartup");
     lockPlayerMoveOnStartup = (JCheckBox) getComponent("@lockPlayerMovementOnStartup");
     lockPlayerLibrary = (JCheckBox) getComponent("@disablePlayerLibrary");
+    warningLabel = (JLabel) getComponent("@Warning");
 
     getRoleCombo().setModel(new DefaultComboBoxModel<>(Player.Role.values()));
     getRoleCombo().setSelectedItem(prefs.getRole());
@@ -164,6 +169,14 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
 
     getRootPane().setDefaultButton(getOKButton());
     getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
+    warningLabel.setForeground(UIManager.getDefaults().getColor("Actions.Red"));
+    if (!MapTool.getCampaign().hasPlayerStartZone()) {
+      warningLabel.setText(I18N.getText("msg.warning.noPlayerStartZone"));
+    } else if (!MapTool.getCampaign().isPlayerStartZoneVisible()) {
+      warningLabel.setText(I18N.getText("msg.warning.playerStartZoneNotVisible"));
+    } else {
+      warningLabel.setText("");
+    }
     dialog.showDialog();
   }
 

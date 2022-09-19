@@ -25,7 +25,9 @@ public class InvalidDataOperation extends RuntimeException {
     INVALID_CONVERSION,
     ALREADY_EXISTS,
     UNDEFINED,
-    NAMESPACE_DOES_NOT_EXIST
+    NAMESPACE_DOES_NOT_EXIST,
+    RESERVED_TYPE_OR_NAMESPACE,
+    NOT_ON_RESTRICTED_DATA_STORE,
   }
 
   /** the propertyType of error that occurred */
@@ -116,12 +118,35 @@ public class InvalidDataOperation extends RuntimeException {
    *
    * @param propertyType the propertyType for the namespace.
    * @param namespace The namespace that already exists.
-   * @return
+   * @return the InvalidDataOperation.
    */
   public static InvalidDataOperation createNamespaceAlreadyExists(
       String propertyType, String namespace) {
     return new InvalidDataOperation(
         I18N.getText("data.error.namespaceAlreadyExists", namespace, propertyType),
         Type.ALREADY_EXISTS);
+  }
+
+  /**
+   * Create an InvalidDataOperation for when a propertyType or namespace is reserved.
+   *
+   * @param type the data type.
+   * @param namespace the namespace.
+   * @return the InvalidDataOperation.
+   */
+  public static InvalidDataOperation createReservedTypeOrNamespace(String type, String namespace) {
+    return new InvalidDataOperation(
+        I18N.getText("data.error.reservedTypeOrNamespace", type, namespace),
+        Type.RESERVED_TYPE_OR_NAMESPACE);
+  }
+
+  /**
+   * Create an InvalidDataOperation for when an operation is attempted on a restricted data store.
+   *
+   * @return the InvalidDataOperation.
+   */
+  public static InvalidDataOperation createNotOnRestrictedStore() {
+    return new InvalidDataOperation(
+        I18N.getText("data.error.notOnRestrictedStore"), Type.NOT_ON_RESTRICTED_DATA_STORE);
   }
 }

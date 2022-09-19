@@ -60,7 +60,7 @@ public class AddOnLibraryData implements LibraryData {
   @Override
   public CompletableFuture<Set<String>> getAllKeys() {
     return new DataStoreManager()
-        .getDefaultDataStore()
+        .getDefaultPrivilegedDataStore()
         .getProperties(DATA_TYPE, dataNameSpace)
         .thenApply(p -> p.stream().map(DataValue::getName).collect(Collectors.toSet()));
   }
@@ -83,7 +83,7 @@ public class AddOnLibraryData implements LibraryData {
   @Override
   public CompletableFuture<Void> setData(DataValue value) {
     return new DataStoreManager()
-        .getDefaultDataStore()
+        .getDefaultPrivilegedDataStore()
         .setProperty(DATA_TYPE, dataNameSpace, value)
         .thenAccept(p -> {});
   }
@@ -184,7 +184,9 @@ public class AddOnLibraryData implements LibraryData {
    * @return The data value for the given key.
    */
   private CompletableFuture<DataValue> getDataValue(String key) {
-    return new DataStoreManager().getDefaultDataStore().getProperty(DATA_TYPE, dataNameSpace, key);
+    return new DataStoreManager()
+        .getDefaultPrivilegedDataStore()
+        .getProperty(DATA_TYPE, dataNameSpace, key);
   }
 
   /**
@@ -194,7 +196,7 @@ public class AddOnLibraryData implements LibraryData {
    * @return A future that completes when the data is initialized.
    */
   CompletableFuture<Void> initialize() {
-    var ds = new DataStoreManager().getDefaultDataStore();
+    var ds = new DataStoreManager().getDefaultPrivilegedDataStore();
     return ds.hasPropertyNamespace(DATA_TYPE, dataNameSpace)
         .thenApply(
             has -> {
@@ -220,14 +222,14 @@ public class AddOnLibraryData implements LibraryData {
 
   CompletableFuture<Boolean> needsInitialization() {
     return new DataStoreManager()
-        .getDefaultDataStore()
+        .getDefaultPrivilegedDataStore()
         .getProperty(DATA_TYPE, dataNameSpace, NEEDS_INIT_KEY)
         .thenApply(DataValue::asBoolean);
   }
 
   public CompletableFuture<Void> setNeedsToBeInitialized(boolean needsToBeInitialized) {
     return new DataStoreManager()
-        .getDefaultDataStore()
+        .getDefaultPrivilegedDataStore()
         .setProperty(
             DATA_TYPE,
             dataNameSpace,
