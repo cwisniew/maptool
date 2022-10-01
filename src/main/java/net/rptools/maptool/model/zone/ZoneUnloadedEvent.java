@@ -12,17 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package net.rptools.maptool.model.zone;
 
-import javax.swing.JList;
-import javax.swing.JPanel;
-import net.rptools.maptool.model.zone.ElevationLevel;
+import net.rptools.maptool.model.GUID;
 
-public class ElevationDialog extends JPanel {
-
-  private final JList<ElevationLevel> elevationLevelJList = new JList<>();
-
-  public ElevationDialog() {
-    super();
-  }
-}
+/**
+ * Event sent when a Zone is unloaded (replaced by another zone).
+ *
+ * @param zoneId the id of the zone that was removed, can be {@code null}.
+ */
+public record ZoneUnloadedEvent(GUID zoneId) {}

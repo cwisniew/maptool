@@ -44,8 +44,6 @@ public class Elevation {
     levels.addAll(from.levels);
   }
 
-
-
   public ElevationDto toDto() {
     ElevationDto.Builder builder = ElevationDto.newBuilder().setEnabled(enabled);
     levels.forEach(level -> builder.addLevel(level.toDto()));

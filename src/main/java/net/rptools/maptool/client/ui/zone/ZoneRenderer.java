@@ -56,6 +56,7 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
@@ -65,6 +66,7 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zone.ZoneLoadedEvent;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -2015,6 +2017,7 @@ public class ZoneRenderer extends JComponent
     if (isLoaded) {
       // Notify the token tree that it should update
       MapTool.getFrame().updateTokenTree();
+      new MapToolEventBus().getMainEventBus().post(new ZoneLoadedEvent(zone.getId()));
     }
     return !isLoaded;
   }

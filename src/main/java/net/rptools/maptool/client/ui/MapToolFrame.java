@@ -84,6 +84,7 @@ import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -98,6 +99,8 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.tokens.TokenEventBusBridge;
+import net.rptools.maptool.model.zone.ZoneEventBusBridge;
+import net.rptools.maptool.model.zone.ZoneUnloadedEvent;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -460,6 +463,8 @@ public class MapToolFrame extends DefaultDockableHolder
     // Add the Event Dispatcher to EventBus bridging classes
     MapTool.getEventDispatcher()
         .addListener(TokenEventBusBridge.getInstance(), ZoneEvent.Added, ZoneEvent.Removed);
+    MapTool.getEventDispatcher()
+        .addListener(ZoneEventBusBridge.getInstance(), ZoneEvent.Added, ZoneEvent.Removed);
 
     restorePreferences();
     updateKeyStrokes();
@@ -1568,6 +1573,8 @@ public class MapToolFrame extends DefaultDockableHolder
         stopTokenDrag(); // if a token is being dragged, stop the drag
       }
       oldZone = currentRenderer.getZone();
+      var oldZoneId = oldZone == null ? null : oldZone.getId();
+      new MapToolEventBus().getMainEventBus().post(new ZoneUnloadedEvent(oldZoneId));
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }

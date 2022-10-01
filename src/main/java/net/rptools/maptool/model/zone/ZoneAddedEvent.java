@@ -12,17 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package net.rptools.maptool.model.zone;
 
-import javax.swing.JList;
-import javax.swing.JPanel;
-import net.rptools.maptool.model.zone.ElevationLevel;
+import net.rptools.maptool.model.GUID;
 
-public class ElevationDialog extends JPanel {
-
-  private final JList<ElevationLevel> elevationLevelJList = new JList<>();
-
-  public ElevationDialog() {
-    super();
-  }
-}
+public record ZoneAddedEvent(GUID zoneId, String name) {}

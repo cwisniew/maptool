@@ -72,7 +72,6 @@ public class MapPropertiesDialog extends JDialog {
   private Zone zone;
   private PaintChooser paintChooser;
 
-
   // As a new grid is created from scratch, need to hold on to these values.
   private int gridOffsetX = 0;
   private int gridOffsetY = 0;
