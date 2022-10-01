@@ -111,7 +111,15 @@ public class MapToolRegistry {
       List<String> servers = new ArrayList<>();
       for (JsonElement ele : array) {
         JsonObject jobj = ele.getAsJsonObject();
-        String val = jobj.get("name").getAsString() + ":" + jobj.get("version").getAsString();
+        if (!jobj.has("webrtc")) {
+          jobj.addProperty("webrtc", "false");
+        }
+        String val =
+            jobj.get("name").getAsString()
+                + ":"
+                + jobj.get("version").getAsString()
+                + ":"
+                + jobj.get("webrtc").getAsString();
         servers.add(val);
       }
       return servers;
@@ -137,6 +145,7 @@ public class MapToolRegistry {
     body.addProperty("language", locale.getLanguage());
     TimeZone timeZone = TimeZone.getDefault();
     body.addProperty("timezone", timeZone.getID());
+    body.addProperty("webrtc", AppState.useWebRTC());
 
     OkHttpClient client = new OkHttpClient();
     RequestBody requestBody = RequestBody.create(body.toString(), JSON);

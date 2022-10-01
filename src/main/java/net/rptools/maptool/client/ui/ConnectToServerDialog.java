@@ -54,7 +54,7 @@ import yasb.Binder;
 /** @author trevor */
 public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences>
     implements AnnouncementListener {
-  private static ServiceFinder finder;
+  private static final ServiceFinder finder;
 
   static {
     finder = new ServiceFinder(AppConstants.SERVICE_GROUP);
@@ -233,7 +233,17 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
                   JTable rem = getRemoteServerTable();
                   getServerNameTextField()
                       .setText(rem.getModel().getValueAt(rem.getSelectedRow(), 0).toString());
-                  if (e.getClickCount() == 2) handleOK();
+                  boolean useWebRTC = (boolean) rem.getModel().getValueAt(rem.getSelectedRow(), 2);
+                  var useWebRTCBox = getUseWebRTCCheckBox();
+                  useWebRTCBox.setSelected(useWebRTC);
+                  if (useWebRTC) {
+                    useWebRTCBox.setEnabled(true);
+                  } else {
+                    useWebRTCBox.setEnabled(false);
+                  }
+                  if (e.getClickCount() == 2) {
+                    handleOK();
+                  }
                 }
               }
             });
@@ -427,26 +437,41 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
     @Override
     public String getColumnName(int column) {
-      switch (column) {
-        case 0:
-          return I18N.getText("ConnectToServerDialog.msg.headingServer");
-        case 1:
-          return I18N.getText("ConnectToServerDialog.msg.headingVersion");
-      }
-      return "";
+      return switch (column) {
+        case 0 -> I18N.getText("ConnectToServerDialog.msg.headingServer");
+        case 1 -> I18N.getText("ConnectToServerDialog.msg.headingVersion");
+        case 2 -> I18N.getText("ConnectToServerDialog.msg.headingWebRTC");
+        default -> "";
+      };
     }
 
+    @Override
     public int getColumnCount() {
-      return 2;
+      return 3;
     }
 
+    @Override
     public int getRowCount() {
       return data.size();
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
       String[] row = data.get(rowIndex);
-      return row[columnIndex];
+      return switch (columnIndex) {
+        case 0 -> row[0];
+        case 1 -> row[1];
+        case 2 -> row.length > 2 && row[2].equals("true");
+        default -> "";
+      };
+    }
+
+    @Override
+    public Class getColumnClass(int columnIndex) {
+      return switch (columnIndex) {
+        case 2 -> Boolean.class;
+        default -> String.class;
+      };
     }
   }
 
