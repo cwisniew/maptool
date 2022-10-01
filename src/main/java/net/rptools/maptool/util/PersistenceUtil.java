@@ -754,7 +754,7 @@ public class PersistenceUtil {
     var dataStoreDto = builder.build();
 
     try {
-      var dataStore = new DataStoreManager().getDefaultDataStore();
+      var dataStore = new DataStoreManager().getDefaultPrivilegedDataStore();
       new GameDataImporter(dataStore).importData(dataStoreDto);
     } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
