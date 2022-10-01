@@ -32,13 +32,26 @@ public class DataStoreManager {
   private static final DataStore memoryDataStore = new MemoryDataStore();
 
   /**
-   * Returns the default data store. Any updates to the data store using the returned data store
-   * will be propagated to other clients.
+   * Returns the default privileged data store. This data store allows setting of internal data so
+   * should <em>NOT</em> be used by any functionality that allows users to manipulate data (e.g.
+   * macros). Any updates to the data store using the returned data store will be propagated to
+   * other clients.
    *
    * @return the default data store.
    */
-  public DataStore getDefaultDataStore() {
+  public DataStore getDefaultPrivilegedDataStore() {
     return new DataStoreUpdateClientsProxy(memoryDataStore);
+  }
+
+  /**
+   * Returns the default privileged data store. This data store allows setting of internal data so
+   * should be used by any functionality that allows users to manipulate data (e.g. macros). Any
+   * updates to the data store using the returned data store will be propagated to other clients.
+   *
+   * @return the default data store.
+   */
+  public DataStore getDefaultRestrictedDataStore() {
+    return new RestrictedDataStoreProxy(getDefaultPrivilegedDataStore());
   }
 
   /**

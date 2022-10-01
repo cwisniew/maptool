@@ -20,11 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
@@ -32,12 +28,11 @@ import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import org.apache.log4j.Logger;
 
-class DataStoreUpdateClientsProxy implements DataStore {
+class RestrictedDataStoreProxy implements DataStore {
 
   private final DataStore dataStore;
-
   /** Class for logging. */
-  private static final Logger log = Logger.getLogger(DataStoreUpdateClientsProxy.class);
+  private static final Logger log = Logger.getLogger(RestrictedDataStoreProxy.class);
 
   @Override
   public CompletableFuture<Set<String>> getPropertyTypes() {
@@ -86,168 +81,109 @@ class DataStoreUpdateClientsProxy implements DataStore {
     return dataStore.getProperties(type, namespace);
   }
 
-  /**
-   * Notifies remote clients of a change to a property.
-   *
-   * @param type the type of the property
-   * @param namespace the namespace of the property
-   * @param data the data value of the property
-   */
-  private void notifyClientsOfDataUpdate(String type, String namespace, DataValue data) {
-    try {
-      MapTool.serverCommand().updateData(type, namespace, toDto(data).get());
-    } catch (InterruptedException | ExecutionException e) {
-      log.error(I18N.getText("data.error.sendingUpdate"));
-      throw new CompletionException(e.getCause());
-    }
-  }
-
   @Override
   public CompletableFuture<DataValue> setProperty(String type, String namespace, DataValue value) {
-    return dataStore
-        .setProperty(type, namespace, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setProperty(type, namespace, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setLongProperty(
       String type, String namespace, String name, long value) {
-    return dataStore
-        .setLongProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setLongProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setDoubleProperty(
       String type, String namespace, String name, double value) {
-    return dataStore
-        .setDoubleProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setDoubleProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setStringProperty(
       String type, String namespace, String name, String value) {
-    return dataStore
-        .setStringProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setStringProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setBooleanProperty(
       String type, String namespace, String name, boolean value) {
-    return dataStore
-        .setBooleanProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setBooleanProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setJsonArrayProperty(
       String type, String namespace, String name, JsonArray value) {
-    return dataStore
-        .setJsonArrayProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setJsonArrayProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setJsonObjectProperty(
       String type, String namespace, String name, JsonObject value) {
-    return dataStore
-        .setJsonObjectProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setJsonObjectProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<DataValue> setAssetProperty(
       String type, String namespace, String name, Asset value) {
-    return dataStore
-        .setAssetProperty(type, namespace, name, value)
-        .thenApply(
-            v -> {
-              notifyClientsOfDataUpdate(type, namespace, v);
-              return v;
-            });
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
+    return dataStore.setAssetProperty(type, namespace, name, value);
   }
 
   @Override
   public CompletableFuture<Void> removeProperty(String type, String namespace, String name) {
-    MapTool.serverCommand().removeData(type, namespace, name);
+    if (new DataStoreReserved().isReserved(type, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(type, namespace);
+    }
     return dataStore.removeProperty(type, namespace, name);
   }
 
   @Override
   public CompletableFuture<Void> createNamespace(String propertyType, String namespace) {
-    return dataStore
-        .createNamespace(propertyType, namespace)
-        .thenRun(
-            () -> {
-              try {
-                MapTool.serverCommand().updateDataNamespace(toDto(propertyType, namespace).get());
-              } catch (InterruptedException | ExecutionException e) {
-                log.error(I18N.getText("data.error.sendingUpdate"));
-                throw new CompletionException(e.getCause());
-              }
-            });
+    if (new DataStoreReserved().isReserved(propertyType, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(propertyType, namespace);
+    }
+    return dataStore.createNamespace(propertyType, namespace);
   }
 
   @Override
   public CompletableFuture<Void> createNamespaceWithInitialData(
       String propertyType, String namespace, Collection<DataValue> initialData) {
-    return dataStore
-        .createNamespaceWithInitialData(propertyType, namespace, initialData)
-        .thenRun(
-            () -> {
-              try {
-                MapTool.serverCommand().updateDataNamespace(toDto(propertyType, namespace).get());
-              } catch (InterruptedException | ExecutionException e) {
-                log.error(I18N.getText("data.error.sendingUpdate"));
-                throw new CompletionException(e.getCause());
-              }
-            });
+    if (new DataStoreReserved().isReserved(propertyType, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(propertyType, namespace);
+    }
+    return dataStore.createNamespaceWithInitialData(propertyType, namespace, initialData);
   }
 
   @Override
   public CompletableFuture<Void> createNamespaceWithTypes(
       String propertyType, String namespace, Map<String, DataType> dataTypes) {
-    return dataStore
-        .createNamespaceWithTypes(propertyType, namespace, dataTypes)
-        .thenRun(
-            () -> {
-              try {
-                MapTool.serverCommand().updateDataNamespace(toDto(propertyType, namespace).get());
-              } catch (InterruptedException | ExecutionException e) {
-                log.error(I18N.getText("data.error.sendingUpdate"));
-                throw new CompletionException(e.getCause());
-              }
-            });
+    if (new DataStoreReserved().isReserved(propertyType, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(propertyType, namespace);
+    }
+    return dataStore.createNamespaceWithTypes(propertyType, namespace, dataTypes);
   }
 
   @Override
@@ -262,13 +198,14 @@ class DataStoreUpdateClientsProxy implements DataStore {
 
   @Override
   public void clear() {
-    dataStore.clear();
-    MapTool.serverCommand().removeDataStore();
+    throw InvalidDataOperation.createNotOnRestrictedStore();
   }
 
   @Override
   public CompletableFuture<Void> clearNamespace(String propertyType, String namespace) {
-    MapTool.serverCommand().removeDataNamespace(propertyType, namespace);
+    if (new DataStoreReserved().isReserved(propertyType, namespace)) {
+      throw InvalidDataOperation.createReservedTypeOrNamespace(propertyType, namespace);
+    }
     return dataStore.clearNamespace(propertyType, namespace);
   }
 
@@ -277,7 +214,7 @@ class DataStoreUpdateClientsProxy implements DataStore {
     return dataStore.toDto(value);
   }
 
-  public DataStoreUpdateClientsProxy(DataStore delegate) {
+  public RestrictedDataStoreProxy(DataStore delegate) {
     this.dataStore = delegate;
   }
 }

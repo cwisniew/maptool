@@ -44,7 +44,7 @@ public class GameDataImporter {
 
   public void importData(DataStoreDto dataStoreDto)
       throws ExecutionException, InterruptedException {
-    var datStore = new DataStoreManager().getDefaultDataStore();
+    var datStore = new DataStoreManager().getDefaultPrivilegedDataStore();
     for (var data : dataStoreDto.getDataList()) {
       importData(data);
     }

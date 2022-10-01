@@ -63,7 +63,7 @@ public class DataFunctions extends AbstractFunction {
     }
 
     try {
-      var dataStore = new DataStoreManager().getDefaultDataStore();
+      var dataStore = new DataStoreManager().getDefaultRestrictedDataStore();
 
       switch (fName) {
         case "data.listtypes" -> {
@@ -123,7 +123,7 @@ public class DataFunctions extends AbstractFunction {
         }
         case "data.clearalldata" -> {
           MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
-          new DataStoreManager().getDefaultDataStore().clear();
+          new DataStoreManager().getDefaultPrivilegedDataStore().clear();
           return "";
         }
         case "data.clearnamespace" -> {
@@ -131,7 +131,7 @@ public class DataFunctions extends AbstractFunction {
           String type = parameters.get(0).toString();
           String namespace = parameters.get(1).toString();
           new DataStoreManager()
-              .getDefaultDataStore()
+              .getDefaultRestrictedDataStore()
               .clearNamespace(parameters.get(0).toString(), parameters.get(1).toString())
               .get();
 
@@ -142,7 +142,10 @@ public class DataFunctions extends AbstractFunction {
           String type = parameters.get(0).toString();
           String namespace = parameters.get(1).toString();
           String name = parameters.get(2).toString();
-          new DataStoreManager().getDefaultDataStore().removeProperty(type, namespace, name).get();
+          new DataStoreManager()
+              .getDefaultRestrictedDataStore()
+              .removeProperty(type, namespace, name)
+              .get();
           return "";
         }
         case "data.getstaticdata" -> {
