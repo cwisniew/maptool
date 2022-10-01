@@ -43,6 +43,7 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zone.Elevation;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TopologyTypeDto;
 import net.rptools.maptool.server.proto.ZoneDto;
@@ -307,6 +308,9 @@ public class Zone extends BaseModel {
   private int width;
 
   private transient Map<String, Integer> tokenNumberCache;
+
+  /** a Elevation data for the zone. */
+  private Elevation elevation = new Elevation();
 
   /**
    * Note: When adding new fields to this class, make sure to update all constructors, {@link
@@ -574,6 +578,7 @@ public class Zone extends BaseModel {
     topologyTypes = zone.topologyTypes;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
+    elevation = new Elevation(zone.elevation);
   }
 
   public GUID getId() {
@@ -2122,6 +2127,10 @@ public class Zone extends BaseModel {
       }
     }
 
+    if (elevation == null) {
+      elevation = new Elevation();
+    }
+
     return this;
   }
 
@@ -2179,6 +2188,15 @@ public class Zone extends BaseModel {
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
+  }
+
+  /**
+   * Returns the {@link Elevation} data for the Zone.
+   *
+   * @return the {@link Elevation} data for the Zone.
+   */
+  public Elevation getElevation() {
+    return elevation;
   }
 
   public static Zone fromDto(ZoneDto dto) {
@@ -2257,6 +2275,7 @@ public class Zone extends BaseModel {
         at.setZoneId(zone.id);
       }
     }
+    zone.elevation = Elevation.fromDto(dto.getElevation());
     return zone;
   }
 
@@ -2320,6 +2339,7 @@ public class Zone extends BaseModel {
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
     dto.setHeight(height);
     dto.setWidth(width);
+    dto.setElevation(elevation.toDto());
     return dto.build();
   }
 }

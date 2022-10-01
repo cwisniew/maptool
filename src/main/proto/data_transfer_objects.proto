@@ -531,6 +531,7 @@ message ZoneDto {
   TokenSelectionDto token_selection = 35;
   int32 height = 36;
   int32 width = 37;
+  ElevationDto elevation = 38;
 }
 
 message InitiativeListDto {
@@ -685,4 +686,13 @@ message TokenFootPrintDto {
   bool is_default = 4;;
   double scale = 5;
   bool localize_name = 6;
+}
+
+message ElevationDto {
+  message ElevationLevelDto {
+    int32 level = 1;
+    string name = 2;
+  }
+  bool enabled = 1;
+  repeated ElevationLevelDto level = 2;
 }

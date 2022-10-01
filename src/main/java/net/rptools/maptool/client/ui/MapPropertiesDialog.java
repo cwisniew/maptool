@@ -72,6 +72,7 @@ public class MapPropertiesDialog extends JDialog {
   private Zone zone;
   private PaintChooser paintChooser;
 
+
   // As a new grid is created from scratch, need to hold on to these values.
   private int gridOffsetX = 0;
   private int gridOffsetY = 0;
@@ -246,6 +247,10 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getComboBox("visionType");
   }
 
+  public JCheckBox getUseElevationComboBox() {
+    return formPanel.getCheckBox("useElevation");
+  }
+
   public JComboBox getAStarRoundingOptionsComboBox() {
     return formPanel.getComboBox("aStarRoundingOptionsComboBox");
   }
@@ -269,6 +274,7 @@ public class MapPropertiesDialog extends JDialog {
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
     getVisionTypeCombo().setSelectedItem(zone.getVisionType());
     getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
+    getUseElevationComboBox().setSelected(zone.getElevation().isEnabled());
 
     gridOffsetX = zone.getGrid().getOffsetX();
     gridOffsetY = zone.getGrid().getOffsetY();
@@ -295,6 +301,7 @@ public class MapPropertiesDialog extends JDialog {
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
     zone.setMapAsset(mapAsset != null ? mapAsset.getMD5Key() : null);
+    zone.getElevation().setEnabled(getUseElevationComboBox().isSelected());
     // TODO: Handle grid type changes
   }
 
