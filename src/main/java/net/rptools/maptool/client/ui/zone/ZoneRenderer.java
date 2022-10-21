@@ -66,6 +66,7 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zone.ElevationLevel;
 import net.rptools.maptool.model.zone.ZoneLoadedEvent;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -172,6 +173,8 @@ public class ZoneRenderer extends JComponent
     FALSE,
     OTHER
   }
+
+  private ElevationLevel elevationLevel;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -2845,6 +2848,10 @@ public class ZoneRenderer extends JComponent
 
   public Zone.Layer getActiveLayer() {
     return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
+  }
+
+  public ElevationLevel getActiveElevation() {
+    return elevationLevel != null ? elevationLevel : zone.getElevation().getCurrentLevel();
   }
 
   /**

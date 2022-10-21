@@ -108,6 +108,7 @@ public class AppStyle {
 
   public static BufferedImage lightSourceIcon;
 
+
   static {
     try {
       // Set defaults
@@ -183,6 +184,7 @@ public class AppStyle {
 
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");
+
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }

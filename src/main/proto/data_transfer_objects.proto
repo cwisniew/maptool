@@ -532,6 +532,7 @@ message ZoneDto {
   int32 height = 36;
   int32 width = 37;
   ElevationDto elevation = 38;
+  int32 current_elevation = 39;
 }
 
 message InitiativeListDto {
@@ -694,5 +695,6 @@ message ElevationDto {
     string name = 2;
   }
   bool enabled = 1;
-  repeated ElevationLevelDto level = 2;
+  ElevationLevelDto current_level = 2;
+  repeated ElevationLevelDto level = 3;
 }

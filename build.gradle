@@ -445,6 +445,12 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.14.3'
 
     implementation 'com.google.guava:guava:31.0.1-jre'
+
+    // Font Icons
+    implementation 'org.kordamp.ikonli:ikonli-swing:12.3.1'
+    implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
+    implementation 'org.kordamp.ikonli:ikonli-material2-pack:12.3.1'
+
 }
 
 

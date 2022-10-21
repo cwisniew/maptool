@@ -53,20 +53,11 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   private boolean isEraser;
   private boolean isSnapToGridSelected;
   private boolean isEraseSelected;
-  private static final LayerSelectionDialog layerSelectionDialog;
 
   private static Zone.Layer selectedLayer = Zone.Layer.TOKEN;
 
   protected static final int TOOLBAR_ICON_SIZE = 32;
 
-  static {
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> selectedLayer = layer);
-  }
 
   protected Rectangle createRect(ZonePoint originPoint, ZonePoint newPoint) {
     int x = Math.min(originPoint.x, newPoint.x);
@@ -139,6 +130,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   @Override
   protected void attachTo(ZoneRenderer renderer) {
     if (MapTool.getPlayer().isGM()) {
+      var layerSelectionDialog = LayerSelectionDialog.getInstance();
+      layerSelectionDialog.setLayerSelectionListener(layer -> selectedLayer = layer);
       MapTool.getFrame()
           .showControlPanel(MapTool.getFrame().getColorPicker(), layerSelectionDialog);
     } else {

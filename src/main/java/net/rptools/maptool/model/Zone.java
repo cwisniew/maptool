@@ -309,7 +309,7 @@ public class Zone extends BaseModel {
 
   private transient Map<String, Integer> tokenNumberCache;
 
-  /** a Elevation data for the zone. */
+  /** Elevation data for the zone. */
   private Elevation elevation = new Elevation();
 
   /**

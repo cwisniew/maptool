@@ -45,6 +45,7 @@ import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
@@ -94,7 +95,8 @@ public class PointerTool extends DefaultTool {
   private final TokenStackPanel tokenStackPanel = new TokenStackPanel();
   private final HTMLPanelRenderer htmlRenderer = new HTMLPanelRenderer();
   private final Font boldFont = AppStyle.labelFont.deriveFont(Font.BOLD);
-  private final LayerSelectionDialog layerSelectionDialog;
+
+  private final ElevationDialog elevationDialog;
 
   private BufferedImage statSheet;
   private Token tokenOnStatSheet;
@@ -126,29 +128,28 @@ public class PointerTool extends DefaultTool {
     htmlRenderer.addStyleSheetRule("body{color:black}");
     htmlRenderer.addStyleSheetRule(".title{font-size: 14pt}");
 
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> {
-              if (renderer != null) {
-                renderer.setActiveLayer(layer);
-                MapTool.getFrame().setLastSelectedLayer(layer);
-
-                if (layer != Layer.TOKEN) {
-                  MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
-                }
-              }
-            });
+    elevationDialog = new ElevationDialog();
+    new MapToolEventBus().getMainEventBus().register(elevationDialog);
   }
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
 
+    var layerSelectionDialog = LayerSelectionDialog.getInstance();
+    layerSelectionDialog.setLayerSelectionListener(layer -> {
+      if (renderer != null) {
+        renderer.setActiveLayer(layer);
+        MapTool.getFrame().setLastSelectedLayer(layer);
+
+        if (layer != Layer.TOKEN) {
+          MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
+        }
+      }
+    });
+
     if (MapTool.getPlayer().isGM()) {
-      MapTool.getFrame().showControlPanel(layerSelectionDialog);
+      MapTool.getFrame().showControlPanel(layerSelectionDialog, elevationDialog);
     }
     htmlRenderer.attach(renderer);
     layerSelectionDialog.updateViewList();

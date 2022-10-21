@@ -911,6 +911,7 @@ public class MapToolFrame extends DefaultDockableHolder
       gbc.gridy = i;
       gbc.weightx = 1;
       gbc.fill = GridBagConstraints.BOTH;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
       layoutPanel.add(panel, gbc);
       i++;
     }
@@ -921,6 +922,14 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.revalidate();
     zoneRendererPanel.repaint();
     visibleControlPanel = layoutPanel;
+  }
+
+  public void refreshControlPanel() {
+    if (visibleControlPanel != null) {
+      visibleControlPanel.setSize(visibleControlPanel.getPreferredSize());
+      visibleControlPanel.revalidate();
+      visibleControlPanel.repaint();
+    }
   }
 
   public ZoomStatusBar getZoomStatusBar() {

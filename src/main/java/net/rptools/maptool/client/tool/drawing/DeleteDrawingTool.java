@@ -45,11 +45,6 @@ public class DeleteDrawingTool extends DefaultTool
 
   @Serial private static final long serialVersionUID = -8846217296437736953L;
 
-  private static final LayerSelectionDialog layerSelectionDialog =
-      new LayerSelectionDialog(
-          new Layer[] {Layer.TOKEN, Layer.GM, Layer.OBJECT, Layer.BACKGROUND},
-          layer -> selectedLayer = layer);
-
   private static final Set<GUID> selectedDrawings = new HashSet<>();
   private static final DrawPanelPopupMenu.DeleteDrawingAction deleteAction =
       new DrawPanelPopupMenu.DeleteDrawingAction(selectedDrawings);
@@ -84,6 +79,8 @@ public class DeleteDrawingTool extends DefaultTool
   @Override
   protected void attachTo(ZoneRenderer renderer) {
     if (MapTool.getPlayer().isGM()) {
+      var layerSelectionDialog = LayerSelectionDialog.getInstance();
+      layerSelectionDialog.setLayerSelectionListener( layer -> selectedLayer = layer);
       MapTool.getFrame().showControlPanel(layerSelectionDialog);
     }
 

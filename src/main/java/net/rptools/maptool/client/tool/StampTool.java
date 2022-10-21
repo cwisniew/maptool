@@ -98,7 +98,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   // private Map<Shape, Token> rotateBoundsMap = new HashMap<Shape, Token>();
   private final Map<Shape, Token> resizeBoundsMap = new HashMap<Shape, Token>();
 
-  private final LayerSelectionDialog layerSelectionDialog;
 
   // Offset from token's X,Y when dragging. Values are in cell coordinates.
   private int dragOffsetX;
@@ -107,21 +106,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   private int dragStartY;
 
   public StampTool() {
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> {
-              if (renderer != null) {
-                renderer.setActiveLayer(layer);
-                MapTool.getFrame().setLastSelectedLayer(layer);
-
-                if (layer == Layer.TOKEN) {
-                  MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
-                }
-              }
-            });
     try {
       setIcon(
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/stamper.png")));
@@ -131,7 +115,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void updateLayerSelectionView() {
-    layerSelectionDialog.updateViewList();
+    LayerSelectionDialog.getInstance().updateViewList();
   }
 
   @Override
@@ -142,11 +126,23 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     MapTool.getFrame().hideControlPanel();
+    LayerSelectionDialog.getInstance().setLayerSelectionListener(null);
     super.detachFrom(renderer);
   }
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
+    var layerSelectionDialog = LayerSelectionDialog.getInstance();
+    layerSelectionDialog.setLayerSelectionListener(layer -> {
+        if (renderer != null) {
+          renderer.setActiveLayer(layer);
+          MapTool.getFrame().setLastSelectedLayer(layer);
+
+          if (layer == Layer.TOKEN) {
+            MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
+          }
+        }
+    });
     MapTool.getFrame().showControlPanel(layerSelectionDialog);
     super.attachTo(renderer);
 

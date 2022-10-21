@@ -25,4 +25,8 @@ public record ElevationLevel(int level, String name) {
   public ElevationDto.ElevationLevelDto toDto() {
     return ElevationDto.ElevationLevelDto.newBuilder().setLevel(level).setName(name).build();
   }
+
+  public String toString() {
+    return level + " - " + name;
+  }
 }
