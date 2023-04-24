@@ -294,11 +294,11 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.9.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.8.2'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.9.4'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.2'
     // For Twelvemonkey SVG
-    implementation 'org.apache.xmlgraphics:batik-all:1.14'
+    implementation 'org.apache.xmlgraphics:batik-all:1.16'
 
 
     // For Sentry bug reporting
@@ -309,7 +309,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
 
     // ftp client
-    implementation 'commons-net:commons-net:3.8.0'
+    implementation 'commons-net:commons-net:3.9.0'
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.4'
 
@@ -349,7 +349,7 @@ dependencies {
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
 
     // utils for handling reflection
-    implementation 'org.reflections:reflections:0.9.11'
+    implementation 'org.reflections:reflections:0.10.2'
 
     // find running instances in LAN
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
@@ -398,7 +398,7 @@ dependencies {
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
-    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.16.1'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
+    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.19.0'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
 
     // For RESTful functions
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
