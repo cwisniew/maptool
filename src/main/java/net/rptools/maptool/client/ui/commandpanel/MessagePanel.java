@@ -163,6 +163,16 @@ public class MessagePanel extends JPanel {
     style.addRule(mainCss);
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
+    style.addRule(".genesys { font-family: \"Genesys Glyphs and Dice\"}");
+    style.addRule(".swRpg { font-family: \"sw-rpg-icons\"}");
+    style.addRule(
+        ".genesysRoll { font-family: \"Genesys Glyphs and Dice\"; font-size: 150%; "
+            + "margin: 0px; padding: 0px; "
+            + "background:#efefef;}");
+    style.addRule(
+        ".swRpgRoll { font-family: \"sw-rpg-icons\"; font-size: 125%; margin: 0px; "
+            + "padding: 0px; "
+            + "background:#efefef;}");
     setTrustedMacroPrefixColors(
         AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
     var css = MessageUtil.getMessageCss();
