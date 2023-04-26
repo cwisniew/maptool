@@ -290,7 +290,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
 
     // Image processing lib
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.9.4'
@@ -306,12 +306,12 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     // parsing of configuration data
-    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.9.0'
 
     // ftp client
     implementation 'commons-net:commons-net:3.9.0'
     // commandline parsing
-    implementation 'commons-cli:commons-cli:1.4'
+    implementation 'commons-cli:commons-cli:1.5.0'
 
     // needed for preference dialog at runtime
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
@@ -321,8 +321,6 @@ dependencies {
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     // parser for macros
     implementation 'com.github.RPTools:parser:1.8.3'
-    // dice expressions
-    implementation 'net.rptools.dicelib:dicelib:1.8.6'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -379,8 +377,8 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.8.0'
 
     // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.27'
-    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.27'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.28'
+    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.28'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.70'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
