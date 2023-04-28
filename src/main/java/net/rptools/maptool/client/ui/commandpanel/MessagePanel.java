@@ -38,6 +38,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
+import net.rptools.dicelib.expression.function.GenesysDice.GenesysDiceType;
+import net.rptools.dicelib.expression.function.GenesysDice.SupportedDice;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -56,6 +58,11 @@ public class MessagePanel extends JPanel {
   private final JEditorPane textPane;
 
   private static final String SND_MESSAGE_RECEIVED = "messageReceived";
+
+  private static final String GENESYS_CSS_FONT_DETAILS =
+      "font-family: \"Genesys Glyphs and Dice\";" + " font-size: 150%; ";
+  private static final String FFG_CSS_STARWARS_FONT_FAMILY =
+      "font-family: \"sw-rpg-icons\"; " + " font-size: 150%; ";
 
   /** From ImageView */
   private static final String IMAGE_CACHE_PROPERTY = "imageCache";
@@ -163,23 +170,162 @@ public class MessagePanel extends JPanel {
     style.addRule(mainCss);
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
-    style.addRule(".genesys { font-family: \"Genesys Glyphs and Dice\"}; font-size: 200%;");
-    style.addRule(".swRpg { font-family: \"sw-rpg-icons\"; font-size: 200%;}");
+    style.addRule(".genesys { " + GENESYS_CSS_FONT_DETAILS + " }");
+    style.addRule(".swRpg { " + FFG_CSS_STARWARS_FONT_FAMILY + " }");
     style.addRule(
-        ".genesysRoll {"
-            + "margin: 0px; "
-            + "padding: 0px; "
-            + "background:#efefef;}");
+        "."
+            + GenesysDiceType.BOOST.getCssDieClass(SupportedDice.GENERIC)
+            + "{ color: blue; "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
     style.addRule(
-        ".swRpgRoll { "
-            + "margin: 0px; "
-            + "padding: 0px; "
-            + "background:#efefef;}");
+        "."
+            + GenesysDiceType.BOOST.getCssDieClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " color: rgb(136,203,218);}");
+    style.addRule(
+        "."
+            + GenesysDiceType.ABILITY.getCssDieClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.ABILITY.getCssDieClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.PROFICIENCY.getCssDieClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.PROFICIENCY.getCssDieClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.SETBACK.getCssDieClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.SETBACK.getCssDieClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.DIFFICULTY.getCssDieClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.DIFFICULTY.getCssDieClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.CHALLENGE.getCssDieClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.CHALLENGE.getCssDieClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+
+    style.addRule(
+        "."
+            + GenesysDiceType.BOOST.getCssRollClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.BOOST.getCssRollClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.ABILITY.getCssRollClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.ABILITY.getCssRollClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.PROFICIENCY.getCssRollClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.PROFICIENCY.getCssRollClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.SETBACK.getCssRollClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.SETBACK.getCssRollClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.DIFFICULTY.getCssRollClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.DIFFICULTY.getCssRollClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.CHALLENGE.getCssRollClass(SupportedDice.GENERIC)
+            + "{ "
+            + GENESYS_CSS_FONT_DETAILS
+            + " }");
+    style.addRule(
+        "."
+            + GenesysDiceType.CHALLENGE.getCssRollClass(SupportedDice.STARWARS)
+            + "{ "
+            + FFG_CSS_STARWARS_FONT_FAMILY
+            + " }");
+
+    style.addRule(".genesysRoll {" + "margin: 0px; " + "padding: 0px; " + "background:#efefef;}");
+    style.addRule(".swRpgRoll { " + "margin: 0px; " + "padding: 0px; " + "background:#efefef;}");
     setTrustedMacroPrefixColors(
         AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
     var css = MessageUtil.getMessageCss();
     style.addRule(css);
     repaint();
+    System.out.println(style);
   }
 
   @Subscribe

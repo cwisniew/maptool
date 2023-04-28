@@ -14,28 +14,7 @@
  */
 package net.rptools.dicelib.expression;
 
-import net.rptools.dicelib.expression.function.ArsMagicaStress;
-import net.rptools.dicelib.expression.function.CountSuccessDice;
-import net.rptools.dicelib.expression.function.DropHighestRoll;
-import net.rptools.dicelib.expression.function.DropRoll;
-import net.rptools.dicelib.expression.function.ExplodeDice;
-import net.rptools.dicelib.expression.function.ExplodingSuccessDice;
-import net.rptools.dicelib.expression.function.FudgeRoll;
-import net.rptools.dicelib.expression.function.HeroKillingRoll;
-import net.rptools.dicelib.expression.function.HeroRoll;
-import net.rptools.dicelib.expression.function.If;
-import net.rptools.dicelib.expression.function.KeepLowestRoll;
-import net.rptools.dicelib.expression.function.KeepRoll;
-import net.rptools.dicelib.expression.function.OpenTestDice;
-import net.rptools.dicelib.expression.function.RerollDice;
-import net.rptools.dicelib.expression.function.RerollDiceOnce;
-import net.rptools.dicelib.expression.function.Roll;
-import net.rptools.dicelib.expression.function.RollWithBounds;
-import net.rptools.dicelib.expression.function.ShadowRun4Dice;
-import net.rptools.dicelib.expression.function.ShadowRun4ExplodeDice;
-import net.rptools.dicelib.expression.function.ShadowRun5Dice;
-import net.rptools.dicelib.expression.function.ShadowRun5ExplodeDice;
-import net.rptools.dicelib.expression.function.UbiquityRoll;
+import net.rptools.dicelib.expression.function.*;
 import net.rptools.parser.*;
 import net.rptools.parser.transform.RegexpStringTransformer;
 import net.rptools.parser.transform.StringLiteralTransformer;
@@ -205,6 +184,12 @@ public class ExpressionParser {
         new String[] {"\\b[aA][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStress($1, $2)"},
         new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
         new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
+
+        // GeneSys Die
+        new String[] {"\\b(?i)gs:([^:]+):", "genesysDice(\"$1\")"},
+
+        // FFG StarWars
+        new String[] {"\\b(?i)sw:([^:]+):", "ffgStarWarsDice(\"$1\")"},
       };
 
   private final Parser parser;
@@ -238,6 +223,7 @@ public class ExpressionParser {
     parser.addFunction(new DropHighestRoll());
     parser.addFunction(new KeepLowestRoll());
     parser.addFunction(new ArsMagicaStress());
+    parser.addFunction(new GenesysDice());
 
     parser.addFunction(new If());
 
