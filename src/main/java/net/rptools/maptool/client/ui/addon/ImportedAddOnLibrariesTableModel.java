@@ -25,12 +25,16 @@ import net.rptools.maptool.model.library.LibraryType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AddOnLibrariesTableModel extends AbstractTableModel {
-  private static final Logger log = LogManager.getLogger(AddOnLibrariesDialogController.class);
+/** Table model for displaying add-on imported for development. */
+public class ImportedAddOnLibrariesTableModel extends AbstractTableModel {
+  /** Logger instance. */
+  private static final Logger log = LogManager.getLogger(ImportedAddOnLibrariesTableModel.class);
 
+  /** List of add-ons. */
   private final List<LibraryInfo> addons = new ArrayList<>();
 
-  public AddOnLibrariesTableModel() {
+  /** Creates a new instance. */
+  public ImportedAddOnLibrariesTableModel() {
     try {
       addons.addAll(new LibraryManager().getLibraries(LibraryType.ADD_ON));
     } catch (ExecutionException | InterruptedException e) {
@@ -38,18 +42,28 @@ public class AddOnLibrariesTableModel extends AbstractTableModel {
     }
   }
 
+  /**
+   * Returns the add-on at the specified row.
+   *
+   * @param row the row
+   * @return the add-on
+   */
   public LibraryInfo getAddOn(int row) {
     return addons.get(row);
   }
 
   @Override
   public int getRowCount() {
-    return addons.size();
+    if (new LibraryManager().getAddOnLibraryDevHelper().isDevModeEnabled()) {
+      return addons.size();
+    } else {
+      return 0;
+    }
   }
 
   @Override
   public int getColumnCount() {
-    return 4;
+    return 3;
   }
 
   @Override
@@ -59,7 +73,6 @@ public class AddOnLibrariesTableModel extends AbstractTableModel {
       case 0 -> addon.name();
       case 1 -> addon.namespace();
       case 2 -> addon.version();
-      case 3 -> addon.shortDescription();
       default -> null;
     };
   }
@@ -70,7 +83,6 @@ public class AddOnLibrariesTableModel extends AbstractTableModel {
       case 0 -> I18N.getText("library.dialog.addon.name");
       case 1 -> I18N.getText("library.dialog.addon.namespace");
       case 2 -> I18N.getText("library.dialog.addon.version");
-      case 3 -> I18N.getText("library.dialog.addon.shortDescription");
       default -> null;
     };
   }

@@ -29,6 +29,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryData;
+import net.rptools.maptool.model.library.addon.AddOnLibraryDevHelper;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnSlashCommandManager;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
@@ -376,5 +377,14 @@ public class LibraryManager {
           }
           return new ArrayList<>(libs);
         });
+  }
+
+  /**
+   * Returns the {@link AddOnLibraryDevHelper} for the add-on in libraries.
+   *
+   * @return the {@link AddOnLibraryDevHelper} for the add-on in libraries.
+   */
+  public AddOnLibraryDevHelper getAddOnLibraryDevHelper() {
+    return addOnLibraryManager.getDevHelper();
   }
 }

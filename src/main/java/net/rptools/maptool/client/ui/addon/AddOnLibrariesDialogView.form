@@ -283,38 +283,114 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <hspacer id="28b4a">
+                  <grid id="bd221" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
-                  </hspacer>
-                  <vspacer id="61f72">
-                    <constraints>
-                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                  </vspacer>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="456e5" class="javax.swing.JButton" binding="copyThemeCSS">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTThemeCSS"/>
+                        </properties>
+                      </component>
+                      <component id="35630" class="javax.swing.JButton" binding="copyStatSheetThemeButton" default-binding="true">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTStatSheetTheme"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
                   <component id="fde58" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copy.title"/>
                     </properties>
                   </component>
-                  <component id="456e5" class="javax.swing.JButton" binding="copyThemeCSS">
+                  <grid id="9c2ad" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="eb485" class="javax.swing.JButton" binding="createAddonStructureButton">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.createAddonStructure"/>
+                        </properties>
+                      </component>
+                      <component id="a370e" class="javax.swing.JButton" binding="packageAddOnButton">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.packageAddon"/>
+                        </properties>
+                      </component>
+                      <vspacer id="447fb">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </vspacer>
+                      <component id="908e3" class="javax.swing.JButton" binding="repackageAndImportButton" default-binding="true">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.repackageAddon"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <component id="d0a92" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTThemeCSS"/>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.packagedThisSession"/>
                     </properties>
                   </component>
-                  <component id="35630" class="javax.swing.JButton" binding="copyStatSheetThemeButton" default-binding="true">
+                  <scrollpane id="75dce">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="39f9d" class="javax.swing.JTable" binding="importedAddonLibrariesTable">
+                        <constraints/>
+                        <properties/>
+                      </component>
+                    </children>
+                  </scrollpane>
+                  <component id="26ce0" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTStatSheetTheme"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="fe584" class="javax.swing.JCheckBox" binding="enableAddOnDevelopmentCheckBox" default-binding="true">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.enableDevMode"/>
                     </properties>
                   </component>
                 </children>

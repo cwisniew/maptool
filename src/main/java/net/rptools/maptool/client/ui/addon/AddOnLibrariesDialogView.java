@@ -27,6 +27,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -39,6 +40,7 @@ import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
 import net.rptools.maptool.language.I18N;
@@ -69,6 +71,11 @@ public class AddOnLibrariesDialogView extends JDialog {
   private JButton viewLicenseFileButton;
   private JButton copyThemeCSS;
   private JButton copyStatSheetThemeButton;
+  private JButton createAddonStructureButton;
+  private JButton packageAddOnButton;
+  private JTable importedAddonLibrariesTable;
+  private JCheckBox enableAddOnDevelopmentCheckBox;
+  private JButton repackageAndImportButton;
 
   private LibraryInfo selectedAddOn;
 
@@ -97,6 +104,19 @@ public class AddOnLibrariesDialogView extends JDialog {
                 buttonRemove.setEnabled(true);
                 selectedAddOnChanged(model.getAddOn(selectedRow));
               }
+            });
+
+    importedAddonLibrariesTable.setModel(new ImportedAddOnLibrariesTableModel());
+    importedAddonLibrariesTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    importedAddonLibrariesTable
+        .getSelectionModel()
+        .addListSelectionListener(
+            evt -> {
+              if (evt.getValueIsAdjusting()) {
+                return;
+              }
+              int selectedRow = importedAddonLibrariesTable.getSelectedRow();
+              repackageAndImportButton.setEnabled(selectedRow != -1);
             });
 
     buttonRemove.addActionListener(
@@ -205,6 +225,52 @@ public class AddOnLibrariesDialogView extends JDialog {
                         .setContents(new StringSelection(themeCss), null);
                   });
         });
+
+    var devHelper = new LibraryManager().getAddOnLibraryDevHelper();
+
+    enableAddOnDevelopmentCheckBox.setSelected(devHelper.isDevModeEnabled());
+    setDevModeEnabled(devHelper.isDevModeEnabled());
+
+    enableAddOnDevelopmentCheckBox.addActionListener(
+        e -> {
+          devHelper.setDevModeEnabled(enableAddOnDevelopmentCheckBox.isSelected());
+          setDevModeEnabled(enableAddOnDevelopmentCheckBox.isSelected());
+          ((ImportedAddOnLibrariesTableModel) importedAddonLibrariesTable.getModel())
+              .fireTableDataChanged();
+        });
+
+    packageAddOnButton.addActionListener(e -> packageAddOn());
+  }
+
+  private void packageAddOn() {
+    var devHelper = new LibraryManager().getAddOnLibraryDevHelper();
+    JFileChooser choser = new JFileChooser(devHelper.getLastPath().toFile());
+    choser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    choser.setDialogTitle(I18N.getText("library.dialog.package.dirTitle"));
+    if (choser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+      var dialog = new AddOnPackageDialog();
+      dialog.pack();
+      SwingUtil.centerOver(dialog, MapTool.getFrame());
+      dialog.setVisible(true);
+
+      devHelper.packageNewAddOn(selectedAddOn, choser.getSelectedFile().toPath(), null);
+    }
+  }
+
+  /**
+   * Sets the enabled state of the controls that are only enabled when add-on development mode is
+   *
+   * @param enabled the enabled state.
+   */
+  private void setDevModeEnabled(boolean enabled) {
+    createAddonStructureButton.setEnabled(enabled);
+    repackageAndImportButton.setEnabled(enabled);
+    packageAddOnButton.setEnabled(enabled);
+    importedAddonLibrariesTable.setEnabled(enabled);
+    if (enabled) {
+      int row = importedAddonLibrariesTable.getSelectionModel().getMinSelectionIndex();
+      repackageAndImportButton.setEnabled(row != -1);
+    }
   }
 
   /**

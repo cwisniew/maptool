@@ -40,6 +40,9 @@ public class AddOnLibraryManager {
   /** The add-on libraries that are registered. */
   private final Map<String, AddOnLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
 
+  /** Dev helper for add-on libraries. */
+  private final AddOnLibraryDevHelper devHelper = new AddOnLibraryDevHelper();
+
   /**
    * Is there a add-on library that would handle this path. This just checks the protocol and
    * namespace, it won't check that the full path actually exists.
@@ -192,5 +195,14 @@ public class AddOnLibraryManager {
             namespaceLibraryMap.values().stream()
                 .filter(l -> l.getLegacyEvents().contains(eventName))
                 .collect(Collectors.toSet()));
+  }
+
+  /**
+   * Returns the development helper for add-on libraries.
+   *
+   * @return the development helper for add-on libraries.
+   */
+  public AddOnLibraryDevHelper getDevHelper() {
+    return devHelper;
   }
 }
