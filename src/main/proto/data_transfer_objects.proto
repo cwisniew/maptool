@@ -705,3 +705,14 @@ message TokenFootPrintDto {
   double scale = 5;
   bool localize_name = 6;
 }
+
+message ZoneTreeDto {
+  message ZoneTreeGroupDto {
+    string name = 1;
+    google.protobuf.StringValue id = 2;
+    repeated ZoneTreeGroupDto groups = 3;
+    repeated string zones = 4;
+  }
+  google.protobuf.StringValue default_zone_id = 1;
+  ZoneTreeGroupDto root = 2;
+}

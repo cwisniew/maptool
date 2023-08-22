@@ -74,6 +74,8 @@ import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
+import net.rptools.maptool.model.zones.ZoneTree;
+import net.rptools.maptool.server.proto.ZoneTreeDto;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -98,6 +100,8 @@ public class PersistenceUtil {
   private static final String GAME_DATA_DIR = "data/";
 
   private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
+
+  private static final String ZONE_TREE_FILE = "zone-tree.json";
 
   private static final String CAMPAIGN_VERSION = "1.11.0";
 
@@ -322,6 +326,11 @@ public class PersistenceUtil {
       saveGameData(pakFile);
       saveTimer.stop("Save Game Data");
 
+      // Store the Zone Tree
+      saveTimer.start("Save Zone Tree");
+      saveZoneTree(campaign.getZoneTree(), pakFile);
+      saveTimer.stop("Save Zone Tree");
+
       try {
         saveTimer.start("Set content");
 
@@ -391,6 +400,45 @@ public class PersistenceUtil {
 
     if (saveTimer.isEnabled()) {
       MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
+    }
+  }
+
+  /**
+   * Persists the zone tree to the given packed file.
+   *
+   * @param zoneTree The zone tree to persist.
+   * @param packedFile The packed file to persist the zone tree to.
+   * @throws IOException If there is an error persisting the zone tree.
+   */
+  private static void saveZoneTree(ZoneTree zoneTree, PackedFile packedFile) throws IOException {
+    var dto = zoneTree.toDto();
+    packedFile.putFile(
+        ZONE_TREE_FILE, JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+  }
+
+  /**
+   * Loads the ZoneTree from the given packed file.
+   *
+   * @param packedFile The packed file to load the ZoneTree from.
+   * @return The ZoneTree loaded from the packed file.
+   * @throws IOException If there is an error loading the ZoneTree.
+   */
+  private static ZoneTree loadZoneTree(PackedFile packedFile) throws IOException {
+    if (!packedFile.hasFile(ZONE_TREE_FILE)) {
+      return null;
+    }
+    try {
+      var builder = ZoneTreeDto.newBuilder();
+      JsonFormat.parser()
+          .merge(
+              new InputStreamReader(
+                  packedFile.getFileAsInputStream(ZONE_TREE_FILE), StandardCharsets.UTF_8),
+              builder);
+      return ZoneTree.fromDto(builder.build());
+    } catch (IOException e) {
+      // TODO: CDW
+      log.error("Error loading zone tree", e);
+      return null;
     }
   }
 
@@ -471,6 +519,14 @@ public class PersistenceUtil {
         new CampaignManager().clearCampaignData();
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
+
+        // Load the Zone Tree
+        ZoneTree zoneTree = loadZoneTree(pakFile);
+        if (zoneTree != null) {
+          persistedCampaign.campaign.setZoneTree(zoneTree);
+        } else {
+          persistedCampaign.campaign.setZoneTree(ZoneTree.zoneTreeFor(persistedCampaign.campaign));
+        }
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {

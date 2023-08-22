@@ -32,6 +32,7 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
+import net.rptools.maptool.model.zones.ZoneTree;
 import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
@@ -88,6 +89,12 @@ public class Campaign {
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
+
+  /**
+   * The {@link ZoneTree} for this campaign. This is the tree structure of the zones in this
+   * campaign.
+   */
+  private ZoneTree zoneTree;
 
   /**
    * Record to hold the arguments for rename token type functionality.
@@ -859,5 +866,23 @@ public class Campaign {
                 }
               });
     }
+  }
+
+  /**
+   * Sets the zone tree for the campaign.
+   *
+   * @param zoneTree the zone tree to set
+   */
+  public void setZoneTree(ZoneTree zoneTree) {
+    this.zoneTree = zoneTree;
+  }
+
+  /**
+   * Gets the zone tree for the campaign.
+   *
+   * @return the zone tree for the campaign.
+   */
+  public ZoneTree getZoneTree() {
+    return zoneTree;
   }
 }

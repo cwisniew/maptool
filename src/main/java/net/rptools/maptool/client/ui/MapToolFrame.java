@@ -92,6 +92,7 @@ import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.selector.ZoneSelector;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -137,6 +138,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+
+  private final ZoneSelector zoneSelector = new ZoneSelector();
+
   /** The HTML pane showing the map overlay. */
   private HTMLOverlayPanel overlayPanel;
 
@@ -521,7 +525,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     CAMPAIGN("Campaign"),
     GM("Gm"),
     SELECTION("Selected"),
-    IMPERSONATED("Impersonate");
+    IMPERSONATED("Impersonate"),
+    MAP_SELECTOR("MapSelector");
     // @formatter:on
 
     private String displayName;
@@ -660,6 +665,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
             MTFrame.INITIATIVE,
             initiativePanel,
             RessourceManager.getSmallIcon(Icons.WINDOW_INITIATIVE)));
+    frameMap.put(
+        MTFrame.MAP_SELECTOR,
+        createDockingFrame(
+            MTFrame.MAP_SELECTOR,
+            zoneSelector.getRootComponent(),
+            RessourceManager.getSmallIcon(Icons.WINDOW_MAP_EXPLORER)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
