@@ -15,6 +15,7 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.BoolValue;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
-import net.rptools.maptool.model.zones.ZoneTree;
+import net.rptools.maptool.model.zones.ZoneGroup;
 import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
@@ -87,14 +88,21 @@ public class Campaign {
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
 
+  /** The root of the zone group tree. */
+  private ZoneGroup rootZoneGroup;
+
+  /** The default zone id. */
+  private GUID defaultZoneId;
+
+  /** The name of the root zone group. This is a constant and should not be changed. */
+  public static final String ROOT_ZONE_GROUP_NAME = "Root";
+
+  /** The id of the root zone group. This is a constant and should not be changed. */
+  public static final UUID ROOT_ZONE_GROUP_ID =
+      UUID.nameUUIDFromBytes(ROOT_ZONE_GROUP_NAME.getBytes(StandardCharsets.UTF_8));
+
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
-
-  /**
-   * The {@link ZoneTree} for this campaign. This is the tree structure of the zones in this
-   * campaign.
-   */
-  private ZoneTree zoneTree;
 
   /**
    * Record to hold the arguments for rename token type functionality.
@@ -124,11 +132,16 @@ public class Campaign {
     gmMacroButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
+    rootZoneGroup = new ZoneGroup(ROOT_ZONE_GROUP_NAME, ROOT_ZONE_GROUP_ID);
   }
 
   private Object readResolve() {
     if (exportSettings == null) {
       exportSettings = new HashMap<>();
+    }
+
+    if (rootZoneGroup == null) {
+      rootZoneGroup = new ZoneGroup(ROOT_ZONE_GROUP_NAME, ROOT_ZONE_GROUP_ID);
     }
 
     return this;
@@ -189,6 +202,7 @@ public class Campaign {
         new ArrayList<MacroButtonProperties>(campaign.getMacroButtonPropertiesArray());
     gmMacroButtonProperties =
         new ArrayList<MacroButtonProperties>(campaign.getGmMacroButtonPropertiesArray());
+    rootZoneGroup = new ZoneGroup(campaign.rootZoneGroup);
   }
 
   public GUID getId() {
@@ -438,6 +452,9 @@ public class Campaign {
    */
   public void removeZone(GUID id) {
     zones.remove(id);
+    if (defaultZoneId != null && defaultZoneId.equals(id)) {
+      defaultZoneId = null;
+    }
   }
 
   public boolean containsAsset(Asset asset) {
@@ -866,23 +883,5 @@ public class Campaign {
                 }
               });
     }
-  }
-
-  /**
-   * Sets the zone tree for the campaign.
-   *
-   * @param zoneTree the zone tree to set
-   */
-  public void setZoneTree(ZoneTree zoneTree) {
-    this.zoneTree = zoneTree;
-  }
-
-  /**
-   * Gets the zone tree for the campaign.
-   *
-   * @return the zone tree for the campaign.
-   */
-  public ZoneTree getZoneTree() {
-    return zoneTree;
   }
 }

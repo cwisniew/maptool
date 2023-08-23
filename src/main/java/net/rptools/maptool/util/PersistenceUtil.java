@@ -328,7 +328,8 @@ public class PersistenceUtil {
 
       // Store the Zone Tree
       saveTimer.start("Save Zone Tree");
-      saveZoneTree(campaign.getZoneTree(), pakFile);
+      // TODO: CDW
+      // saveZoneTree(campaign.getZoneTree(), pakFile);
       saveTimer.stop("Save Zone Tree");
 
       try {
@@ -522,11 +523,12 @@ public class PersistenceUtil {
 
         // Load the Zone Tree
         ZoneTree zoneTree = loadZoneTree(pakFile);
-        if (zoneTree != null) {
+        // TODO: CDW
+        /*if (zoneTree != null) {
           persistedCampaign.campaign.setZoneTree(zoneTree);
         } else {
           persistedCampaign.campaign.setZoneTree(ZoneTree.zoneTreeFor(persistedCampaign.campaign));
-        }
+        }*/
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {

@@ -706,6 +706,12 @@ message TokenFootPrintDto {
   bool localize_name = 6;
 }
 
+message ZoneGroupDto {
+  string id = 1;
+  string name = 2;
+  repeated ZoneGroupDto children = 3;
+}
+
 message ZoneTreeDto {
   message ZoneTreeGroupDto {
     string name = 1;

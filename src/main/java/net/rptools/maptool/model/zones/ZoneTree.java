@@ -36,8 +36,4 @@ public class ZoneTree {
     // TODO: CDW
     return null;
   }
-
-  public void setCampaign(Campaign campaign) {
-    this.campaign = campaign;
-  }
 }

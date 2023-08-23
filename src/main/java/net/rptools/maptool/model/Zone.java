@@ -327,6 +327,8 @@ public class Zone {
   private int height;
   private int width;
 
+  private UUID groupId;
+
   private transient Map<String, Integer> tokenNumberCache;
 
   /**
@@ -637,6 +639,8 @@ public class Zone {
     topologyTypes = zone.topologyTypes;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
+
+    groupId = zone.groupId;
   }
 
   public GUID getId() {
