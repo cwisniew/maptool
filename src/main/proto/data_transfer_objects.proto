@@ -549,6 +549,7 @@ message ZoneDto {
   TokenSelectionDto token_selection = 36;
   int32 height = 37;
   int32 width = 38;
+  google.protobuf.StringValue group_id = 39;
 }
 
 message InitiativeListDto {
@@ -710,15 +711,4 @@ message ZoneGroupDto {
   string id = 1;
   string name = 2;
   repeated ZoneGroupDto children = 3;
-}
-
-message ZoneTreeDto {
-  message ZoneTreeGroupDto {
-    string name = 1;
-    google.protobuf.StringValue id = 2;
-    repeated ZoneTreeGroupDto groups = 3;
-    repeated string zones = 4;
-  }
-  google.protobuf.StringValue default_zone_id = 1;
-  ZoneTreeGroupDto root = 2;
 }

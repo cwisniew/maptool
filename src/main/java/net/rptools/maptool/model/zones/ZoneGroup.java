@@ -17,6 +17,7 @@ package net.rptools.maptool.model.zones;
 import java.util.ArrayList;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.proto.ZoneGroupDto;
 
 /** The class that represents a Zone Group in MapTool. */
@@ -89,5 +90,8 @@ public class ZoneGroup {
     ZoneGroup zoneGroup = new ZoneGroup(dto.getName(), UUID.fromString(dto.getId()));
     dto.getChildrenList().forEach(child -> zoneGroup.addChild(fromDto(child)));
     return zoneGroup;
+  }
+
+  public void addZone(Zone zone) {
   }
 }

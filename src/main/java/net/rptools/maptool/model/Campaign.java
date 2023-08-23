@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.BoolValue;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -88,18 +87,9 @@ public class Campaign {
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
 
-  /** The root of the zone group tree. */
-  private ZoneGroup rootZoneGroup;
-
   /** The default zone id. */
   private GUID defaultZoneId;
 
-  /** The name of the root zone group. This is a constant and should not be changed. */
-  public static final String ROOT_ZONE_GROUP_NAME = "Root";
-
-  /** The id of the root zone group. This is a constant and should not be changed. */
-  public static final UUID ROOT_ZONE_GROUP_ID =
-      UUID.nameUUIDFromBytes(ROOT_ZONE_GROUP_NAME.getBytes(StandardCharsets.UTF_8));
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -132,7 +122,6 @@ public class Campaign {
     gmMacroButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
-    rootZoneGroup = new ZoneGroup(ROOT_ZONE_GROUP_NAME, ROOT_ZONE_GROUP_ID);
   }
 
   private Object readResolve() {
@@ -140,9 +129,6 @@ public class Campaign {
       exportSettings = new HashMap<>();
     }
 
-    if (rootZoneGroup == null) {
-      rootZoneGroup = new ZoneGroup(ROOT_ZONE_GROUP_NAME, ROOT_ZONE_GROUP_ID);
-    }
 
     return this;
   }
@@ -202,7 +188,6 @@ public class Campaign {
         new ArrayList<MacroButtonProperties>(campaign.getMacroButtonPropertiesArray());
     gmMacroButtonProperties =
         new ArrayList<MacroButtonProperties>(campaign.getGmMacroButtonPropertiesArray());
-    rootZoneGroup = new ZoneGroup(campaign.rootZoneGroup);
   }
 
   public GUID getId() {

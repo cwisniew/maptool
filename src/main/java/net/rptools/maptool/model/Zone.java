@@ -327,7 +327,8 @@ public class Zone {
   private int height;
   private int width;
 
-  private UUID groupId;
+  /** The id of the group that this zone belongs to. */
+  private UUID groupId = Campaign.ROOT_ZONE_GROUP_ID;
 
   private transient Map<String, Integer> tokenNumberCache;
 
@@ -2208,6 +2209,10 @@ public class Zone {
       }
     }
 
+    if (groupId == null) {
+      groupId = Campaign.ROOT_ZONE_GROUP_ID;
+    }
+
     return this;
   }
 
@@ -2346,6 +2351,11 @@ public class Zone {
         at.setZoneId(zone.id);
       }
     }
+    if (dto.hasGroupId()) {
+      zone.groupId = UUID.fromString(dto.getGroupId().getValue());
+    } else {
+      zone.groupId = Campaign.ROOT_ZONE_GROUP_ID;
+    }
     return zone;
   }
 
@@ -2410,6 +2420,23 @@ public class Zone {
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
     dto.setHeight(height);
     dto.setWidth(width);
+    dto.setGroupId(StringValue.of(groupId.toString()));
     return dto.build();
+  }
+
+  /**
+   * Returns the zone's group id.
+   * @return the zone's group id.
+   */
+  public UUID getGroupId() {
+    return groupId;
+  }
+
+  /**
+   * Sets the zone's group id.
+   * @param groupId the zone's group id.
+   */
+  public void setGroupId(UUID groupId) {
+    this.groupId = groupId;
   }
 }

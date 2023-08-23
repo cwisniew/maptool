@@ -14,26 +14,31 @@
  */
 package net.rptools.maptool.model.zones;
 
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.server.proto.ZoneTreeDto;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import net.rptools.maptool.model.Zone;
 
-public class ZoneTree {
-  private Campaign campaign;
-  private GUID defaultZoneId;
+public class ZoneGroupTreeNode {
+  private String name;
+  private UUID id;
+  private final ArrayList<ZoneGroupTreeNode> groups = new ArrayList<>();
 
-  public static ZoneTree zoneTreeFor(Campaign campaign) {
-    return new ZoneTree();
+  private final ArrayList<Zone> zones = new ArrayList<>();
+
+  private final Map<UUID, ZoneGroupTreeNode> groupMap = new HashMap<>();
+
+
+  public ZoneGroupTreeNode(UUID rootZoneGroupId, String rootZoneGroupName) {
     // TODO: CDW
   }
 
-  public ZoneTreeDto toDto() {
+  public void addZone(Zone zone) {
     // TODO: CDW
-    return null;
   }
 
-  public static ZoneTree fromDto(ZoneTreeDto dto) {
+  public void removeZone(Zone zone) {
     // TODO: CDW
-    return null;
   }
 }
