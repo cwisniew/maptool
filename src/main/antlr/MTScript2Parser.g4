@@ -216,7 +216,7 @@ expression                  : LPAREN expression RPAREN
                             ;
 
 
-variableDeclaration         : type variableDeclarationAssign (COMMA variableDeclarationAssign )* SEMI
+variableDeclaration         : type variableDeclarationAssign (COMMA variableDeclarationAssign )*
                             ;
 
 variableDeclarationAssign   : variable ( OP_ASSIGN expression )?
