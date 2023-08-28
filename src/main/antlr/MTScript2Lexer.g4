@@ -9,19 +9,24 @@ package net.rptools.mtscript.parser;
 
 // Default Mode
 OPEN_SCRIPT_MODE            : '[[' -> pushMode(SCRIPT_MODE);
-OPEN_ROLL_MODE              : '{' -> pushMode(ROLL_MODE);
+OPEN_ROLL_MODE              : '[' -> pushMode(ROLL_MODE);
 TEXT                        : .+? ;
 
 mode ROLL_MODE;
-CLOSE_ROLL_MODE             : '}' -> popMode;
+CLOSE_ROLL_MODE             : ']' -> popMode;
 ROLL_DECIMAL_LITERAL        : ( '0' | [1-9] (Digits? | '_' + Digits) ) ;
 ROLL_IDENTIFIER             : Letter LetterOrDigit* ;
+ROLL_WS                     : [ \t\r\n\u000C]+  -> channel(HIDDEN);
 
-
+mode EMBEDED_ROLL_MODE;
+CLOSE_EMBEDED_ROLL_MODE     : ']]' -> popMode;
+EM_ROLL_DECIMAL_LITERAL     : ( '0' | [1-9] (Digits? | '_' + Digits) ) ;
+EM_ROLL_IDENTIFIER          : Letter LetterOrDigit* ;
+EM_ROLL_WS                  : [ \t\r\n\u000C]+  -> channel(HIDDEN);
 
 mode SCRIPT_MODE;
+OPEN_EMBEDED_ROLL_MODE    : '[['  -> pushMode(EMBEDED_ROLL_MODE);
 CLOSE_SCRIPT_MODE         : ']]' -> popMode;
-
 
 
 // Keywords

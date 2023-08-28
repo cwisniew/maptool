@@ -9,7 +9,7 @@ options { tokenVocab=MTScript2Lexer; }
 
 // Top level sentences
 
-chat                        : (OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE | OPEN_ROLL_MODE simpleRoll CLOSE_ROLL_MODE | text)* ;
+chat                        : (OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE | OPEN_ROLL_MODE dice CLOSE_ROLL_MODE | text)* ;
 
 text                        : passThroughText
                             ;
@@ -28,17 +28,19 @@ group                       : LPAREN val=expression RPAREN                      
                             | LBRACE val=expression RBRACE                          # braceGroup
                             ;
 
-diceExpression              : KEYWORD_ROLL dice
-                            ;
-
-simpleRoll                  : ROLL_DECIMAL_LITERAL ROLL_IDENTIFIER ROLL_DECIMAL_LITERAL
-                            ;
-
-dice                        :  numDice? diceName=IDENTIFIER diceArguments?
+diceExpression              : OPEN_EMBEDED_ROLL_MODE dice CLOSE_EMBEDED_ROLL_MODE
                             ;
 
 
-numDice                     : integerLiteral
+dice                        :  numDice? diceName  diceArguments?
+                            ;
+
+diceName                    : ROLL_IDENTIFIER
+                            | EM_ROLL_IDENTIFIER
+                            ;
+
+numDice                     : ROLL_DECIMAL_LITERAL
+                            | EM_ROLL_DECIMAL_LITERAL
                             | group
                             ;
 
