@@ -17,7 +17,14 @@ text                        : TEXT+
 script                      : statement+
                             ;
 
-statement                   : variableDeclarationOrInit SEMI
+statement                   : topLevelStatement
+                            | blockStatement
+                            ;
+
+topLevelStatement           : exportStatement SEMI
+                            ;
+
+blockStatement              : variableDeclarationOrInit SEMI
                             | constantDeclarationAndInit SEMI
                             | switchStatement
                             | expression SEMI
@@ -34,9 +41,14 @@ statement                   : variableDeclarationOrInit SEMI
                             | assertStatement SEMI
                             | returnStatement SEMI
                             | inlineFunctionDefinition SEMI
+                            | functionDefinition
+                            | procedureDefinition
                             ;
 
-block                       : LBRACE statement+ RBRACE
+block                       : LBRACE blockStatement+ RBRACE
+                            ;
+
+exportStatement             : KEYWORD_EXPORT name=IDENTIFIER KEYWORD_AS STRING_LITERAL (modifier = (KEYWORD_TRUSTED | KEYWORD_GM))?
                             ;
 
 methodCall                  : methodName=IDENTIFIER LPAREN argumentList? RPAREN
@@ -126,6 +138,9 @@ expression                  : methodCall
                             | expression bop=OP_AND expression
                             | expression bop=OP_OR expression
                             | switchExpression
+                            | dictValue
+                            | listValue
+                            | embeddedDiceRoll
                             ;
 
 
@@ -158,7 +173,7 @@ yieldStatement              : KEYWORD_YIELD expression
 switchStatement             : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchStatementBlock* RBRACE
                             ;
 
-switchStatementBlock        : (switchStatementLabel statement+)+ (KEYWORD_DEFAULT COLON statement+)?
+switchStatementBlock        : (switchStatementLabel blockStatement+)+ (KEYWORD_DEFAULT COLON blockStatement+)?
                             ;
 
 switchStatementLabel        : KEYWORD_CASE literal (COMMA literal)* COLON
@@ -196,13 +211,17 @@ returnStatement             : KEYWORD_RETURN expression?
 inlineFunctionDefinition    : KEYWORD_FUNCTION funcName=IDENTIFIER LPAREN formalParameterList? RPAREN COLON returnType=type OP_ARROW expression
                             ;
 
+functionDefinition          : KEYWORD_FUNCTION funcName=IDENTIFIER LPAREN formalParameterList? RPAREN COLON returnType=type block
+                            ;
+
+procedureDefinition         : KEYWORD_PROCEDURE procName=IDENTIFIER LPAREN formalParameterList? RPAREN block
+                            ;
 
 formalParameterList         : formalParameter (COMMA formalParameter)*
                             ;
 
-formalParameter             : variable COLON type
+formalParameter             : variable COLON type (OP_ASSIGN expression)?
                             ;
-
 
 assignmentOp                : OP_ASSIGN
                             | OP_ADD_ASSIGN
@@ -214,6 +233,7 @@ assignmentOp                : OP_ASSIGN
                             | OP_XOR_ASSIGN
                             | OP_MOD_ASSIGN
                             ;
+
 
 type                        : KEYWORD_BOOLEAN
                             | KEYWORD_NUMBER
@@ -235,6 +255,24 @@ type                        : KEYWORD_BOOLEAN
                             | KEYWORD_ITEM
                             ;
 
+
+dictValue                   : LBRACE (dictPair (COMMA dictPair)*)? RBRACE
+                            | LBRACE RBRACE
+                            ;
+
+listValue                   : LBRACK (expression (COMMA expression)*)? RBRACK
+                            | LBRACK RBRACK
+                            ;
+
+dictPair                    : field=(STRING_LITERAL | IDENTIFIER) COLON expression
+                            ;
+
+embeddedDiceRoll            : OPEN_EMBEDED_ROLL_MODE dice CLOSE_EMBEDED_ROLL_MODE
+                            ;
+
+
+
+////////////////////////////////////////////////////////////////////////////////
 /*
 
 group                       : LPAREN val=expression RPAREN                          # parenGroup
@@ -284,81 +322,9 @@ diceArgumentVal             : IDENTIFIER                                        
 
 
 
-scriptExports               : KEYWORD_EXPORT LBRACE (exported (COMMA exported)*) RBRACE;
-
-exported                    : IDENTIFIER (KEYWORD_AS IDENTIFIER)? (LBRACK exportDest RBRACK)?;
-
-exportDest                  : KEYWORD_INTERNAL
-                            | KEYWORD_CHAT (LPAREN perm=(KEYWORD_GM | KEYWORD_TRUSTED) RPAREN)?
-                            | KEYWORD_ROLL LPAREN KEYWORD_DEFAULT OP_ASSIGN def=DECIMAL_LITERAL COMMA
-                              KEYWORD_ROLL OP_ASSIGN rollName=IDENTIFIER
-                            ;
 
 
 
-methodDeclaration           : KEYWORD_FUNCTION IDENTIFIER formalParameters KEYWORD_RETURNS returnType=type block
-                            | KEYWORD_PROCEDURE IDENTIFIER formalParameters block
-                            ;
-
-formalParameters            : LPAREN formalParameterList? RPAREN ;
-
-formalParameterList         : formalParameter (COMMA formalParameter)* ;
-
-formalParameter             : type variableDeclarator;
-
-
-blockStatement
-                            | methodDeclaration
-                            ;
-
-
-expression                  : methodCall
-                            | LPAREN expression RPAREN
-                            | diceExpression
-                            | literal
-                            | variable
-                            | expression bop=DOT ( IDENTIFIER | methodCall )
-                            | expression LBRACK expression RBRACK
-                            | json
-                            | prefix=OP_BANG expression
-                            | expression bop=(OP_MUL | OP_DIV | OP_MOD) expression
-                            | expression bop=(OP_ADD | OP_SUB) expression
-                            | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
-                            | expression bop=(TYPE OF) type
-                            | expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
-                            | expression bop=OP_BITAND expression
-                            | expression bop=OP_CARET expression
-                            | expression bop=OP_BITOR expression
-                            | expression bop=OP_AND expression
-                            | expression bop=OP_OR expression
-                            | expression bop=OP_QUESTION expression COLON expression
-                            | expression postfix=(OP_INC | OP_DEC)
-                            | <assoc=right> variable bop=(OP_ASSIGN | OP_ADD_ASSIGN |
-                            OP_SUB_ASSIGN | OP_MUL_ASSIGN | OP_DIV_ASSIGN | OP_AND_ASSIGN | OP_OR_ASSIGN | OP_XOR_ASSIGN | OP_MOD_ASSIGN ) expression
-                            ;
-
-
-
-variableDeclaration         : KEYWORD_VAR variableDeclarationAssign (COMMA variableDeclarationAssign )*
-                            ;
-
-variableDeclarationAssign   : variable COLON IDENTIFIER ( OP_ASSIGN expression )?
-                            ;
-
-constantDeclaration         : KEYWORD_CONST constantDeclarationAssign ( COMMA constantDeclarationAssign )* SEMI
-                            ;
-
-constantDeclarationAssign   : IDENTIFIER COLON IDENTIFIER ( LBRACK RBRACK)* OP_ASSIGN expression
-                            ;
-
-variableDeclarator          : KEYWORD_VAR variableDeclaratorId (OP_ASSIGN variableInitializer)? ;
-
-
-variableDeclaratorId        : IDENTIFIER COLON IDENTIFIER ( LBRACK RBRACK )* ;
-
-variableInitializer         : arrayInitializer
-                            | expression
-                            ;
 
 arrayInitializer            : LBRACE (variableInitializer ( COMMA variableInitializer )* (COMMA)? )? RBRACE ;
 
@@ -380,32 +346,5 @@ type                        : KEYWORD_INTEGER listTypeDecl?
                             | KEYWORD_DICT listTypeDecl?
                             | IDENTIFIER listTypeDecl?
                             ;
-
-json                        : jsonObj
-                            | jsonArray
-                            ;
-
-jsonValue                   : NUMBER_LITERAL
-                            | DECIMAL_LITERAL
-                            | HEX_LITERAL
-                            | STRING_LITERAL
-                            | BOOL_LITERAL
-                            | NULL_LITERAL
-                            | jsonObj
-                            | jsonArray
-                            ;
-
-jsonObj                     : LBRACE (jsonPair (COMMA jsonPair)*)? RBRACE
-                            | LBRACE RBRACE
-                            ;
-
-jsonArray                   : LBRACK (jsonValue (COMMA jsonValue)*)? RBRACK
-                            | LBRACK RBRACK
-                            ;
-
-jsonPair                    : STRING_LITERAL COLON jsonValue
-                            ;
-
-
 
 */

@@ -44,7 +44,6 @@ KEYWORD_FOREACH    : 'foreach';
 KEYWORD_FUNCTION   : 'function';
 KEYWORD_PROCEDURE  : 'procedure';
 KEYWORD_IF         : 'if';
-KEYWORD_RETURNS    : 'returns';
 KEYWORD_RETURN     : 'return';
 KEYWORD_SWITCH     : 'switch';
 KEYWORD_WHILE      : 'while';
@@ -55,6 +54,7 @@ KEYWORD_THROW      : 'throw';
 KEYWORD_TYPE       : 'type';
 KEYWORD_OF         : 'of';
 KEYWORD_YIELD      : 'yield';
+
 
 KEYWORD_USE        : 'uses';
 KEYWORD_AS         : 'as';
@@ -87,9 +87,9 @@ KEYWORD_ITEM        : 'item';
 
 
 // Literals
-DECIMAL_LITERAL : ( '0' | [1-9] (Digits? | '_' + Digits) ) ;
+DECIMAL_LITERAL : ( '0' | '-'? [1-9] (Digits? | '_' + Digits) ) ;
 HEX_LITERAL     : '0' [xX] [0-9a-fA-F] ([0-9a-fA-F_]* [0-9a-fA-F])? ;
-NUMBER_LITERAL  : (Digits '.' Digits? | '.' Digits) ;
+NUMBER_LITERAL  : '-'?(Digits '.' Digits+ | '.' Digits) ;
 BOOL_LITERAL    : 'true' | 'false' ;
 STRING_LITERAL  : ( '\'' (~['] | EscapeSequence)* '\''  )
                 | ( '"'  (~["] | EscapeSequence)* '"'   )
