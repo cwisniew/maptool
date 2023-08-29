@@ -29,6 +29,8 @@ statement                   : variableDeclarationOrInit SEMI
                             | throwStatement SEMI
                             | variableAssign SEMI
                             | yieldStatement SEMI
+                            | KEYWORD_BREAK (label=IDENTIFIER)? SEMI
+                            | KEYWORD_CONTINUE (label=IDENTIFIER)? SEMI
                             ;
 
 
@@ -295,10 +297,7 @@ blockStatement
                             ;
 
 statement                   : assertStatement
-                            | switchStatement
                             | returnStatement
-                            | breakStatement
-                            | continueStatement
                             | variableDeclaration
                             | constantDeclaration
                             | statementExpression=expression
