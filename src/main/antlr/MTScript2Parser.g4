@@ -72,10 +72,20 @@ declarationInit             : variableDefinition OP_ASSIGN expression
 
 
 expression                  : methodCall
+                            | LPAREN expression RPAREN
                             | variable
                             | literal
+                            | prefix=OP_BANG expression
+                            | expression bop=(OP_MUL | OP_DIV | OP_MOD) expression
+                            | expression bop=(OP_ADD | OP_SUB) expression
+                            | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
+                            | expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
+                            | expression bop=OP_BITAND expression
+                            | expression bop=OP_CARET expression
+                            | expression bop=OP_BITOR expression
+                            | expression bop=OP_AND expression
+                            | expression bop=OP_OR expression
                             ;
-
 
 booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
