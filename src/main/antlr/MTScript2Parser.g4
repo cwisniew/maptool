@@ -19,7 +19,8 @@ script                      : statement+
 
 statement                   : variableDeclarationOrInit SEMI
                             | constantDeclarationAndInit SEMI
-                            | variableName=IDENTIFIER OP_ASSIGN expression SEMI
+                            | expression SEMI
+                            | variableAssign SEMI
                             | forStatement
                             | ifStatement
                             ;
@@ -72,9 +73,13 @@ declarationInit             : variableDefinition OP_ASSIGN expression
 
 
 expression                  : methodCall
-                            | LPAREN expression RPAREN
                             | variable
+                            | expression DOT variable
+                            | expression DOT methodCall
+                            | LPAREN expression RPAREN
                             | literal
+                            | variableDeclarationOrInit
+                            | constantDeclarationAndInit
                             | prefix=OP_BANG expression
                             | expression bop=(OP_MUL | OP_DIV | OP_MOD) expression
                             | expression bop=(OP_ADD | OP_SUB) expression
@@ -86,6 +91,11 @@ expression                  : methodCall
                             | expression bop=OP_AND expression
                             | expression bop=OP_OR expression
                             ;
+
+/*fieldAccess                 : DOT methodCall
+                            | DOT variable
+                            ;*/
+
 
 booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
@@ -101,6 +111,7 @@ booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression bop=OP_QUESTION expression COLON expression
                             | expression postfix=(OP_INC | OP_DEC)
                             ;
+
 
 literal                     : DECIMAL_LITERAL
                             | HEX_LITERAL
@@ -237,8 +248,6 @@ formalParameterList         : formalParameter (COMMA formalParameter)* ;
 
 formalParameter             : type variableDeclarator;
 
-block                       : LBRACE statements* RBRACE ;
-
 
 blockStatement              : ifStatement
                             | forStatement
@@ -263,8 +272,6 @@ statement                   : assertStatement
 assertStatement             : KEYWORD_ASSERT expression (COLON expression)?
                             ;
 
-forStatement                : KEYWORD_FOR LPAREN forControl RPAREN block
-                            ;
 
 whileStatement              : KEYWORD_WHILE parExpression block
                             ;
@@ -291,15 +298,6 @@ returnStatement             : KEYWORD_RETURN expression?
                             ;
 
 
-ifStatement                 : KEYWORD_IF parExpression block (KEYWORD_ELSE KEYWORD_IF parExpression block)* (KEYWORD_ELSE block)?
-                            ;
-
-
-statements                  : ( block | statement SEMI | blockStatement | SEMI) ( block | statement SEMI | blockStatement | SEMI )*
-                            ;
-
-
-
 catchClause                 : KEYWORD_CATCH LPAREN IDENTIFIER RPAREN block ;
 
 finallyBlock                : KEYWORD_FINALLY block ;
@@ -310,20 +308,6 @@ switchLabel                 : KEYWORD_CASE constantExpression=expression COLON
                             | KEYWORD_DEFAULT COLON
                             ;
 
-forControl                  : type variableDeclaratorId COLON expression                  # forControlForeach
-                            | forInit? SEMI expression? SEMI forUpdate=expressionList?  # forControlBasic
-                            ;
-
-forInit                     : variableDeclaration
-                            | expressionList
-                            ;
-
-parExpression               : LPAREN expression RPAREN ;
-
-expressionList              : expression (COMMA expression)* ;
-
-methodCall                  : methodName=IDENTIFIER LPAREN argumentList? RPAREN  # exprMethodCall
-                            ;
 
 expression                  : methodCall
                             | LPAREN expression RPAREN
