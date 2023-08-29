@@ -34,6 +34,7 @@ KEYWORD_ASSERT     : 'assert';
 KEYWORD_BREAK      : 'break';
 KEYWORD_CASE       : 'case';
 KEYWORD_CONST      : 'const';
+KEYWORD_VAR        : 'var';
 KEYWORD_CONTINUE   : 'continue';
 KEYWORD_DEFAULT    : 'default';
 KEYWORD_DO         : 'do';
@@ -51,7 +52,8 @@ KEYWORD_TRY        : 'try';
 KEYWORD_CATCH      : 'catch';
 KEYWORD_FINALLY    : 'finally';
 KEYWORD_THROW      : 'throw';
-KEYWORD_INSTANCEOF : 'instanceof';
+KEYWORD_TYPE       : 'type';
+KEYWORD_OF         : 'of';
 
 KEYWORD_USE        : 'uses';
 KEYWORD_AS         : 'as';
@@ -61,17 +63,27 @@ KEYWORD_CHAT       : 'chat';
 KEYWORD_GM         : 'gm';
 KEYWORD_TRUSTED    : 'trusted';
 
+// Types
+KEYWORD_BOOLEAN     : 'bool';
+KEYWORD_NUMBER      : 'number';
+KEYWORD_STRING      : 'string';
+KEYWORD_LIST        : 'list';
+KEYWORD_DICT        : 'dict';
+KEYWORD_INT         : 'int';
+KEYWORD_ROLL        : 'roll';
+KEYWORD_ANY         : 'any';
+KEYWORD_MAP         : 'map';
+KEYWORD_TOKEN       : 'token';
+KEYWORD_ACTOR       : 'actor';
+KEYWORD_IMAGE       : 'image';
+KEYWORD_SOUND       : 'sound';
+KEYWORD_TABLE       : 'table';
+KEYWORD_LIGHT       : 'light';
+KEYWORD_LIGHTSOURCE : 'lightsource';
+KEYWORD_PATH        : 'path';
+KEYWORD_ITEM        : 'item';
 
-KEYWORD_CONSTANT   : 'constant';
-KEYWORD_INTEGER    : 'integer';
-KEYWORD_NUMBER     : 'number';
-KEYWORD_STRING     : 'string';
-KEYWORD_TOKEN      : 'token';
-KEYWORD_ROLL       : 'roll';
-KEYWORD_BOOLEAN    : 'bool';
-KEYWORD_DICT       : 'dict';
-KEYWORD_LIST       : 'list';
-KEYWORD_TYPE       : 'type';
+
 
 // Literals
 DECIMAL_LITERAL : ( '0' | [1-9] (Digits? | '_' + Digits) ) ;
@@ -94,15 +106,16 @@ RBRACK  : ']';
 SEMI    : ';';
 COMMA   : ',';
 DOT     : '.';
+COLON   : ':';
 
 // Operators
-OP_ASSIGN  : '=';
 OP_GT      : '>';
 OP_LT      : '<';
 OP_BANG    : '!';
 OP_TILDE   : '~';
 OP_QUESTION: '?';
-OP_COLON   : ':';
+
+
 OP_EQUAL   : '==';
 OP_LE      : '<=';
 OP_GE      : '>=';
@@ -120,6 +133,7 @@ OP_BITOR   : '|';
 OP_CARET   : '^';
 OP_MOD     : '%';
 
+OP_ASSIGN     : '=';
 OP_ADD_ASSIGN : '+=';
 OP_SUB_ASSIGN : '-=';
 OP_MUL_ASSIGN : '*=';
@@ -130,6 +144,8 @@ OP_XOR_ASSIGN : '^=';
 OP_MOD_ASSIGN : '%=';
 
 
+
+
 // Whitespace and comments
 WS           : [ \t\r\n\u000C]+  -> channel(HIDDEN);
 COMMENT      : '/*' .*? '*/'     -> channel(HIDDEN);
@@ -138,7 +154,6 @@ LINE_COMMENT : '//' ~[\r\n]*     -> channel(HIDDEN);
 // Identifiers
 IDENTIFIER   : Letter LetterOrDigit* ;
 
-LOCAL_VAR_LEADER   : '$';
 
 // Fragment rules
 fragment EscapeSequence : '\\' [btnfr"'\\] ;

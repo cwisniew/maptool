@@ -11,17 +11,141 @@ options { tokenVocab=MTScript2Lexer; }
 
 chat                        : (OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE | OPEN_ROLL_MODE dice CLOSE_ROLL_MODE | text)* ;
 
-text                        : passThroughText
+text                        : TEXT+
                             ;
 
-passThroughText             : TEXT+
+script                      : statement+
                             ;
 
-script                      : stmt=statement
-                            | stmtList=statements;
+statement                   : variableDeclarationOrInit SEMI
+                            | constantDeclarationAndInit SEMI
+                            | variableName=IDENTIFIER OP_ASSIGN expression SEMI
+                            | forStatement
+                            | ifStatement
+                            ;
+
+block                       : LBRACE statement+ RBRACE
+                            ;
+
+methodCall                  : methodName=IDENTIFIER LPAREN argumentList? RPAREN
+                            ;
+
+argumentList                : argument (COMMA argument)*
+                            ;
+
+argument                    : expression
+                            ;
+
+ifStatement                 : KEYWORD_IF LPAREN booleanTest RPAREN block (KEYWORD_ELSE KEYWORD_IF LPAREN booleanTest RPAREN block)* (KEYWORD_ELSE block)?
+                            ;
+
+forStatement                : KEYWORD_FOR LPAREN forInit? SEMI forTest? SEMI forUpdate? RPAREN block
+                            ;
+
+forInit                     : variableDeclarationInit
+                            ;
+
+forTest                     : booleanTest
+                            ;
+
+forUpdate                   : variableAssign
+                            ;
+
+variableDeclarationOrInit   : KEYWORD_VAR declaration (COMMA declaration )*
+                            ;
+
+variableDeclarationInit     : KEYWORD_VAR declarationInit (COMMA declarationInit )*
+                            ;
+
+constantDeclarationAndInit  : KEYWORD_CONST declarationInit ( COMMA declarationInit )*
+                            ;
+
+variableDefinition          : variable COLON type
+                            ;
+
+declaration                 : declarationInit
+                            | variableDefinition
+                            ;
+
+declarationInit             : variableDefinition OP_ASSIGN expression
+                            ;
 
 
-variable                    : scope=LOCAL_VAR_LEADER varName=IDENTIFIER
+expression                  : methodCall
+                            | variable
+                            | literal
+                            ;
+
+
+booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
+                            | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
+                            | expression bop=OP_AND expression
+                            | expression bop=OP_OR expression
+                            | expression bop=OP_QUESTION expression COLON expression
+                            | prefix=OP_BANG expression
+                            | expression bop=OP_BITAND expression
+                            | expression bop=OP_CARET expression
+                            | expression bop=OP_BITOR expression
+                            | expression bop=OP_AND expression
+                            | expression bop=OP_OR expression
+                            | expression bop=OP_QUESTION expression COLON expression
+                            | expression postfix=(OP_INC | OP_DEC)
+                            ;
+
+literal                     : DECIMAL_LITERAL
+                            | HEX_LITERAL
+                            | NUMBER_LITERAL
+                            | STRING_LITERAL
+                            | BOOL_LITERAL
+                            | NULL_LITERAL
+                            ;
+
+dice                        : numDice=(ROLL_DECIMAL_LITERAL | EM_ROLL_DECIMAL_LITERAL)? diceName=(ROLL_IDENTIFIER | EM_ROLL_IDENTIFIER)
+                            ;
+
+variable                    : IDENTIFIER
+                            ;
+
+variableAssign              : variable assignmentOp expression
+                            | postfixExpression
+                            ;
+
+postfixExpression           : variable postfix=(OP_INC | OP_DEC)
+                            ;
+
+assignmentOp                : OP_ASSIGN
+                            | OP_ADD_ASSIGN
+                            | OP_SUB_ASSIGN
+                            | OP_MUL_ASSIGN
+                            | OP_DIV_ASSIGN
+                            | OP_AND_ASSIGN
+                            | OP_OR_ASSIGN
+                            | OP_XOR_ASSIGN
+                            | OP_MOD_ASSIGN
+                            ;
+
+type                        : KEYWORD_BOOLEAN
+                            | KEYWORD_NUMBER
+                            | KEYWORD_STRING
+                            | KEYWORD_LIST
+                            | KEYWORD_DICT
+                            | KEYWORD_INT
+                            | KEYWORD_ROLL
+                            | KEYWORD_ANY
+                            | KEYWORD_MAP
+                            | KEYWORD_TOKEN
+                            | KEYWORD_ACTOR
+                            | KEYWORD_IMAGE
+                            | KEYWORD_SOUND
+                            | KEYWORD_TABLE
+                            | KEYWORD_LIGHT
+                            | KEYWORD_LIGHTSOURCE
+                            | KEYWORD_PATH
+                            | KEYWORD_ITEM
+                            ;
+
+/*
+variable                    : varName=IDENTIFIER
                             ;
 
 group                       : LPAREN val=expression RPAREN                          # parenGroup
@@ -101,7 +225,7 @@ formalParameters            : LPAREN formalParameterList? RPAREN ;
 
 formalParameterList         : formalParameter (COMMA formalParameter)* ;
 
-formalParameter             : type variableDeclaratorId;
+formalParameter             : type variableDeclarator;
 
 block                       : LBRACE statements* RBRACE ;
 
@@ -126,7 +250,7 @@ statement                   : assertStatement
                             | statementExpression=expression
                             ;
 
-assertStatement             : KEYWORD_ASSERT expression (OP_COLON expression)?
+assertStatement             : KEYWORD_ASSERT expression (COLON expression)?
                             ;
 
 forStatement                : KEYWORD_FOR LPAREN forControl RPAREN block
@@ -172,11 +296,11 @@ finallyBlock                : KEYWORD_FINALLY block ;
 
 switchBlockStatementGroup   : switchLabel+ statements ;
 
-switchLabel                 : KEYWORD_CASE constantExpression=expression OP_COLON
-                            | KEYWORD_DEFAULT OP_COLON
+switchLabel                 : KEYWORD_CASE constantExpression=expression COLON
+                            | KEYWORD_DEFAULT COLON
                             ;
 
-forControl                  : type variableDeclaratorId OP_COLON expression                  # forControlForeach
+forControl                  : type variableDeclaratorId COLON expression                  # forControlForeach
                             | forInit? SEMI expression? SEMI forUpdate=expressionList?  # forControlBasic
                             ;
 
@@ -188,49 +312,52 @@ parExpression               : LPAREN expression RPAREN ;
 
 expressionList              : expression (COMMA expression)* ;
 
-methodCall                  : IDENTIFIER LPAREN expressionList? RPAREN  # exprMethodCall
+methodCall                  : methodName=IDENTIFIER LPAREN argumentList? RPAREN  # exprMethodCall
                             ;
 
-expression                  : LPAREN expression RPAREN
+expression                  : methodCall
+                            | LPAREN expression RPAREN
                             | diceExpression
                             | literal
                             | variable
                             | expression bop=DOT ( IDENTIFIER | methodCall )
                             | expression LBRACK expression RBRACK
-                            | methodCall
                             | json
                             | prefix=OP_BANG expression
                             | expression bop=(OP_MUL | OP_DIV | OP_MOD) expression
                             | expression bop=(OP_ADD | OP_SUB) expression
                             | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
-                            | expression bop=KEYWORD_INSTANCEOF type
+                            | expression bop=(TYPE OF) type
                             | expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression bop=OP_BITAND expression
                             | expression bop=OP_CARET expression
                             | expression bop=OP_BITOR expression
                             | expression bop=OP_AND expression
                             | expression bop=OP_OR expression
-                            | expression bop=OP_QUESTION expression OP_COLON expression
+                            | expression bop=OP_QUESTION expression COLON expression
                             | expression postfix=(OP_INC | OP_DEC)
-                            | <assoc=right> expression bop=(OP_ASSIGN | OP_ADD_ASSIGN | OP_SUB_ASSIGN | OP_MUL_ASSIGN | OP_DIV_ASSIGN | OP_AND_ASSIGN | OP_OR_ASSIGN | OP_XOR_ASSIGN | OP_MOD_ASSIGN ) expression
+                            | <assoc=right> variable bop=(OP_ASSIGN | OP_ADD_ASSIGN |
+                            OP_SUB_ASSIGN | OP_MUL_ASSIGN | OP_DIV_ASSIGN | OP_AND_ASSIGN | OP_OR_ASSIGN | OP_XOR_ASSIGN | OP_MOD_ASSIGN ) expression
                             ;
 
 
-variableDeclaration         : type variableDeclarationAssign (COMMA variableDeclarationAssign )*
+
+variableDeclaration         : KEYWORD_VAR variableDeclarationAssign (COMMA variableDeclarationAssign )*
                             ;
 
-variableDeclarationAssign   : variable ( OP_ASSIGN expression )?
+variableDeclarationAssign   : variable COLON IDENTIFIER ( OP_ASSIGN expression )?
                             ;
 
-constantDeclaration         : KEYWORD_CONST type constantDeclarationAssign ( COMMA constantDeclarationAssign )* SEMI
+constantDeclaration         : KEYWORD_CONST constantDeclarationAssign ( COMMA constantDeclarationAssign )* SEMI
                             ;
 
-constantDeclarationAssign   : IDENTIFIER OP_ASSIGN expression
+constantDeclarationAssign   : IDENTIFIER COLON IDENTIFIER ( LBRACK RBRACK)* OP_ASSIGN expression
                             ;
 
-variableDeclarator          : variableDeclaratorId (OP_ASSIGN variableInitializer)? ;
+variableDeclarator          : KEYWORD_VAR variableDeclaratorId (OP_ASSIGN variableInitializer)? ;
 
-variableDeclaratorId        : scope=LOCAL_VAR_LEADER IDENTIFIER ( LBRACK RBRACK )* ;
+
+variableDeclaratorId        : IDENTIFIER COLON IDENTIFIER ( LBRACK RBRACK )* ;
 
 variableInitializer         : arrayInitializer
                             | expression
@@ -240,7 +367,10 @@ arrayInitializer            : LBRACE (variableInitializer ( COMMA variableInitia
 
 ////////
 
-arguments                   : LPAREN expressionList? RPAREN ;
+argumentList                : argument (COMMA argument)* ;
+
+argument                    : (namedParameter=IDENTIFIER COLON)? expression
+                            ;
 
 listTypeDecl                : LBRACK RBRACK
                             ;
@@ -276,7 +406,9 @@ jsonArray                   : LBRACK (jsonValue (COMMA jsonValue)*)? RBRACK
                             | LBRACK RBRACK
                             ;
 
-jsonPair                    : STRING_LITERAL OP_COLON jsonValue
+jsonPair                    : STRING_LITERAL COLON jsonValue
                             ;
 
 
+
+*/
