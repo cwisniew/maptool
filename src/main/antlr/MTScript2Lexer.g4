@@ -54,6 +54,7 @@ KEYWORD_FINALLY    : 'finally';
 KEYWORD_THROW      : 'throw';
 KEYWORD_TYPE       : 'type';
 KEYWORD_OF         : 'of';
+KEYWORD_YIELD      : 'yield';
 
 KEYWORD_USE        : 'uses';
 KEYWORD_AS         : 'as';
@@ -142,6 +143,8 @@ OP_AND_ASSIGN : '&=';
 OP_OR_ASSIGN  : '|=';
 OP_XOR_ASSIGN : '^=';
 OP_MOD_ASSIGN : '%=';
+
+OP_ARROW      : '->';
 
 
 

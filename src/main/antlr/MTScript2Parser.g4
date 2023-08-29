@@ -19,15 +19,18 @@ script                      : statement+
 
 statement                   : variableDeclarationOrInit SEMI
                             | constantDeclarationAndInit SEMI
+                            | switchStatement
                             | expression SEMI
-                            | variableAssign SEMI
-                            | forStatement
-                            | whileStatement
-                            | doStatement SEMI
+                            | loopLabel? forStatement
+                            | loopLabel? whileStatement
+                            | loopLabel? doStatement SEMI
                             | ifStatement
                             | tryStatement
                             | throwStatement SEMI
+                            | variableAssign SEMI
+                            | yieldStatement SEMI
                             ;
+
 
 block                       : LBRACE statement+ RBRACE
                             ;
@@ -46,6 +49,9 @@ namedArgument               : variable COLON expression
                             ;
 
 ifStatement                 : KEYWORD_IF LPAREN booleanTest RPAREN block (KEYWORD_ELSE KEYWORD_IF LPAREN booleanTest RPAREN block)* (KEYWORD_ELSE block)?
+                            ;
+
+loopLabel                   : IDENTIFIER COLON
                             ;
 
 forStatement                : KEYWORD_FOR LPAREN variableDeclarationInit? SEMI booleanTest? SEMI variableAssign? RPAREN block
@@ -90,6 +96,7 @@ declarationInit             : variableDefinition OP_ASSIGN expression
 
 
 expression                  : methodCall
+                            | postfixExpression
                             | variable
                             | expression DOT variable
                             | expression DOT methodCall
@@ -126,13 +133,25 @@ booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression postfix=(OP_INC | OP_DEC)
                             ;
 
-switchExpression            : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchBlockStatementGroup* switchLabel* RBRACE
+switchExpression            : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchExpressionLabel+ (KEYWORD_DEFAULT OP_ARROW (block | expression) SEMI)? RBRACE
                             ;
 
-switchBlockStatementGroup   : (switchLabel+ statement+)+ (KEYWORD_DEFAULT COLON statement+)*
+switchExpressionLabel       : KEYWORD_CASE literal (COMMA literal)* OP_ARROW (block | expression SEMI)
+                            | KEYWORD_CASE KEYWORD_TYPE KEYWORD_OF type OP_ARROW (block | expression SEMI)
                             ;
 
-switchLabel                 : KEYWORD_CASE literal COLON
+
+yieldStatement              : KEYWORD_YIELD expression
+                            ;
+
+
+switchStatement             : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchStatementBlock* switchStatementLabel* RBRACE
+                            ;
+
+switchStatementBlock        : (switchStatementLabel+ statement+)+ (KEYWORD_DEFAULT COLON statement+)?
+                            ;
+
+switchStatementLabel        : KEYWORD_CASE literal COLON
                             | KEYWORD_CASE KEYWORD_TYPE KEYWORD_OF type COLON
                             ;
 
