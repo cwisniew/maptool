@@ -33,6 +33,7 @@ statement                   : variableDeclarationOrInit SEMI
                             | continueStatement SEMI
                             | assertStatement SEMI
                             | returnStatement SEMI
+                            | inlineFunctionDefinition SEMI
                             ;
 
 block                       : LBRACE statement+ RBRACE
@@ -192,6 +193,17 @@ assertStatement             : KEYWORD_ASSERT booleanTest (OP_ARROW expression)?
 returnStatement             : KEYWORD_RETURN expression?
                             ;
 
+inlineFunctionDefinition    : KEYWORD_FUNCTION funcName=IDENTIFIER LPAREN formalParameterList? RPAREN COLON returnType=type OP_ARROW expression
+                            ;
+
+
+formalParameterList         : formalParameter (COMMA formalParameter)*
+                            ;
+
+formalParameter             : variable COLON type
+                            ;
+
+
 assignmentOp                : OP_ASSIGN
                             | OP_ADD_ASSIGN
                             | OP_SUB_ASSIGN
@@ -296,9 +308,6 @@ formalParameter             : type variableDeclarator;
 
 
 blockStatement
-                            | doStatement
-                            | tryStatement
-                            | switchStatement
                             | methodDeclaration
                             ;
 
