@@ -26,7 +26,7 @@ statement                   : variableDeclarationOrInit SEMI
                             | doStatement SEMI
                             | ifStatement
                             | tryStatement
-                            | throwStatement
+                            | throwStatement SEMI
                             ;
 
 block                       : LBRACE statement+ RBRACE
@@ -66,6 +66,8 @@ catchClause                 : KEYWORD_CATCH LPAREN variable RPAREN block
 finallyBlock                : KEYWORD_FINALLY block
                             ;
 
+throwStatement              : KEYWORD_THROW expression
+                            ;
 
 variableDeclarationOrInit   : KEYWORD_VAR declaration (COMMA declaration )*
                             ;
@@ -105,6 +107,7 @@ expression                  : methodCall
                             | expression bop=OP_BITOR expression
                             | expression bop=OP_AND expression
                             | expression bop=OP_OR expression
+                            | switchExpression
                             ;
 
 
@@ -123,6 +126,15 @@ booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression postfix=(OP_INC | OP_DEC)
                             ;
 
+switchExpression            : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchBlockStatementGroup* switchLabel* RBRACE
+                            ;
+
+switchBlockStatementGroup   : (switchLabel+ statement+)+ (KEYWORD_DEFAULT COLON statement+)*
+                            ;
+
+switchLabel                 : KEYWORD_CASE literal COLON
+                            | KEYWORD_CASE KEYWORD_TYPE KEYWORD_OF type COLON
+                            ;
 
 literal                     : DECIMAL_LITERAL
                             | HEX_LITERAL
@@ -266,7 +278,6 @@ blockStatement
 statement                   : assertStatement
                             | switchStatement
                             | returnStatement
-                            | throwStatement
                             | breakStatement
                             | continueStatement
                             | variableDeclaration
@@ -279,9 +290,6 @@ assertStatement             : KEYWORD_ASSERT expression (COLON expression)?
 
 
 tryStatement                : KEYWORD_TRY block (catchClause+ finallyBlock? | finallyBlock)
-                            ;
-
-throwStatement              : KEYWORD_THROW expression
                             ;
 
 breakStatement              : KEYWORD_BREAK
