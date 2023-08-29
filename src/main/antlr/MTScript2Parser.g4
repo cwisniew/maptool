@@ -9,7 +9,7 @@ options { tokenVocab=MTScript2Lexer; }
 
 // Top level sentences
 
-chat                        : (OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE | OPEN_ROLL_MODE dice CLOSE_ROLL_MODE | text)* ;
+cht                        : (OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE | OPEN_ROLL_MODE dice CLOSE_ROLL_MODE | text)* ;
 
 text                        : TEXT+
                             ;
@@ -29,9 +29,10 @@ statement                   : variableDeclarationOrInit SEMI
                             | throwStatement SEMI
                             | variableAssign SEMI
                             | yieldStatement SEMI
-                            | KEYWORD_BREAK (label=IDENTIFIER)? SEMI
-                            | KEYWORD_CONTINUE (label=IDENTIFIER)? SEMI
+                            | breakStatement SEMI
+                            | continueStatement SEMI
                             | assertStatement SEMI
+                            | returnStatement SEMI
                             ;
 
 block                       : LBRACE statement+ RBRACE
@@ -76,6 +77,13 @@ finallyBlock                : KEYWORD_FINALLY block
 
 throwStatement              : KEYWORD_THROW expression
                             ;
+
+breakStatement              : KEYWORD_BREAK (label=IDENTIFIER)?
+                            ;
+
+continueStatement           : KEYWORD_CONTINUE (label=IDENTIFIER)?
+                            ;
+
 
 variableDeclarationOrInit   : KEYWORD_VAR declaration (COMMA declaration )*
                             ;
@@ -146,13 +154,13 @@ yieldStatement              : KEYWORD_YIELD expression
                             ;
 
 
-switchStatement             : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchStatementBlock* switchStatementLabel* RBRACE
+switchStatement             : KEYWORD_SWITCH LPAREN expression RPAREN LBRACE switchStatementBlock* RBRACE
                             ;
 
-switchStatementBlock        : (switchStatementLabel+ statement+)+ (KEYWORD_DEFAULT COLON statement+)?
+switchStatementBlock        : (switchStatementLabel statement+)+ (KEYWORD_DEFAULT COLON statement+)?
                             ;
 
-switchStatementLabel        : KEYWORD_CASE literal COLON
+switchStatementLabel        : KEYWORD_CASE literal (COMMA literal)* COLON
                             | KEYWORD_CASE KEYWORD_TYPE KEYWORD_OF type COLON
                             ;
 
@@ -162,6 +170,7 @@ literal                     : DECIMAL_LITERAL
                             | STRING_LITERAL
                             | BOOL_LITERAL
                             | NULL_LITERAL
+                            | NONE_LITERAL
                             ;
 
 dice                        : numDice=(ROLL_DECIMAL_LITERAL | EM_ROLL_DECIMAL_LITERAL)? diceName=(ROLL_IDENTIFIER | EM_ROLL_IDENTIFIER)
@@ -178,6 +187,9 @@ postfixExpression           : variable postfix=(OP_INC | OP_DEC)
                             ;
 
 assertStatement             : KEYWORD_ASSERT booleanTest (OP_ARROW expression)?
+                            ;
+
+returnStatement             : KEYWORD_RETURN expression?
                             ;
 
 assignmentOp                : OP_ASSIGN
@@ -212,8 +224,6 @@ type                        : KEYWORD_BOOLEAN
                             ;
 
 /*
-variable                    : varName=IDENTIFIER
-                            ;
 
 group                       : LPAREN val=expression RPAREN                          # parenGroup
                             | LBRACE val=expression RBRACE                          # braceGroup
@@ -273,12 +283,6 @@ exportDest                  : KEYWORD_INTERNAL
                             ;
 
 
-literal                     : integerLiteral    # literalInteger
-                            | NUMBER_LITERAL    # literalNumber
-                            | STRING_LITERAL    # literalString
-                            | BOOL_LITERAL      # literalBool
-                            | NULL_LITERAL      # literalNull
-                            ;
 
 methodDeclaration           : KEYWORD_FUNCTION IDENTIFIER formalParameters KEYWORD_RETURNS returnType=type block
                             | KEYWORD_PROCEDURE IDENTIFIER formalParameters block
@@ -296,40 +300,6 @@ blockStatement
                             | tryStatement
                             | switchStatement
                             | methodDeclaration
-                            ;
-
-statement                   : assertStatement
-                            | returnStatement
-                            ;
-
-assertStatement             : KEYWORD_ASSERT expression (COLON expression)?
-                            ;
-
-
-tryStatement                : KEYWORD_TRY block (catchClause+ finallyBlock? | finallyBlock)
-                            ;
-
-breakStatement              : KEYWORD_BREAK
-                            ;
-
-continueStatement           : KEYWORD_CONTINUE
-                            ;
-
-switchStatement             : KEYWORD_SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE
-                            ;
-
-returnStatement             : KEYWORD_RETURN expression?
-                            ;
-
-
-catchClause                 : KEYWORD_CATCH LPAREN IDENTIFIER RPAREN block ;
-
-finallyBlock                : KEYWORD_FINALLY block ;
-
-switchBlockStatementGroup   : switchLabel+ statements ;
-
-switchLabel                 : KEYWORD_CASE constantExpression=expression COLON
-                            | KEYWORD_DEFAULT COLON
                             ;
 
 
