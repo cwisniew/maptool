@@ -22,7 +22,11 @@ statement                   : variableDeclarationOrInit SEMI
                             | expression SEMI
                             | variableAssign SEMI
                             | forStatement
+                            | whileStatement
+                            | doStatement SEMI
                             | ifStatement
+                            | tryStatement
+                            | throwStatement
                             ;
 
 block                       : LBRACE statement+ RBRACE
@@ -44,17 +48,24 @@ namedArgument               : variable COLON expression
 ifStatement                 : KEYWORD_IF LPAREN booleanTest RPAREN block (KEYWORD_ELSE KEYWORD_IF LPAREN booleanTest RPAREN block)* (KEYWORD_ELSE block)?
                             ;
 
-forStatement                : KEYWORD_FOR LPAREN forInit? SEMI forTest? SEMI forUpdate? RPAREN block
+forStatement                : KEYWORD_FOR LPAREN variableDeclarationInit? SEMI booleanTest? SEMI variableAssign? RPAREN block
                             ;
 
-forInit                     : variableDeclarationInit
+whileStatement              : KEYWORD_WHILE LPAREN booleanTest RPAREN block
                             ;
 
-forTest                     : booleanTest
+doStatement                 : KEYWORD_DO block KEYWORD_WHILE LPAREN booleanTest RPAREN
                             ;
 
-forUpdate                   : variableAssign
+tryStatement                : KEYWORD_TRY block catchClause? finallyBlock?
                             ;
+
+catchClause                 : KEYWORD_CATCH LPAREN variable RPAREN block
+                            ;
+
+finallyBlock                : KEYWORD_FINALLY block
+                            ;
+
 
 variableDeclarationOrInit   : KEYWORD_VAR declaration (COMMA declaration )*
                             ;
@@ -234,10 +245,6 @@ literal                     : integerLiteral    # literalInteger
                             | NULL_LITERAL      # literalNull
                             ;
 
-integerLiteral              : DECIMAL_LITERAL
-                            | HEX_LITERAL
-                            ;
-
 methodDeclaration           : KEYWORD_FUNCTION IDENTIFIER formalParameters KEYWORD_RETURNS returnType=type block
                             | KEYWORD_PROCEDURE IDENTIFIER formalParameters block
                             ;
@@ -249,9 +256,7 @@ formalParameterList         : formalParameter (COMMA formalParameter)* ;
 formalParameter             : type variableDeclarator;
 
 
-blockStatement              : ifStatement
-                            | forStatement
-                            | whileStatement
+blockStatement
                             | doStatement
                             | tryStatement
                             | switchStatement
@@ -272,12 +277,6 @@ statement                   : assertStatement
 assertStatement             : KEYWORD_ASSERT expression (COLON expression)?
                             ;
 
-
-whileStatement              : KEYWORD_WHILE parExpression block
-                            ;
-
-doStatement                 : KEYWORD_DO block KEYWORD_WHILE parExpression
-                            ;
 
 tryStatement                : KEYWORD_TRY block (catchClause+ finallyBlock? | finallyBlock)
                             ;
