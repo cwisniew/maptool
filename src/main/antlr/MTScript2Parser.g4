@@ -31,10 +31,14 @@ block                       : LBRACE statement+ RBRACE
 methodCall                  : methodName=IDENTIFIER LPAREN argumentList? RPAREN
                             ;
 
-argumentList                : argument (COMMA argument)*
+argumentList                : argument (COMMA argument)* (COMMA namedArgument)*
+                            | namedArgument (COMMA namedArgument)*
                             ;
 
 argument                    : expression
+                            ;
+
+namedArgument               : variable COLON expression
                             ;
 
 ifStatement                 : KEYWORD_IF LPAREN booleanTest RPAREN block (KEYWORD_ELSE KEYWORD_IF LPAREN booleanTest RPAREN block)* (KEYWORD_ELSE block)?
@@ -91,10 +95,6 @@ expression                  : methodCall
                             | expression bop=OP_AND expression
                             | expression bop=OP_OR expression
                             ;
-
-/*fieldAccess                 : DOT methodCall
-                            | DOT variable
-                            ;*/
 
 
 booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
