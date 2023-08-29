@@ -330,21 +330,4 @@ arrayInitializer            : LBRACE (variableInitializer ( COMMA variableInitia
 
 ////////
 
-argumentList                : argument (COMMA argument)* ;
-
-argument                    : (namedParameter=IDENTIFIER COLON)? expression
-                            ;
-
-listTypeDecl                : LBRACK RBRACK
-                            ;
-
-type                        : KEYWORD_INTEGER listTypeDecl?
-                            | KEYWORD_NUMBER listTypeDecl?
-                            | KEYWORD_STRING listTypeDecl?
-                            | KEYWORD_ROLL listTypeDecl?
-                            | KEYWORD_BOOLEAN listTypeDecl?
-                            | KEYWORD_DICT listTypeDecl?
-                            | IDENTIFIER listTypeDecl?
-                            ;
-
 */
