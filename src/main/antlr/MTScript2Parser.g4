@@ -31,8 +31,8 @@ statement                   : variableDeclarationOrInit SEMI
                             | yieldStatement SEMI
                             | KEYWORD_BREAK (label=IDENTIFIER)? SEMI
                             | KEYWORD_CONTINUE (label=IDENTIFIER)? SEMI
+                            | assertStatement SEMI
                             ;
-
 
 block                       : LBRACE statement+ RBRACE
                             ;
@@ -131,7 +131,6 @@ booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression bop=OP_BITOR expression
                             | expression bop=OP_AND expression
                             | expression bop=OP_OR expression
-                            | expression bop=OP_QUESTION expression COLON expression
                             | expression postfix=(OP_INC | OP_DEC)
                             ;
 
@@ -176,6 +175,9 @@ variableAssign              : variable assignmentOp expression
                             ;
 
 postfixExpression           : variable postfix=(OP_INC | OP_DEC)
+                            ;
+
+assertStatement             : KEYWORD_ASSERT booleanTest (OP_ARROW expression)?
                             ;
 
 assignmentOp                : OP_ASSIGN
@@ -298,9 +300,6 @@ blockStatement
 
 statement                   : assertStatement
                             | returnStatement
-                            | variableDeclaration
-                            | constantDeclaration
-                            | statementExpression=expression
                             ;
 
 assertStatement             : KEYWORD_ASSERT expression (COLON expression)?
