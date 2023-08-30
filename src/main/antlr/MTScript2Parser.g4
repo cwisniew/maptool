@@ -45,7 +45,7 @@ blockStatement              : variableDeclarationOrInit SEMI
                             | ifStatement
                             | tryStatement
                             | throwStatement SEMI
-                            | variableAssign SEMI
+                            | valueAssign SEMI
                             | yieldStatement SEMI
                             | breakStatement SEMI
                             | continueStatement SEMI
@@ -54,6 +54,8 @@ blockStatement              : variableDeclarationOrInit SEMI
                             | inlineFunctionDefinition SEMI
                             | functionDefinition
                             | procedureDefinition
+                            | referencePoint SEMI
+                            | logStatement SEMI
                             ;
 
 block                       : LBRACE blockStatement+ RBRACE
@@ -95,7 +97,7 @@ ifStatement                 : KEYWORD_IF LPAREN booleanTest RPAREN block (KEYWOR
 loopLabel                   : IDENTIFIER COLON
                             ;
 
-forStatement                : KEYWORD_FOR LPAREN variableDeclarationInit? SEMI booleanTest? SEMI variableAssign? RPAREN block
+forStatement                : KEYWORD_FOR LPAREN variableDeclarationInit? SEMI booleanTest? SEMI valueAssign? RPAREN block
                             ;
 
 whileStatement              : KEYWORD_WHILE LPAREN booleanTest RPAREN block
@@ -122,6 +124,11 @@ breakStatement              : KEYWORD_BREAK (label=IDENTIFIER)?
 continueStatement           : KEYWORD_CONTINUE (label=IDENTIFIER)?
                             ;
 
+logStatement                : KEYWORD_LOG (level = (KEYWORD_INFO | KEYWORD_WARN | KEYWORD_ERROR ))? expression stringInterpolationUsing?
+                            ;
+
+stringInterpolationUsing    : KEYWORD_USING expression (COMMA expression)*
+                            ;
 
 variableDeclarationOrInit   : KEYWORD_VAR declaration (COMMA declaration )*
                             ;
@@ -130,6 +137,13 @@ variableDeclarationInit     : KEYWORD_VAR declarationInit (COMMA declarationInit
                             ;
 
 constantDeclarationAndInit  : KEYWORD_CONST declarationInit ( COMMA declarationInit )*
+                            ;
+
+referenceDeclarationAndInit : KEYWORD_REF referencePoint ( COMMA referencePoint )*
+                            ;
+
+referencePoint              : reference OP_ARROW property
+                            | reference OP_ARROW dataAccess
                             ;
 
 variableDefinition          : variable COLON type
@@ -143,15 +157,21 @@ declarationInit             : variableDefinition OP_ASSIGN expression
                             ;
 
 
+dataAccess                  : KEYWORD_DATA LBRACK (namespace=expression COMMA)? name=expression RBRACK
+                            ;
+
 expression                  : methodCall
                             | postfixExpression
                             | variable
+                            | property
+                            | reference
                             | expression DOT variable
                             | expression DOT methodCall
                             | LPAREN expression RPAREN
                             | literal
                             | variableDeclarationOrInit
                             | constantDeclarationAndInit
+                            | referenceDeclarationAndInit
                             | prefix=OP_BANG expression
                             | expression bop=(OP_MUL | OP_DIV | OP_MOD) expression
                             | expression bop=(OP_ADD | OP_SUB) expression
@@ -166,6 +186,8 @@ expression                  : methodCall
                             | dictValue
                             | listValue
                             | embeddedDiceRoll
+                            | dataAccess
+                            | i18n
                             ;
 
 
@@ -220,11 +242,45 @@ dice                        : numDice=(ROLL_DECIMAL_LITERAL | EM_ROLL_DECIMAL_LI
 variable                    : IDENTIFIER
                             ;
 
-variableAssign              : variable assignmentOp expression
-                            | postfixExpression
+property                    : PROPERTY_LEADER IDENTIFIER
                             ;
 
-postfixExpression           : variable postfix=(OP_INC | OP_DEC)
+reference                   : REFERENCE_LEADER IDENTIFIER
+                            ;
+
+valueAssign                 : variableAssign
+                            | propertyAssign
+                            | referenceAssign
+                            | dataAssign
+                            ;
+
+variableAssign              : variable assignmentOp expression
+                            | variablePostFix
+                            ;
+
+variablePostFix             : variable postfix=(OP_INC | OP_DEC)
+                            ;
+
+propertyAssign              : property assignmentOp expression
+                            | propertyPostFix
+                            ;
+
+propertyPostFix             : property postfix=(OP_INC | OP_DEC)
+                            ;
+
+postfixExpression           : variablePostFix
+                            | propertyPostFix
+                            | referencePostFix
+                            ;
+
+referenceAssign             : reference assignmentOp expression
+                            | referencePostFix
+                            ;
+
+referencePostFix            : reference postfix=(OP_INC | OP_DEC)
+                            ;
+
+dataAssign                  : dataAccess assignmentOp expression
                             ;
 
 assertStatement             : KEYWORD_ASSERT booleanTest (OP_ARROW expression)?
@@ -356,3 +412,5 @@ arrayInitializer            : LBRACE (variableInitializer ( COMMA variableInitia
 ////////
 
 */
+
+

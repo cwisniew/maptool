@@ -15,6 +15,7 @@ OPEN_HANDLBARS_RAW_MODE     : '{{{' -> pushMode(HANDLEBARS_RAW_MODE);
 OPEN_HANDLEBARS_MODE        : '{{' -> pushMode(HANDLEBARS_MODE);
 TEXT                        : .+? ;
 
+
 // In a hndlebars expression
 mode HANDLEBARS_MODE;
 CLOSE_HANDLEBARS_MODE       : '}}' -> popMode;
@@ -57,6 +58,7 @@ KEYWORD_BREAK      : 'break';
 KEYWORD_CASE       : 'case';
 KEYWORD_CONST      : 'const';
 KEYWORD_VAR        : 'var';
+KEYWORD_REF        : 'ref';
 KEYWORD_CONTINUE   : 'continue';
 KEYWORD_DEFAULT    : 'default';
 KEYWORD_DO         : 'do';
@@ -76,7 +78,15 @@ KEYWORD_THROW      : 'throw';
 KEYWORD_TYPE       : 'type';
 KEYWORD_OF         : 'of';
 KEYWORD_YIELD      : 'yield';
-
+KEYWORD_DATA       : 'data';
+KEYWORD_PRINT      : 'print';
+KEYWORD_DEBUG      : 'debug';
+KEYWORD_LOG        : 'log';
+KEYWORD_ERROR      : 'error';
+KEYWORD_WARN       : 'warn';
+KEYWORD_INFO       : 'info';
+KEYWORD_I18N       : 'i18n';
+KEYWORD_USING      : 'using';
 
 KEYWORD_USE        : 'uses';
 KEYWORD_AS         : 'as';
@@ -87,6 +97,9 @@ KEYWORD_INTERNAL   : 'internal';
 KEYWORD_CHAT       : 'chat';
 KEYWORD_GM         : 'gm';
 KEYWORD_TRUSTED    : 'trusted';
+
+PROPERTY_LEADER    : '@';
+REFERENCE_LEADER   : '#';
 
 // Types
 KEYWORD_BOOLEAN     : 'bool';
