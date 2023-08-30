@@ -101,6 +101,7 @@ KEYWORD_TRUSTED    : 'trusted';
 PROPERTY_LEADER    : '@';
 REFERENCE_LEADER   : '#';
 
+STRING_INTERPORLATION_PREFIX : '$';
 // Types
 KEYWORD_BOOLEAN     : 'bool';
 KEYWORD_NUMBER      : 'number';
@@ -120,7 +121,6 @@ KEYWORD_LIGHT       : 'light';
 KEYWORD_LIGHTSOURCE : 'lightsource';
 KEYWORD_PATH        : 'path';
 KEYWORD_ITEM        : 'item';
-
 
 
 // Literals

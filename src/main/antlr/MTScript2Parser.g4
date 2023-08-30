@@ -124,10 +124,19 @@ breakStatement              : KEYWORD_BREAK (label=IDENTIFIER)?
 continueStatement           : KEYWORD_CONTINUE (label=IDENTIFIER)?
                             ;
 
-logStatement                : KEYWORD_LOG (level = (KEYWORD_INFO | KEYWORD_WARN | KEYWORD_ERROR ))? expression stringInterpolationUsing?
+logStatement                : KEYWORD_LOG (level = (KEYWORD_INFO | KEYWORD_WARN | KEYWORD_ERROR ) )? expression
+                            ;
+
+i18n                        : KEYWORD_I18N expression stringInterpolationUsing?
+                            ;
+
+stringInterpolation         : STRING_INTERPORLATION_PREFIX string=STRING_LITERAL stringInterpolationUsing?
                             ;
 
 stringInterpolationUsing    : KEYWORD_USING expression (COMMA expression)*
+                            | KEYWORD_USING KEYWORD_DICT expression
+                            | KEYWORD_USING KEYWORD_LIST expression
+                            | KEYWORD_USING LPAREN argumentList RPAREN
                             ;
 
 variableDeclarationOrInit   : KEYWORD_VAR declaration (COMMA declaration )*
@@ -188,8 +197,8 @@ expression                  : methodCall
                             | embeddedDiceRoll
                             | dataAccess
                             | i18n
+                            | stringInterpolation
                             ;
-
 
 booleanTest                 : expression bop=(OP_EQUAL | OP_NOTEQUAL) expression
                             | expression bop=(OP_LE | OP_GE | OP_GT | OP_LT) expression
