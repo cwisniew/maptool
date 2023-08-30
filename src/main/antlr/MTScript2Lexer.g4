@@ -7,26 +7,48 @@ package net.rptools.mtscript.parser;
 @lexer::members {
 }
 
-// Default Mode
-OPEN_SCRIPT_MODE            : '[[' -> pushMode(SCRIPT_MODE);
-OPEN_ROLL_MODE              : '[' -> pushMode(ROLL_MODE);
+// Default Mode (i.e. chat)
+OPEN_SCRIPT_MODE            : '[[[' -> pushMode(SCRIPT_MODE);
+OPEN_ROLL_MODE              : '[[' -> pushMode(ROLL_MODE);
+OPEN_MARKDOWN_LINK_MODE     : '[' -> pushMode(MARKDOWN_LINK_MODE);
+OPEN_HANDLBARS_RAW_MODE     : '{{{' -> pushMode(HANDLEBARS_RAW_MODE);
+OPEN_HANDLEBARS_MODE        : '{{' -> pushMode(HANDLEBARS_MODE);
 TEXT                        : .+? ;
 
+// In a hndlebars expression
+mode HANDLEBARS_MODE;
+CLOSE_HANDLEBARS_MODE       : '}}' -> popMode;
+HANDLEBARS_TEXT             : ~[}]*;
+
+// In a hndlebars raw expression
+mode HANDLEBARS_RAW_MODE;
+CLOSE_HANDLEBARS_RAW_MODE   : '}}}' -> popMode;
+HANDLEBARS_RAW_TEXT         : ~[}]*;
+
+
+// In a markdown link
+mode MARKDOWN_LINK_MODE;
+CLOSE_MARKDOWN_LINK_MODE    : ']' -> popMode;
+MARKDOWN_LINK_TEXT          : ~[\]]*;
+
+// In a roll expression
 mode ROLL_MODE;
-CLOSE_ROLL_MODE             : ']' -> popMode;
+CLOSE_ROLL_MODE             : ']]' -> popMode;
 ROLL_DECIMAL_LITERAL        : ( '0' | [1-9] (Digits? | '_' + Digits) ) ;
 ROLL_IDENTIFIER             : Letter LetterOrDigit* ;
 ROLL_WS                     : [ \t\r\n\u000C]+  -> channel(HIDDEN);
 
+// In a embebed roll expression (inside a script)
 mode EMBEDED_ROLL_MODE;
 CLOSE_EMBEDED_ROLL_MODE     : ']]' -> popMode;
 EM_ROLL_DECIMAL_LITERAL     : ( '0' | [1-9] (Digits? | '_' + Digits) ) ;
 EM_ROLL_IDENTIFIER          : Letter LetterOrDigit* ;
 EM_ROLL_WS                  : [ \t\r\n\u000C]+  -> channel(HIDDEN);
 
+// In a script
 mode SCRIPT_MODE;
 OPEN_EMBEDED_ROLL_MODE    : '[['  -> pushMode(EMBEDED_ROLL_MODE);
-CLOSE_SCRIPT_MODE         : ']]' -> popMode;
+CLOSE_SCRIPT_MODE         : ']]]' -> popMode;
 
 
 // Keywords
@@ -58,7 +80,9 @@ KEYWORD_YIELD      : 'yield';
 
 KEYWORD_USE        : 'uses';
 KEYWORD_AS         : 'as';
+KEYWORD_FROM       : 'from';
 KEYWORD_EXPORT     : 'export';
+KEYWORD_IMPORT     : 'import';
 KEYWORD_INTERNAL   : 'internal';
 KEYWORD_CHAT       : 'chat';
 KEYWORD_GM         : 'gm';

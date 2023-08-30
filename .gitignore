@@ -43,7 +43,7 @@ src/main/resources/sentry.properties
 workbench.xmi
 .theia
 .nb-*
-
+src/main/gen
 # Keystore
 build-resources/rptools-keystore
 /log.html

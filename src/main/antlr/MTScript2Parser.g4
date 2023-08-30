@@ -9,7 +9,17 @@ options { tokenVocab=MTScript2Lexer; }
 
 // Top level sentences
 
-cht                        : (OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE | OPEN_ROLL_MODE dice CLOSE_ROLL_MODE | text)* ;
+chat                        : chatContents* EOF
+                            ;
+
+chatContents                : OPEN_SCRIPT_MODE script  CLOSE_SCRIPT_MODE
+                            | OPEN_ROLL_MODE dice CLOSE_ROLL_MODE
+                            | text
+                            | OPEN_MARKDOWN_LINK_MODE MARKDOWN_LINK_TEXT CLOSE_MARKDOWN_LINK_MODE
+                            | OPEN_HANDLBARS_RAW_MODE HANDLEBARS_RAW_TEXT CLOSE_HANDLEBARS_RAW_MODE
+                            | OPEN_HANDLEBARS_MODE HANDLEBARS_TEXT CLOSE_HANDLEBARS_MODE
+                            ;
+
 
 text                        : TEXT+
                             ;
@@ -22,6 +32,7 @@ statement                   : topLevelStatement
                             ;
 
 topLevelStatement           : exportStatement SEMI
+                            | importStatement SEMI
                             ;
 
 blockStatement              : variableDeclarationOrInit SEMI
@@ -48,7 +59,21 @@ blockStatement              : variableDeclarationOrInit SEMI
 block                       : LBRACE blockStatement+ RBRACE
                             ;
 
-exportStatement             : KEYWORD_EXPORT name=IDENTIFIER KEYWORD_AS STRING_LITERAL (modifier = (KEYWORD_TRUSTED | KEYWORD_GM))?
+exportStatement             : KEYWORD_EXPORT name=IDENTIFIER KEYWORD_AS fullyQualifiedName exportDestination?
+                            ;
+
+importStatement             : KEYWORD_IMPORT name=fullyQualifiedName KEYWORD_FROM fromPackage=fullyQualifiedName (KEYWORD_AS asName=fullyQualifiedName)?
+                            ;
+
+exportDestination           : exportDestKeyword (COMMA exportDestKeyword)*
+                            ;
+
+exportDestKeyword           : KEYWORD_TRUSTED
+                            | KEYWORD_CHAT
+                            | KEYWORD_GM
+                            ;
+
+fullyQualifiedName          : IDENTIFIER (DOT IDENTIFIER)*
                             ;
 
 methodCall                  : methodName=IDENTIFIER LPAREN argumentList? RPAREN
