@@ -21,6 +21,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import javax.swing.SwingUtilities;
 
 /**
@@ -207,5 +208,17 @@ public class FlatImageLabel {
     }
 
     return bounds;
+  }
+
+  public BufferedImage renderImage(String string) {
+    var dim =
+        getDimensions(
+            new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics(), string);
+    var image =
+        new BufferedImage((int) dim.getWidth(), (int) dim.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    var g2d = (Graphics2D) image.getGraphics();
+    render(g2d, 0, 0, string);
+    g2d.dispose();
+    return image;
   }
 }

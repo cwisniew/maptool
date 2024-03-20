@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.tool.texttool;
 
-import java.awt.*;
 import javax.swing.*;
 import net.rptools.maptool.client.swing.ColorWell;
 
@@ -31,6 +30,7 @@ public class EditLabelDialogView {
   /** Checkbox to determine whether to show the border. */
   private JCheckBox showBorderCheckBox;
 
+  /** The border colour picker. */
   private ColorWell borderColor;
 
   /** Spinner for specifying the border width. */
@@ -45,20 +45,7 @@ public class EditLabelDialogView {
    * The dialog view can be accessed by calling the getRootComponent() method, which returns the
    * root component of the view.
    */
-  public EditLabelDialogView() {
-    showBorderCheckBox.addActionListener(
-        e -> {
-          if (showBorderCheckBox.isSelected()) {
-            borderColor.setVisible(true); // disabling a ColorWell does nothing.
-            borderWidth.setEnabled(true);
-            borderArc.setEnabled(true);
-          } else {
-            borderColor.setVisible(false); // disabling a ColorWell does nothing.
-            borderWidth.setEnabled(false);
-            borderArc.setEnabled(false);
-          }
-        });
-  }
+  public EditLabelDialogView() {}
 
   /**
    * Retrieves the root component of the EditLabelDialogView class.

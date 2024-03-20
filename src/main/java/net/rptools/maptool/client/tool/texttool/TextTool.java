@@ -22,18 +22,25 @@ import java.awt.event.MouseEvent;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -66,6 +73,10 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
   private boolean isDragging;
 
   private boolean selectedNewLabel;
+
+  private boolean useLabelPresets;
+
+  private boolean showBorder;
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
@@ -365,6 +376,30 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       return (JButton) getComponent("okButton");
     }
 
+    public JButton getManagePresetsButton() {
+      return (JButton) getComponent("managePresetsButton");
+    }
+
+    public JCheckBox getUseLabelPresetsCheckBox() {
+      return (JCheckBox) getComponent("useLabelPresets");
+    }
+
+    public JComboBox<String> getLabelPresetsComboBox() {
+      return (JComboBox<String>) getComponent("presetsComboBox");
+    }
+
+    public JCheckBox getShowBorderCheckBox() {
+      return (JCheckBox) getComponent("@showBorder");
+    }
+
+    public JCheckBox getShowBackgroundCheckBox() {
+      return (JCheckBox) getComponent("@showBackground");
+    }
+
+    public JLabel getLabelPreview() {
+      return (JLabel) getComponent("labelPreview");
+    }
+
     /**
      * Initializes the OK button by adding an ActionListener that handles the button click event.
      * Upon clicking the OK button, the dialog's 'accepted' flag is set to true, the commit() method
@@ -377,6 +412,90 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
                 dialog.accepted = true;
                 commit();
                 close();
+              });
+    }
+
+    public void initPreview() {
+      getLabelTextField()
+          .getDocument()
+          .addDocumentListener(
+              new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                  generatePreview();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                  generatePreview();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                  generatePreview();
+                }
+              });
+      getFontSizeSpinner().addChangeListener(e -> generatePreview());
+      getForegroundColorWell().addActionListener(e -> generatePreview());
+      getBackgroundColorWell().addActionListener(e -> generatePreview());
+      getBorderColorWell().addActionListener(e -> generatePreview());
+      getBorderWidthSpinner().addChangeListener(e -> generatePreview());
+      getBorderArcSpinner().addChangeListener(e -> generatePreview());
+      getShowBorderCheckBox().addChangeListener(e -> generatePreview());
+      getShowBackgroundCheckBox().addChangeListener(e -> generatePreview());
+
+      generatePreview();
+    }
+
+    public void initShowBorderCheckBox() {
+      getShowBorderCheckBox()
+          .addItemListener(
+              l -> {
+                showBorder = getShowBorderCheckBox().isSelected();
+                adjustControls();
+              });
+    }
+
+    private void generatePreview() {
+      var label = new Label(getLabelTextField().getText(), 0, 0);
+      label.setForegroundColor(getForegroundColorWell().getColor());
+      label.setBackgroundColor(getBackgroundColorWell().getColor());
+      label.setFontSize((Integer) getFontSizeSpinner().getValue());
+      label.setBorderColor(getBorderColorWell().getColor());
+      label.setBorderWidth((Integer) getBorderWidthSpinner().getValue());
+      label.setBorderArc((Integer) getBorderArcSpinner().getValue());
+      label.setShowBackground(getShowBackgroundCheckBox().isSelected());
+      label.setShowBorder(getShowBorderCheckBox().isSelected());
+      var flatLabel = new FlatImageLabelFactory().getMapImageLabel(label);
+
+      var text = getLabelTextField().getText();
+      if (text == null || text.isEmpty()) {
+        text = "";
+      }
+      var img = flatLabel.renderImage(text);
+      getLabelPreview().setIcon(new ImageIcon(img));
+      dialog.pack(); // Contents of dialog may have changed size.
+    }
+
+    public void adjustControls() {
+      getLabelPresetsComboBox().setEnabled(useLabelPresets);
+      getFontSizeSpinner().setEnabled(!useLabelPresets);
+      getForegroundColorWell().setVisible(!useLabelPresets); // disabling a ColorWell does nothing.
+      getBackgroundColorWell().setVisible(!useLabelPresets); // disabling a ColorWell does nothing.
+      getBorderColorWell()
+          .setVisible(!useLabelPresets && showBorder); // disabling a ColorWell does nothing.
+      getBorderWidthSpinner().setEnabled(!useLabelPresets && showBorder);
+      getBorderArcSpinner().setEnabled(!useLabelPresets && showBorder);
+      getShowBorderCheckBox().setEnabled(!useLabelPresets);
+      getShowBackgroundCheckBox().setEnabled(!useLabelPresets);
+    }
+
+    public void initUseLabelPresetsCheckBox() {
+      getUseLabelPresetsCheckBox()
+          .addItemListener(
+              l -> {
+                useLabelPresets = getUseLabelPresetsCheckBox().isSelected();
+                adjustControls();
               });
     }
 
