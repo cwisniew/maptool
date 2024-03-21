@@ -39,6 +39,9 @@ public class EditLabelDialogView {
   /** Spinner for specifying the border arc. */
   private JSpinner borderArc;
 
+  private JButton updatePresetButton;
+  private JButton createNewPresetButton;
+
   /**
    * The EditLabelDialogView class represents a dialog view for editing a label. It contains
    * components for specifying label properties such as border color, border width, and border arc.

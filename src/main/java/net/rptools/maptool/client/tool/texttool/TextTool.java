@@ -74,8 +74,6 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
   private boolean selectedNewLabel;
 
-  private boolean useLabelPresets;
-
   private boolean showBorder;
 
   @Override
@@ -380,10 +378,6 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       return (JButton) getComponent("managePresetsButton");
     }
 
-    public JCheckBox getUseLabelPresetsCheckBox() {
-      return (JCheckBox) getComponent("useLabelPresets");
-    }
-
     public JComboBox<String> getLabelPresetsComboBox() {
       return (JComboBox<String>) getComponent("presetsComboBox");
     }
@@ -412,6 +406,14 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
                 dialog.accepted = true;
                 commit();
                 close();
+              });
+    }
+
+    public void initShowBackgroundCheckBox() {
+      getShowBackgroundCheckBox()
+          .addItemListener(
+              l -> {
+                getBackgroundColorWell().setVisible(getShowBackgroundCheckBox().isSelected());
               });
     }
 
@@ -478,25 +480,9 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     }
 
     public void adjustControls() {
-      getLabelPresetsComboBox().setEnabled(useLabelPresets);
-      getFontSizeSpinner().setEnabled(!useLabelPresets);
-      getForegroundColorWell().setVisible(!useLabelPresets); // disabling a ColorWell does nothing.
-      getBackgroundColorWell().setVisible(!useLabelPresets); // disabling a ColorWell does nothing.
-      getBorderColorWell()
-          .setVisible(!useLabelPresets && showBorder); // disabling a ColorWell does nothing.
-      getBorderWidthSpinner().setEnabled(!useLabelPresets && showBorder);
-      getBorderArcSpinner().setEnabled(!useLabelPresets && showBorder);
-      getShowBorderCheckBox().setEnabled(!useLabelPresets);
-      getShowBackgroundCheckBox().setEnabled(!useLabelPresets);
-    }
-
-    public void initUseLabelPresetsCheckBox() {
-      getUseLabelPresetsCheckBox()
-          .addItemListener(
-              l -> {
-                useLabelPresets = getUseLabelPresetsCheckBox().isSelected();
-                adjustControls();
-              });
+      getBorderColorWell().setVisible(showBorder); // disabling a ColorWell does nothing.
+      getBorderWidthSpinner().setEnabled(showBorder);
+      getBorderArcSpinner().setEnabled(showBorder);
     }
 
     /**
