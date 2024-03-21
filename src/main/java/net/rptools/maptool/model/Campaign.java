@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.model.label.presets.LabelPresets;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignDto;
 
@@ -85,6 +86,9 @@ public class Campaign {
 
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
+
+  /** The label presets for the campaign. */
+  private final LabelPresets labelPresets = new LabelPresets();
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -204,6 +208,15 @@ public class Campaign {
    */
   public boolean isBeingSerialized() {
     return isBeingSerialized;
+  }
+
+  /**
+   * Returns the label presets for the campaign.
+   *
+   * @return the label presets for the campaign.
+   */
+  public LabelPresets getLabelPresets() {
+    return labelPresets;
   }
 
   /**

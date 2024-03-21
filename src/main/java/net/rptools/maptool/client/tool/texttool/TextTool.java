@@ -294,13 +294,30 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public boolean commit() {
-      getModel().setForegroundColor(getForegroundColorWell().getColor());
-      getModel().setBackgroundColor(getBackgroundColorWell().getColor());
-      getModel().setFontSize(Math.max((Integer) getFontSizeSpinner().getValue(), 6));
-      getModel().setBorderColor(getBorderColorWell().getColor());
-      getModel().setBorderWidth(Math.max((Integer) getBorderWidthSpinner().getValue(), 0));
-      getModel().setBorderArc(Math.max((Integer) getBorderArcSpinner().getValue(), 0));
+      copyValuesToLabel(getModel());
       return super.commit();
+    }
+
+    private void copyLabelToValues(Label label) {
+      getForegroundColorWell().setColor(label.getForegroundColor());
+      getBackgroundColorWell().setColor(label.getBackgroundColor());
+      getFontSizeSpinner().setValue(label.getFontSize());
+      getBorderColorWell().setColor(label.getBorderColor());
+      getBorderWidthSpinner().setValue(label.getBorderWidth());
+      getBorderArcSpinner().setValue(label.getBorderArc());
+      getLabelTextField().setText(label.getLabel());
+      getShowBorderCheckBox().setSelected(label.getBorderWidth() > 0);
+      getShowBackgroundCheckBox().setSelected(label.getBackgroundColor() != null);
+      showBorder = label.getBorderWidth() > 0;
+      adjustControls();
+    }
+    private void copyValuesToLabel(Label label) {
+      label.setForegroundColor(getForegroundColorWell().getColor());
+      label.setBackgroundColor(getBackgroundColorWell().getColor());
+      label.setFontSize((Integer) getFontSizeSpinner().getValue());
+      label.setBorderColor(getBorderColorWell().getColor());
+      label.setBorderWidth((Integer) getBorderWidthSpinner().getValue());
+      label.setBorderArc((Integer) getBorderArcSpinner().getValue());
     }
 
     /**
@@ -424,6 +441,25 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
               e -> {
                 String presetName =
                     JOptionPane.showInputDialog(MapTool.getFrame(), "Enter preset name:");
+                if (presetName != null) {
+                  var presets = new Label();
+                  copyValuesToLabel(presets);
+                  MapTool.getCampaign().getLabelPresets().addPreset(presetName, getModel());
+                  populatePresets();
+                }
+              });
+    }
+
+    public void initPresetsComboBox() {
+      populatePresets();
+      getLabelPresetsComboBox()
+          .addActionListener(
+              e -> {
+                var presetName = (String) getLabelPresetsComboBox().getSelectedItem();
+                if (presetName != null) {
+                  var label = MapTool.getCampaign().getLabelPresets().getLabel(presetName);
+                  bind(label);
+                }
               });
     }
 
@@ -476,16 +512,17 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
               });
     }
 
+    private void populatePresets() {
+      var combo = getLabelPresetsComboBox();
+      combo.removeAllItems();
+      MapTool.getCampaign().getLabelPresets().getPresetNames().stream()
+          .sorted()
+          .forEach(combo::addItem);
+    }
+
     private void generatePreview() {
       var label = new Label(getLabelTextField().getText(), 0, 0);
-      label.setForegroundColor(getForegroundColorWell().getColor());
-      label.setBackgroundColor(getBackgroundColorWell().getColor());
-      label.setFontSize((Integer) getFontSizeSpinner().getValue());
-      label.setBorderColor(getBorderColorWell().getColor());
-      label.setBorderWidth((Integer) getBorderWidthSpinner().getValue());
-      label.setBorderArc((Integer) getBorderArcSpinner().getValue());
-      label.setShowBackground(getShowBackgroundCheckBox().isSelected());
-      label.setShowBorder(getShowBorderCheckBox().isSelected());
+      copyValuesToLabel(label);
       var flatLabel = new FlatImageLabelFactory().getMapImageLabel(label);
 
       var text = getLabelTextField().getText();
