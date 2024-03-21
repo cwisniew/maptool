@@ -81,19 +81,21 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="5ecff" class="javax.swing.JButton" binding="updatePresetButton" default-binding="true">
+                  <component id="5ecff" class="javax.swing.JButton" default-binding="true">
                     <constraints>
                       <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
+                      <name value="updatePresetButton"/>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.updatePreset"/>
                     </properties>
                   </component>
-                  <component id="6f971" class="javax.swing.JButton" binding="createNewPresetButton" default-binding="true">
+                  <component id="6f971" class="javax.swing.JButton" default-binding="true">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
+                      <name value="createNewPresetButton"/>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.createPreset"/>
                     </properties>
                   </component>

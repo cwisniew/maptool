@@ -28,6 +28,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -378,6 +379,14 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       return (JButton) getComponent("managePresetsButton");
     }
 
+    public JButton getCreateNewPresetButton() {
+      return (JButton) getComponent("createNewPresetButton");
+    }
+
+    public JButton getUpdatePresetButton() {
+      return (JButton) getComponent("updatePresetButton");
+    }
+
     public JComboBox<String> getLabelPresetsComboBox() {
       return (JComboBox<String>) getComponent("presetsComboBox");
     }
@@ -406,6 +415,15 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
                 dialog.accepted = true;
                 commit();
                 close();
+              });
+    }
+
+    public void initCreateNewPresetButton() {
+      getCreateNewPresetButton()
+          .addActionListener(
+              e -> {
+                String presetName =
+                    JOptionPane.showInputDialog(MapTool.getFrame(), "Enter preset name:");
               });
     }
 
