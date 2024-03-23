@@ -500,6 +500,19 @@ message LabelDto {
   int32 border_color = 10;
   bool show_border = 11;
   int32 border_arc = 12;
+  string presets_id = 13;
+  int32 horizontal_padding = 14;
+  int32 vertical_padding = 15;
+}
+
+message LabelPresetDto {
+  string id = 1;
+  string name = 2;
+  LabelDto preset = 3;
+}
+
+message LabelPresetsDto {
+  repeated LabelPresetDto presets = 1;
 }
 
 message DrawnElementListDto {

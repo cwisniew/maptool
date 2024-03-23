@@ -65,6 +65,8 @@ import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.label.LabelManager;
+import net.rptools.maptool.model.label.presets.LabelPresets;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
@@ -72,8 +74,10 @@ import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.LabelFontAndBGTransform;
+import net.rptools.maptool.model.transform.campaign.LabelShapeAndPadTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
+import net.rptools.maptool.server.proto.LabelPresetsDto;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -123,6 +127,12 @@ public class PersistenceUtil {
 
   /** Represents the file path of the game data content file within a persisted campaign file. */
   private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
+
+  /** The directory where label data is stored . */
+  private static final String LABEL_DIR = "labels/";
+
+  /** The filename that label presets are stored in. */
+  private static final String LABEL_PRESETS_FILE = LABEL_DIR + "label-presets.json";
 
   /**
    * The version number of the campaign.
@@ -201,6 +211,7 @@ public class PersistenceUtil {
         "1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
     // Label background color and font
     campaignVersionManager.registerTransformation("1.15.0", new LabelFontAndBGTransform());
+    campaignVersionManager.registerTransformation("1.16.0", new LabelShapeAndPadTransform());
 
     // For a short time, assets were stored separately in files ending with ".dat". As of 1.3.64,
     // they are
@@ -415,6 +426,11 @@ public class PersistenceUtil {
             saveGameData(pakFile);
             saveTimer.stop("Save Game Data");
 
+            // Store the Label Presets
+            saveTimer.start("Save Label Presets");
+            saveLabelPresets(pakFile);
+            saveTimer.stop("Save Label Presets");
+
             try {
               saveTimer.start("Set content");
 
@@ -564,6 +580,7 @@ public class PersistenceUtil {
         }
 
         new CampaignManager().clearCampaignData();
+        loadLabelPresets(pakFile);
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 
@@ -933,6 +950,41 @@ public class PersistenceUtil {
     } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
     }
+  }
+
+  /**
+   * Saves the label presets to the packed campaign file.
+   *
+   * @param packedFile the {@link PackedFile} that the campaign will be saved to.
+   * @throws IOException if an error occurs saving the file.
+   */
+  private static void saveLabelPresets(PackedFile packedFile) throws IOException {
+    // Remove all the label presets from the packed file first.
+    for (String path : packedFile.getPaths()) {
+      if (path.startsWith(LABEL_DIR) && !path.equals(LABEL_DIR)) {
+        packedFile.removeFile(path);
+      }
+    }
+
+    var labelManager = new LabelManager();
+    var dto = labelManager.getPresets().toDto();
+    packedFile.putFile(
+        LABEL_PRESETS_FILE, JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+  }
+
+  private static void loadLabelPresets(PackedFile packedFile) throws IOException {
+    var labelPresets = new LabelManager().getPresets();
+    if (!packedFile.hasFile(LABEL_PRESETS_FILE)) {
+      labelPresets.clear();
+      return;
+    }
+
+    var builder = LabelPresetsDto.newBuilder();
+    JsonFormat.parser()
+        .merge(new InputStreamReader(packedFile.getFileAsInputStream(LABEL_PRESETS_FILE)), builder);
+    var labelPresetsDto = builder.build();
+    var newPresets = LabelPresets.fromDto(labelPresetsDto);
+    labelPresets.setPresets(newPresets);
   }
 
   /**

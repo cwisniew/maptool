@@ -20,9 +20,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.AppStyle;
+import net.rptools.maptool.model.Label;
+import net.rptools.maptool.model.label.LabelShape;
 
 /**
  * The FlatImageLabel class represents an image label with customizable properties such as padding,
@@ -110,13 +112,16 @@ public class FlatImageLabel {
   /** The borderArc variable represents the size of the border arc for a FlatImageLabel. */
   private final int borderArc;
 
+  /** The shape variable represents the shape of the label. */
+  private final LabelShape labelShape;
+
   /**
    * The FlatImageLabel class represents an image label with customizable properties such as
    * padding, colors, font, and justification. It can be used to create labels for images in various
    * containers.
    *
-   * @param padX the horizontal padding value for the label.
-   * @param padY the vertical padding value for the label.
+   * @param horizontalPadding the horizontal padding value for the label.
+   * @param verticalPadding the vertical padding value for the label.
    * @param foreground the color value for the foreground of the label.
    * @param background the color value for the background of the label.
    * @param borderColor the color value for the border of the label.
@@ -125,17 +130,18 @@ public class FlatImageLabel {
    * @param borderWidth the size of the border for the label.
    */
   public FlatImageLabel(
-      int padX,
-      int padY,
+      int horizontalPadding,
+      int verticalPadding,
       Color foreground,
       Color background,
       Color borderColor,
       Font font,
       Justification justification,
       int borderWidth,
-      int borderArc) {
-    this.padX = padX;
-    this.padY = padY;
+      int borderArc,
+      LabelShape labelShape) {
+    this.padX = horizontalPadding;
+    this.padY = verticalPadding;
     this.foreground = foreground;
     this.background = background;
     this.font = font;
@@ -143,6 +149,21 @@ public class FlatImageLabel {
     this.borderColor = borderColor;
     this.borderWidth = borderWidth;
     this.borderArc = borderArc;
+    this.labelShape = labelShape;
+  }
+
+  public FlatImageLabel(Label label, Justification justification) {
+    this(
+        label.getHorizontalPadding(),
+        label.getVerticalPadding(),
+        label.getForegroundColor(),
+        label.getBackgroundColor(),
+        label.getBorderColor(),
+        AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), label.getFontSize()),
+        justification,
+        label.getBorderWidth(),
+        label.getBorderArc(),
+        label.getShape());
   }
 
   /**
@@ -159,8 +180,17 @@ public class FlatImageLabel {
     var fm = g2d.getFontMetrics();
     int strWidth = SwingUtilities.computeStringWidth(fm, string);
     int strHeight = fm.getHeight();
-    return new Dimension(
-        strWidth + padX * 2 + borderWidth * 2, strHeight + padY * 2 + borderWidth * 2);
+    int innerRectWidth = strWidth + padX * 2;
+    int innerRectHeight = strHeight + padY * 2;
+
+    return switch (labelShape) {
+      case RECTANGLE, ELLIPSE -> new Dimension(
+          innerRectWidth + borderWidth * 2, innerRectHeight + borderWidth * 2);
+      case DIAMOND -> new Dimension(
+          innerRectWidth + innerRectHeight, innerRectHeight + innerRectHeight);
+      case TRIANGLE -> new Dimension(
+          innerRectWidth + innerRectWidth, innerRectHeight + innerRectHeight / 2);
+    };
   }
 
   /**
@@ -187,38 +217,109 @@ public class FlatImageLabel {
 
     var bounds = new Rectangle(x, y, width, height);
 
-    int stringY = y + height / 2 + strHeight / 2;
+    int stringY =
+        switch (labelShape) {
+          case RECTANGLE, ELLIPSE, DIAMOND -> y + height / 2 + strHeight / 2;
+          case TRIANGLE -> y + height / 2 + strHeight; // Triangle text needs to be lower
+        };
+
     int stringX =
         switch (justification) {
           case Left -> x + padY;
           case Right -> width - strWidth - padX;
-          case Center -> x + padX + (width - strWidth) / 2 - padX;
+          case Center -> switch (labelShape) {
+            case RECTANGLE, ELLIPSE, TRIANGLE, DIAMOND -> x + (width - strWidth) / 2;
+          };
         };
 
-    var labelRect = new RoundRectangle2D.Float(x, y, width - 1, height - 1, borderArc, borderArc);
     g2d.setBackground(background);
     g2d.setColor(background);
-    g2d.fill(labelRect);
+    switch (labelShape) {
+      case RECTANGLE -> drawRectangleBackground(g2d, x, y, width, height, borderArc, borderArc);
+      case ELLIPSE -> drawEllipseBackground(g2d, x, y, width, height);
+      case DIAMOND -> drawDiamondBackground(g2d, x, y, width, height);
+      case TRIANGLE -> drawTriangleBackground(g2d, x, y, width, height);
+    }
     g2d.setColor(foreground);
     g2d.drawString(string, stringX, stringY);
     if (borderWidth > 0) {
       g2d.setStroke(new BasicStroke(borderWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
       g2d.setColor(borderColor);
-      g2d.draw(labelRect);
+      switch (labelShape) {
+        case RECTANGLE -> drawRectangleBorder(g2d, x, y, width, height, borderArc);
+        case ELLIPSE -> drawEllipseBorder(g2d, x, y, width, height);
+        case DIAMOND -> drawDiamondBorder(g2d, x, y, width, height);
+        case TRIANGLE -> drawTriangleBorder(g2d, x, y, width, height);
+      }
     }
 
     return bounds;
+  }
+
+  private void drawRectangleBackground(
+      Graphics2D g2d, int x, int y, int width, int height, int arcWidth, int arcHeight) {
+    g2d.fillRoundRect(x, y, width - 1, height - 1, arcWidth, arcHeight);
+  }
+
+  private void drawEllipseBackground(Graphics2D g2d, int x, int y, int width, int height) {
+    g2d.fillOval(x, y, width - 1, height - 1);
+  }
+
+  private void drawDiamondBackground(Graphics2D g2d, int x, int y, int width, int height) {
+    int midX = x + width / 2;
+    int midY = y + height / 2;
+    int[] diamondX = {x, midX, x + width, midX};
+    int[] diamondY = {midY, y, midY, y + height};
+    g2d.fillPolygon(diamondX, diamondY, 4);
+  }
+
+  private void drawTriangleBackground(Graphics2D g2d, int x, int y, int width, int height) {
+    int midX = x + width / 2;
+    int[] triangleX = {x, midX, x + width - 1};
+    int[] triangleY = {y + height, y, y + height};
+    g2d.fillPolygon(triangleX, triangleY, 3);
+  }
+
+  private void drawRectangleBorder(Graphics2D g2d, int x, int y, int width, int height, int arc) {
+    g2d.drawRoundRect(x, y, width - 1, height - 1, arc, arc);
+  }
+
+  private void drawEllipseBorder(Graphics2D g2d, int x, int y, int width, int height) {
+    g2d.drawOval(x, y, width - 1, height - 1);
+  }
+
+  private void drawDiamondBorder(Graphics2D g2d, int x, int y, int width, int height) {
+    int midX = x + width / 2;
+    int midY = y + height / 2;
+    int[] diamondX = {x, midX, x + width, midX};
+    int[] diamondY = {midY, y, midY, y + height};
+    g2d.drawPolygon(diamondX, diamondY, 4);
+  }
+
+  private void drawTriangleBorder(Graphics2D g2d, int x, int y, int width, int height) {
+    int midX = x + width / 2;
+    int[] triangleX = {x, midX, x + width - 1};
+    int[] triangleY = {y + height, y, y + height};
+    g2d.drawPolygon(triangleX, triangleY, 3);
   }
 
   public BufferedImage renderImage(String string) {
     var dim =
         getDimensions(
             new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics(), string);
-    var image =
-        new BufferedImage((int) dim.getWidth(), (int) dim.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    int width = (int) dim.getWidth();
+    int height = (int) dim.getHeight();
+    var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     var g2d = (Graphics2D) image.getGraphics();
     render(g2d, 0, 0, string);
     g2d.dispose();
     return image;
+  }
+
+  public boolean supportsArcCorner() {
+    return switch (labelShape) {
+      case RECTANGLE -> true;
+      case ELLIPSE, DIAMOND, TRIANGLE -> false;
+    };
   }
 }

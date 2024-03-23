@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.maptool.model.Label;
+import net.rptools.maptool.server.proto.LabelPresetDto;
+import net.rptools.maptool.server.proto.LabelPresetsDto;
 
 public class LabelPresets {
 
@@ -28,11 +30,48 @@ public class LabelPresets {
     return new HashSet<>(presets.keySet());
   }
 
-  public Label getLabel(String name) {
+  public Label getPreset(String name) {
     return presets.get(name);
   }
 
   public void addPreset(String name, Label label) {
+    // TODO: Check that the name doesn't already exist.
     presets.put(name, label);
+  }
+
+  public LabelPresetsDto toDto() {
+    var presetsDto = LabelPresetsDto.newBuilder();
+    for (var entry : presets.entrySet()) {
+      var dto = LabelPresetDto.newBuilder();
+      var preset = entry.getValue();
+      dto.setId(preset.getId().toString()).setName(entry.getKey()).setPreset(preset.toDto());
+      presetsDto.addPresets(dto);
+    }
+    return presetsDto.build();
+  }
+
+  public static LabelPresets fromDto(LabelPresetsDto dto) {
+    var presets = new LabelPresets();
+    for (var preset : dto.getPresetsList()) {
+      presets.addPreset(preset.getName(), Label.fromDto(preset.getPreset()));
+    }
+    return presets;
+  }
+
+  public void setPresets(LabelPresets newPresets) {
+    clear();
+    presets.putAll(newPresets.presets);
+  }
+
+  public void rename(String oldName, String newName) {
+    // TODO: Check that name does not already exist.
+    var value = presets.remove(oldName);
+    if (value != null) {
+      presets.put(newName, value);
+    }
+  }
+
+  public void clear() {
+    presets.clear();
   }
 }

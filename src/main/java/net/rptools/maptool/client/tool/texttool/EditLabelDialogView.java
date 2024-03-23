@@ -15,7 +15,9 @@
 package net.rptools.maptool.client.tool.texttool;
 
 import javax.swing.*;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.ColorWell;
+import net.rptools.maptool.model.label.presets.LabelPresets;
 
 /**
  * The EditLabelDialogView class represents a dialog view for editing a label. It contains
@@ -34,10 +36,15 @@ public class EditLabelDialogView {
   private ColorWell borderColor;
 
   /** Spinner for specifying the border width. */
-  private JSpinner borderWidth;
+  private JSpinner borderWidthSpinner;
 
   /** Spinner for specifying the border arc. */
-  private JSpinner borderArc;
+  private JSpinner borderArcSpinner;
+
+  private JComboBox<LabelPresets> labelShape;
+  private JSpinner fontSizeSpinner;
+  private JSpinner horizontalPaddingSpinner;
+  private JSpinner verticalPaddingSpinner;
 
   /**
    * The EditLabelDialogView class represents a dialog view for editing a label. It contains
@@ -54,5 +61,17 @@ public class EditLabelDialogView {
    */
   public JComponent getRootComponent() {
     return mainPanel;
+  }
+
+  private void createUIComponents() {
+    labelShape = new JComboBox<>();
+    fontSizeSpinner =
+        new JSpinner(new SpinnerNumberModel(AppPreferences.getMapLabelFontSize(), 8, 256, 1));
+    horizontalPaddingSpinner = new JSpinner(new SpinnerNumberModel(4, 0, 256, 1));
+    verticalPaddingSpinner = new JSpinner(new SpinnerNumberModel(4, 0, 256, 1));
+    borderArcSpinner =
+        new JSpinner(new SpinnerNumberModel(AppPreferences.getMapLabelBorderArc(), 0, 256, 1));
+    borderWidthSpinner =
+        new JSpinner(new SpinnerNumberModel(AppPreferences.getMapLabelBorderWidth(), 0, 256, 1));
   }
 }

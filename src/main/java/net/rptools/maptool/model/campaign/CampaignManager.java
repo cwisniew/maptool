@@ -20,6 +20,7 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.label.LabelManager;
 import net.rptools.maptool.model.library.LibraryManager;
 
 /**
@@ -39,5 +40,6 @@ public class CampaignManager {
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
     UserDefinedMacroFunctions.getInstance().clearUserDefinedFunctions();
     MacroManager.removeCampaignAliases();
+    new LabelManager().getPresets().clear();
   }
 }

@@ -15,6 +15,8 @@
 package net.rptools.maptool.model;
 
 import java.awt.Color;
+import net.rptools.maptool.model.label.LabelManager;
+import net.rptools.maptool.model.label.LabelShape;
 import net.rptools.maptool.server.proto.LabelDto;
 
 /**
@@ -93,6 +95,30 @@ public class Label {
   /** The font size of the label. */
   private int fontSize = DEFAULT_LABEL_FONT_SIZE;
 
+  /** The shape of the label. */
+  private LabelShape shape = LabelShape.RECTANGLE;
+
+  /** The default padding of the label. */
+  private static final int DEFAULT_PADDING = 4;
+
+  /** The horizontal padding of the label. */
+  private int horizontalPadding = DEFAULT_PADDING;
+
+  /** The vertical padding of the label. */
+  private int verticalPadding = DEFAULT_PADDING;
+
+  /**
+   * The preset label ID to copy properties from.
+   *
+   * @see LabelManager
+   * @see LabelManager#getPresets()
+   * @see GUID
+   */
+  private GUID presetsId;
+
+  /** The preset label object to copy properties from. */
+  private volatile Label preset;
+
   /**
    * Creates a new instance of the {@link Label} class.
    *
@@ -106,6 +132,9 @@ public class Label {
    * @param showBorder indicates whether the label should show the border
    * @param borderArc the arc of the label's border
    * @param fontSize the font size of the label
+   * @param horizontalPadding the horizontal padding of the label
+   * @param verticalPadding the vertical padding of the label
+   * @param presetsId the preset id to copy values from
    */
   private Label(
       GUID id,
@@ -119,7 +148,10 @@ public class Label {
       boolean showBorder,
       int borderWidth,
       int borderArc,
-      int fontSize) {
+      int fontSize,
+      int horizontalPadding,
+      int verticalPadding,
+      GUID presetsId) {
     this.id = id;
     this.label = label;
     this.x = x;
@@ -132,6 +164,45 @@ public class Label {
     this.borderWidth = borderWidth;
     this.borderArc = borderArc;
     this.fontSize = fontSize;
+    this.horizontalPadding = horizontalPadding;
+    this.verticalPadding = verticalPadding;
+    this.presetsId = presetsId;
+  }
+
+  /**
+   * Creates a new instance of the Label class with the specified properties.
+   *
+   * @param id the global unique identifier of the label
+   * @param label the text content of the label
+   * @param x the x-coordinate of the label's position
+   * @param y the y-coordinate of the label's position
+   * @param presetsId the preset id to copy properties from
+   */
+  public Label(GUID id, String label, int x, int y, GUID presetsId) {
+    this.id = id;
+    this.label = label;
+    this.x = x;
+    this.y = y;
+    this.presetsId = presetsId;
+    setFromPreset();
+  }
+
+  /** Sets the properties of the label object based on the preset label object. */
+  private void setFromPreset() {
+    if (preset == null && presetsId != null) {
+      preset = new LabelManager().getPresets().getPreset(presetsId.toString());
+    }
+    if (preset != null) {
+      showBackground = preset.isShowBackground();
+      foregroundColor = preset.getForegroundColorValue();
+      backgroundColor = preset.getBackgroundColorValue();
+      showBorder = preset.isShowBorder();
+      borderWidth = preset.getBorderWidth();
+      borderArc = preset.getBorderArc();
+      fontSize = preset.getFontSize();
+      horizontalPadding = preset.getHorizontalPadding();
+      verticalPadding = preset.getVerticalPadding();
+    }
   }
 
   /** Creates a new instance of the Label class with an empty string as the label text. */
@@ -183,7 +254,11 @@ public class Label {
         label.showBorder,
         label.borderWidth,
         label.borderArc,
-        label.fontSize);
+        label.fontSize,
+        label.horizontalPadding,
+        label.verticalPadding,
+        label.presetsId);
+    preset = label.preset;
   }
 
   /**
@@ -255,7 +330,11 @@ public class Label {
    * @return true if the background should be shown, false otherwise
    */
   public boolean isShowBackground() {
-    return showBackground;
+    if (preset != null) {
+      return preset.isShowBackground();
+    } else {
+      return showBackground;
+    }
   }
 
   /**
@@ -264,7 +343,9 @@ public class Label {
    * @param showBackground indicates whether the background should be shown
    */
   public void setShowBackground(boolean showBackground) {
-    this.showBackground = showBackground;
+    if (preset == null) {
+      this.showBackground = showBackground;
+    } // else ignore
   }
 
   /**
@@ -273,7 +354,11 @@ public class Label {
    * @return the foreground color
    */
   public Color getForegroundColor() {
-    return new Color(foregroundColor, true);
+    if (preset != null) {
+      return preset.getForegroundColor();
+    } else {
+      return new Color(foregroundColor, true);
+    }
   }
 
   /**
@@ -282,7 +367,11 @@ public class Label {
    * @return the background color
    */
   public Color getBackgroundColor() {
-    return new Color(backgroundColor, true);
+    if (preset != null) {
+      return preset.getBackgroundColor();
+    } else {
+      return new Color(backgroundColor, true);
+    }
   }
 
   /**
@@ -291,7 +380,11 @@ public class Label {
    * @return the font size
    */
   public int getFontSize() {
-    return fontSize;
+    if (preset != null) {
+      return preset.getFontSize();
+    } else {
+      return fontSize;
+    }
   }
 
   /**
@@ -300,7 +393,11 @@ public class Label {
    * @return the foreground color value
    */
   public int getForegroundColorValue() {
-    return foregroundColor;
+    if (preset != null) {
+      return preset.getForegroundColorValue();
+    } else {
+      return foregroundColor;
+    }
   }
 
   /**
@@ -309,7 +406,11 @@ public class Label {
    * @return the background color value
    */
   public int getBackgroundColorValue() {
-    return backgroundColor;
+    if (preset != null) {
+      return preset.getBackgroundColorValue();
+    } else {
+      return backgroundColor;
+    }
   }
 
   /**
@@ -318,7 +419,9 @@ public class Label {
    * @param foregroundColor the foreground color to set
    */
   public void setForegroundColor(Color foregroundColor) {
-    this.foregroundColor = foregroundColor.getRGB();
+    if (preset == null) {
+      this.foregroundColor = foregroundColor.getRGB();
+    } // else ignore
   }
 
   /**
@@ -327,7 +430,9 @@ public class Label {
    * @param backgroundColor the color to set as the background color
    */
   public void setBackgroundColor(Color backgroundColor) {
-    this.backgroundColor = backgroundColor.getRGB();
+    if (preset == null) {
+      this.backgroundColor = backgroundColor.getRGB();
+    } // else ignore
   }
 
   /**
@@ -336,7 +441,9 @@ public class Label {
    * @param fontSize the font size to set
    */
   public void setFontSize(int fontSize) {
-    this.fontSize = fontSize;
+    if (preset == null) {
+      this.fontSize = fontSize;
+    } // else ignore
   }
 
   /**
@@ -345,7 +452,11 @@ public class Label {
    * @return the border color
    */
   public boolean isShowBorder() {
-    return showBorder;
+    if (preset != null) {
+      return preset.isShowBorder();
+    } else {
+      return showBorder;
+    }
   }
 
   /**
@@ -354,7 +465,9 @@ public class Label {
    * @param showBorder indicates whether the border should be shown
    */
   public void setShowBorder(boolean showBorder) {
-    this.showBorder = showBorder;
+    if (preset == null) {
+      this.showBorder = showBorder;
+    } // else ignore
   }
 
   /**
@@ -363,7 +476,11 @@ public class Label {
    * @return the border color
    */
   public Color getBorderColor() {
-    return new Color(borderColor, true);
+    if (preset != null) {
+      return preset.getBorderColor();
+    } else {
+      return new Color(borderColor, true);
+    }
   }
 
   /**
@@ -372,7 +489,9 @@ public class Label {
    * @param borderColor the color to set as the border color
    */
   public void setBorderColor(Color borderColor) {
-    this.borderColor = borderColor.getRGB();
+    if (preset == null) {
+      this.borderColor = borderColor.getRGB();
+    } // else ignore
   }
 
   /**
@@ -381,7 +500,11 @@ public class Label {
    * @return the width of the border
    */
   public int getBorderWidth() {
-    return borderWidth;
+    if (preset != null) {
+      return preset.getBorderWidth();
+    } else {
+      return borderWidth;
+    }
   }
 
   /**
@@ -390,7 +513,9 @@ public class Label {
    * @param borderWidth the width of the border to set
    */
   public void setBorderWidth(int borderWidth) {
-    this.borderWidth = borderWidth;
+    if (preset == null) {
+      this.borderWidth = borderWidth;
+    } // else ignore
   }
 
   /**
@@ -399,7 +524,11 @@ public class Label {
    * @return the arc of the border
    */
   public int getBorderArc() {
-    return borderArc;
+    if (preset != null) {
+      return preset.getBorderArc();
+    } else {
+      return borderArc;
+    }
   }
 
   /**
@@ -408,7 +537,82 @@ public class Label {
    * @param borderArc the arc of the border to set
    */
   public void setBorderArc(int borderArc) {
-    this.borderArc = borderArc;
+    if (preset == null) {
+      this.borderArc = borderArc;
+    } // else ignore
+  }
+
+  /**
+   * Retrieves the preset ID of the Label object.
+   *
+   * @return the preset ID of the Label object
+   */
+  public GUID getPresetsId() {
+    return presetsId;
+  }
+
+  /**
+   * Sets the preset ID of the Label object.
+   *
+   * @param presetId the preset ID to set.
+   */
+  public void setPresetsId(GUID presetId) {
+    this.presetsId = presetId;
+    setFromPreset();
+  }
+
+  /**
+   * Retrieves the shape of the Label object.
+   *
+   * @return the shape of the Label object
+   */
+  public LabelShape getShape() {
+    return shape;
+  }
+
+  /**
+   * Sets the shape of the Label object.
+   *
+   * @param shape the shape to set
+   */
+  public void setShape(LabelShape shape) {
+    this.shape = shape;
+  }
+
+  /**
+   * Retrieves the horizontal padding of the Label object.
+   *
+   * @return the horizontal padding of the Label object
+   */
+  public int getHorizontalPadding() {
+    return horizontalPadding;
+  }
+
+  /**
+   * Sets the horizontal padding of the Label object.
+   *
+   * @param horizontalPadding the horizontal padding to set
+   */
+  public void setHorizontalPadding(int horizontalPadding) {
+    this.horizontalPadding = horizontalPadding;
+  }
+
+  /**
+   * Retrieves the vertical padding of the Label object.
+   *
+   * @return the vertical padding of the Label object
+   */
+  public int getVerticalPadding() {
+    return verticalPadding;
+  }
+
+  /**
+   * Sets the vertical padding of the Label object.
+   *
+   * @param verticalPadding the vertical padding to set
+   */
+  public void setVerticalPadding(int verticalPadding) {
+    this.verticalPadding = verticalPadding;
   }
 
   /**
@@ -430,7 +634,10 @@ public class Label {
         dto.getShowBorder(),
         dto.getBorderWidth(),
         dto.getBorderArc(),
-        dto.getFontSize());
+        dto.getFontSize(),
+        dto.getHorizontalPadding(),
+        dto.getVerticalPadding(),
+        dto.getPresetsId().isEmpty() ? null : GUID.valueOf(dto.getPresetsId()));
   }
 
   /**
@@ -440,19 +647,25 @@ public class Label {
    *     object.
    */
   public LabelDto toDto() {
-    return LabelDto.newBuilder()
-        .setId(id.toString())
-        .setLabel(label)
-        .setX(x)
-        .setY(y)
-        .setShowBackground(showBackground)
-        .setForegroundColor(foregroundColor)
-        .setBackgroundColor(backgroundColor)
-        .setFontSize(fontSize)
-        .setBorderColor(borderColor)
-        .setShowBorder(showBorder)
-        .setBorderWidth(borderWidth)
-        .setBorderArc(borderArc)
-        .build();
+    var dto =
+        LabelDto.newBuilder()
+            .setId(id.toString())
+            .setLabel(label)
+            .setX(x)
+            .setY(y)
+            .setShowBackground(showBackground)
+            .setForegroundColor(foregroundColor)
+            .setBackgroundColor(backgroundColor)
+            .setFontSize(fontSize)
+            .setBorderColor(borderColor)
+            .setShowBorder(showBorder)
+            .setBorderWidth(borderWidth)
+            .setBorderArc(borderArc)
+            .setHorizontalPadding(horizontalPadding)
+            .setVerticalPadding(verticalPadding);
+    if (presetsId != null) {
+      dto.setPresetsId(presetsId.toString());
+    }
+    return dto.build();
   }
 }

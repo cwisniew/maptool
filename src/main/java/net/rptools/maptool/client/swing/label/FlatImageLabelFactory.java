@@ -14,13 +14,13 @@
  */
 package net.rptools.maptool.client.swing.label;
 
-import java.awt.Color;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.swing.label.FlatImageLabel.Justification;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
+import net.rptools.maptool.model.label.LabelShape;
 
 /**
  * The FlatImageLabelFactory class is responsible for creating instances of FlatImageLabel objects.
@@ -64,7 +64,8 @@ public class FlatImageLabelFactory {
             font,
             Justification.Center,
             borderWidth,
-            borderArc);
+            borderArc,
+            LabelShape.RECTANGLE);
     pcImageLabel =
         new FlatImageLabel(
             4,
@@ -75,7 +76,8 @@ public class FlatImageLabelFactory {
             font,
             Justification.Center,
             borderWidth,
-            borderArc);
+            borderArc,
+            LabelShape.RECTANGLE);
     nonVisibleImageLabel =
         new FlatImageLabel(
             4,
@@ -86,7 +88,8 @@ public class FlatImageLabelFactory {
             font,
             Justification.Center,
             borderWidth,
-            borderArc);
+            borderArc,
+            LabelShape.RECTANGLE);
   }
 
   /**
@@ -112,18 +115,6 @@ public class FlatImageLabelFactory {
    * @return The map image label with the specified properties.
    */
   public FlatImageLabel getMapImageLabel(Label label) {
-    var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), label.getFontSize());
-    var bg = label.isShowBackground() ? label.getBackgroundColor() : new Color(0, 0, 0, 0);
-    int borderSize = label.isShowBorder() ? label.getBorderWidth() : 0;
-    return new FlatImageLabel(
-        4,
-        4,
-        label.getForegroundColor(),
-        bg,
-        label.getBorderColor(),
-        font,
-        Justification.Center,
-        borderSize,
-        label.getBorderArc());
+    return new FlatImageLabel(label, Justification.Center);
   }
 }

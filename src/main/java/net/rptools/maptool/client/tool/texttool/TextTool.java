@@ -19,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -48,6 +49,8 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.label.LabelManager;
+import net.rptools.maptool.model.label.LabelShape;
 
 /**
  * The TextTool class represents a tool that allows users to add and edit labels in a graphical
@@ -289,6 +292,12 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getBorderColorWell().setColor(model.getBorderColor());
       getBorderWidthSpinner().setValue(model.getBorderWidth());
       getBorderArcSpinner().setValue(model.getBorderArc());
+      getLabelTextField().setText(model.getLabel());
+      getShowBorderCheckBox().setSelected(model.isShowBorder());
+      getShowBackgroundCheckBox().setSelected(model.isShowBackground());
+      getLabelShapeComboBox().setSelectedItem(model.getShape());
+      getHorizontalPaddingSpinner().setValue(model.getHorizontalPadding());
+      getVerticalPaddingSpinner().setValue(model.getVerticalPadding());
       super.bind(model);
     }
 
@@ -299,18 +308,25 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     }
 
     private void copyLabelToValues(Label label) {
+      copyLabelToValues(label, label.getLabel());
+    }
+
+    private void copyLabelToValues(Label label, String text) {
       getForegroundColorWell().setColor(label.getForegroundColor());
       getBackgroundColorWell().setColor(label.getBackgroundColor());
       getFontSizeSpinner().setValue(label.getFontSize());
       getBorderColorWell().setColor(label.getBorderColor());
       getBorderWidthSpinner().setValue(label.getBorderWidth());
       getBorderArcSpinner().setValue(label.getBorderArc());
-      getLabelTextField().setText(label.getLabel());
-      getShowBorderCheckBox().setSelected(label.getBorderWidth() > 0);
-      getShowBackgroundCheckBox().setSelected(label.getBackgroundColor() != null);
-      showBorder = label.getBorderWidth() > 0;
+      getLabelTextField().setText(text);
+      getShowBorderCheckBox().setSelected(label.isShowBorder());
+      getShowBackgroundCheckBox().setSelected(label.isShowBackground());
+      getLabelShapeComboBox().setSelectedItem(label.getShape());
+      getHorizontalPaddingSpinner().setValue(label.getHorizontalPadding());
+      getVerticalPaddingSpinner().setValue(label.getVerticalPadding());
       adjustControls();
     }
+
     private void copyValuesToLabel(Label label) {
       label.setForegroundColor(getForegroundColorWell().getColor());
       label.setBackgroundColor(getBackgroundColorWell().getColor());
@@ -318,6 +334,11 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       label.setBorderColor(getBorderColorWell().getColor());
       label.setBorderWidth((Integer) getBorderWidthSpinner().getValue());
       label.setBorderArc((Integer) getBorderArcSpinner().getValue());
+      label.setShowBorder(getShowBorderCheckBox().isSelected());
+      label.setShowBackground(getShowBackgroundCheckBox().isSelected());
+      label.setShape((LabelShape) getLabelShapeComboBox().getSelectedItem());
+      label.setHorizontalPadding((Integer) getHorizontalPaddingSpinner().getValue());
+      label.setVerticalPadding((Integer) getVerticalPaddingSpinner().getValue());
     }
 
     /**
@@ -420,6 +441,18 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       return (JLabel) getComponent("labelPreview");
     }
 
+    public JComboBox<LabelShape> getLabelShapeComboBox() {
+      return (JComboBox<LabelShape>) getComponent("labelShape");
+    }
+
+    public JSpinner getHorizontalPaddingSpinner() {
+      return (JSpinner) getComponent("horizontalPadding");
+    }
+
+    public JSpinner getVerticalPaddingSpinner() {
+      return (JSpinner) getComponent("verticalPadding");
+    }
+
     /**
      * Initializes the OK button by adding an ActionListener that handles the button click event.
      * Upon clicking the OK button, the dialog's 'accepted' flag is set to true, the commit() method
@@ -442,23 +475,23 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
                 String presetName =
                     JOptionPane.showInputDialog(MapTool.getFrame(), "Enter preset name:");
                 if (presetName != null) {
-                  var presets = new Label();
-                  copyValuesToLabel(presets);
-                  MapTool.getCampaign().getLabelPresets().addPreset(presetName, getModel());
-                  populatePresets();
+                  var preset = new Label();
+                  copyValuesToLabel(preset);
+                  new LabelManager().getPresets().addPreset(presetName, preset);
+                  handlePresets();
                 }
               });
     }
 
     public void initPresetsComboBox() {
-      populatePresets();
+      handlePresets();
       getLabelPresetsComboBox()
           .addActionListener(
               e -> {
                 var presetName = (String) getLabelPresetsComboBox().getSelectedItem();
                 if (presetName != null) {
-                  var label = MapTool.getCampaign().getLabelPresets().getLabel(presetName);
-                  bind(label);
+                  var label = new LabelManager().getPresets().getPreset(presetName);
+                  copyLabelToValues(label, getLabelTextField().getText());
                 }
               });
     }
@@ -499,6 +532,9 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getBorderArcSpinner().addChangeListener(e -> generatePreview());
       getShowBorderCheckBox().addChangeListener(e -> generatePreview());
       getShowBackgroundCheckBox().addChangeListener(e -> generatePreview());
+      getLabelShapeComboBox().addActionListener(e -> generatePreview());
+      getHorizontalPaddingSpinner().addChangeListener(e -> generatePreview());
+      getVerticalPaddingSpinner().addChangeListener(e -> generatePreview());
 
       generatePreview();
     }
@@ -512,12 +548,17 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
               });
     }
 
-    private void populatePresets() {
+    public void initLabelShape() {
+      Arrays.stream(LabelShape.values()).forEach(getLabelShapeComboBox()::addItem);
+    }
+
+    private void handlePresets() {
       var combo = getLabelPresetsComboBox();
       combo.removeAllItems();
-      MapTool.getCampaign().getLabelPresets().getPresetNames().stream()
-          .sorted()
-          .forEach(combo::addItem);
+      var presets = new LabelManager().getPresets().getPresetNames().stream().sorted().toArray();
+      for (var preset : presets) {
+        combo.addItem((String) preset);
+      }
     }
 
     private void generatePreview() {
@@ -538,6 +579,14 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getBorderColorWell().setVisible(showBorder); // disabling a ColorWell does nothing.
       getBorderWidthSpinner().setEnabled(showBorder);
       getBorderArcSpinner().setEnabled(showBorder);
+      var label = new Label();
+      copyValuesToLabel(label);
+      var flatLabel = new FlatImageLabelFactory().getMapImageLabel(label);
+      if (flatLabel.supportsArcCorner()) {
+        getBorderArcSpinner().setEnabled(showBorder);
+      } else {
+        getBorderArcSpinner().setEnabled(false);
+      }
     }
 
     /**
