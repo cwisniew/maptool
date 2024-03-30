@@ -134,6 +134,7 @@ public class Label {
    * @param fontSize the font size of the label
    * @param horizontalPadding the horizontal padding of the label
    * @param verticalPadding the vertical padding of the label
+   * @param shape the shape of the label
    * @param presetsId the preset id to copy values from
    */
   private Label(
@@ -151,6 +152,7 @@ public class Label {
       int fontSize,
       int horizontalPadding,
       int verticalPadding,
+      LabelShape shape,
       GUID presetsId) {
     this.id = id;
     this.label = label;
@@ -166,6 +168,7 @@ public class Label {
     this.fontSize = fontSize;
     this.horizontalPadding = horizontalPadding;
     this.verticalPadding = verticalPadding;
+    this.shape = shape;
     this.presetsId = presetsId;
   }
 
@@ -189,6 +192,10 @@ public class Label {
 
   /** Sets the properties of the label object based on the preset label object. */
   private void setFromPreset() {
+    if (id.equals(presetsId)) {
+      return; // If this is a preset, don't copy from itself.
+    }
+
     if (preset == null && presetsId != null) {
       preset = new LabelManager().getPresets().getPreset(presetsId.toString());
     }
@@ -242,23 +249,8 @@ public class Label {
    * @param label The Label object to copy from.
    */
   public Label(Label label) {
-    this(
-        label.id,
-        label.label,
-        label.x,
-        label.y,
-        label.showBackground,
-        label.foregroundColor,
-        label.backgroundColor,
-        label.borderColor,
-        label.showBorder,
-        label.borderWidth,
-        label.borderArc,
-        label.fontSize,
-        label.horizontalPadding,
-        label.verticalPadding,
-        label.presetsId);
-    preset = label.preset;
+    this.id = new GUID();
+    copyValuesFrom(label);
   }
 
   /**
@@ -562,6 +554,16 @@ public class Label {
   }
 
   /**
+   * Retrieves the preset label object of the Label object.
+   *
+   * @return the preset label object of the Label object
+   */
+  public Label getPreset() {
+    setFromPreset();
+    return preset;
+  }
+
+  /**
    * Retrieves the shape of the Label object.
    *
    * @return the shape of the Label object
@@ -615,6 +617,33 @@ public class Label {
     this.verticalPadding = verticalPadding;
   }
 
+  public void copyValuesFrom(Label from) {
+    this.label = from.label;
+    this.x = from.x;
+    this.y = from.y;
+    this.showBackground = from.showBackground;
+    this.foregroundColor = from.foregroundColor;
+    this.backgroundColor = from.backgroundColor;
+    this.borderColor = from.borderColor;
+    this.showBorder = from.showBorder;
+    this.borderWidth = from.borderWidth;
+    this.borderArc = from.borderArc;
+    this.fontSize = from.fontSize;
+    this.horizontalPadding = from.horizontalPadding;
+    this.verticalPadding = from.verticalPadding;
+    this.shape = from.shape;
+    this.presetsId = from.presetsId;
+    this.preset = from.preset;
+  }
+
+  public void setIsPresets() {
+    this.presetsId = id;
+  }
+
+  public boolean isPresets() {
+    return presetsId != null && presetsId.equals(id);
+  }
+
   /**
    * Creates a new instance of the {@link Label} class based on the provided LabelDto object.
    *
@@ -637,6 +666,7 @@ public class Label {
         dto.getFontSize(),
         dto.getHorizontalPadding(),
         dto.getVerticalPadding(),
+        LabelShape.valueOf(dto.getShape()),
         dto.getPresetsId().isEmpty() ? null : GUID.valueOf(dto.getPresetsId()));
   }
 
@@ -662,7 +692,8 @@ public class Label {
             .setBorderWidth(borderWidth)
             .setBorderArc(borderArc)
             .setHorizontalPadding(horizontalPadding)
-            .setVerticalPadding(verticalPadding);
+            .setVerticalPadding(verticalPadding)
+            .setShape(shape.name());
     if (presetsId != null) {
       dto.setPresetsId(presetsId.toString());
     }

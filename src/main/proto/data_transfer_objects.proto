@@ -503,6 +503,7 @@ message LabelDto {
   string presets_id = 13;
   int32 horizontal_padding = 14;
   int32 vertical_padding = 15;
+  string shape = 16;
 }
 
 message LabelPresetDto {

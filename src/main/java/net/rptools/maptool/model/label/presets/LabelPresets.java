@@ -34,8 +34,22 @@ public class LabelPresets {
     return presets.get(name);
   }
 
+  public String getPresetName(Label label) {
+    if (label == null) {
+      return null;
+    }
+    for (var entry : presets.entrySet()) {
+      if (entry.getValue().equals(label)) {
+        return entry.getKey();
+      }
+    }
+    return null;
+  }
+
   public void addPreset(String name, Label label) {
     // TODO: Check that the name doesn't already exist.
+
+    label.setPresetsId(label.getPresetsId()); // The presets for a presets is it's self.
     presets.put(name, label);
   }
 

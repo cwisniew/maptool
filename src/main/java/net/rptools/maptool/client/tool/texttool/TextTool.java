@@ -273,6 +273,9 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
     private final EditLabelDialog dialog;
 
+    /** The values being edited in the dialog. */
+    private Label workingLabel = new Label();
+
     public EditLabelPanel(EditLabelDialog dialog) {
       super(new EditLabelDialogView().getRootComponent());
 
@@ -286,24 +289,15 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public void bind(Label model) {
-      getForegroundColorWell().setColor(model.getForegroundColor());
-      getBackgroundColorWell().setColor(model.getBackgroundColor());
-      getFontSizeSpinner().setValue(model.getFontSize());
-      getBorderColorWell().setColor(model.getBorderColor());
-      getBorderWidthSpinner().setValue(model.getBorderWidth());
-      getBorderArcSpinner().setValue(model.getBorderArc());
-      getLabelTextField().setText(model.getLabel());
-      getShowBorderCheckBox().setSelected(model.isShowBorder());
-      getShowBackgroundCheckBox().setSelected(model.isShowBackground());
-      getLabelShapeComboBox().setSelectedItem(model.getShape());
-      getHorizontalPaddingSpinner().setValue(model.getHorizontalPadding());
-      getVerticalPaddingSpinner().setValue(model.getVerticalPadding());
-      super.bind(model);
+      workingLabel.copyValuesFrom(model);
+      copyLabelToValues(workingLabel);
+      super.bind(workingLabel);
     }
 
     @Override
     public boolean commit() {
-      copyValuesToLabel(getModel());
+      copyValuesToLabel(workingLabel);
+      getModel().copyValuesFrom(workingLabel);
       return super.commit();
     }
 
@@ -319,6 +313,11 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getBorderWidthSpinner().setValue(label.getBorderWidth());
       getBorderArcSpinner().setValue(label.getBorderArc());
       getLabelTextField().setText(text);
+      var presetName = new LabelManager().getPresets().getPresetName(label.getPreset());
+      if (presetName == null) {
+        presetName = "";
+      }
+      getLabelPresetsComboBox().setSelectedItem(presetName);
       getShowBorderCheckBox().setSelected(label.isShowBorder());
       getShowBackgroundCheckBox().setSelected(label.isShowBackground());
       getLabelShapeComboBox().setSelectedItem(label.getShape());
@@ -478,6 +477,21 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
                   var preset = new Label();
                   copyValuesToLabel(preset);
                   new LabelManager().getPresets().addPreset(presetName, preset);
+                  workingLabel.setPresetsId(preset.getId());
+                  handlePresets();
+                }
+              });
+    }
+
+    public void initUpdatePresetButton() {
+      getUpdatePresetButton()
+          .addActionListener(
+              e -> {
+                var presetName = (String) getLabelPresetsComboBox().getSelectedItem();
+                if (presetName != null && !presetName.isEmpty()) {
+                  var preset = new Label();
+                  copyValuesToLabel(preset);
+                  new LabelManager().getPresets().addPreset(presetName, preset);
                   handlePresets();
                 }
               });
@@ -489,9 +503,11 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
           .addActionListener(
               e -> {
                 var presetName = (String) getLabelPresetsComboBox().getSelectedItem();
-                if (presetName != null) {
+                if (presetName != null && !presetName.isEmpty()) {
                   var label = new LabelManager().getPresets().getPreset(presetName);
                   copyLabelToValues(label, getLabelTextField().getText());
+                  workingLabel.copyValuesFrom(label);
+                  workingLabel.setPresetsId(label.getId());
                 }
               });
     }
@@ -556,6 +572,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       var combo = getLabelPresetsComboBox();
       combo.removeAllItems();
       var presets = new LabelManager().getPresets().getPresetNames().stream().sorted().toArray();
+      combo.addItem("");
       for (var preset : presets) {
         combo.addItem((String) preset);
       }
@@ -579,6 +596,10 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getBorderColorWell().setVisible(showBorder); // disabling a ColorWell does nothing.
       getBorderWidthSpinner().setEnabled(showBorder);
       getBorderArcSpinner().setEnabled(showBorder);
+      boolean selectedPreset =
+          getLabelPresetsComboBox().getSelectedItem() != null
+              && !getLabelPresetsComboBox().getSelectedItem().toString().isEmpty();
+      getUpdatePresetButton().setEnabled(selectedPreset);
       var label = new Label();
       copyValuesToLabel(label);
       var flatLabel = new FlatImageLabelFactory().getMapImageLabel(label);
