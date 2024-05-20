@@ -14,31 +14,41 @@
  */
 package net.rptools.maptool.model.label.presets;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.server.proto.LabelPresetDto;
 import net.rptools.maptool.server.proto.LabelPresetsDto;
 
 public class LabelPresets {
 
-  /** The presets for labels, these are stored as {@link Label} objects. */
-  private ConcurrentHashMap<String, Label> presets = new ConcurrentHashMap<>();
+  /** Maps the name of the preset to the preset. */
+  private ConcurrentHashMap<String, Label> presetsNameMap = new ConcurrentHashMap<>();
+
+  /** Maps the id of the preset to the preset. */
+  private ConcurrentHashMap<GUID, Label> presetsIdMap = new ConcurrentHashMap<>();
 
   public Set<String> getPresetNames() {
-    return new HashSet<>(presets.keySet());
+    return new HashSet<>(presetsNameMap.keySet());
   }
 
   public Label getPreset(String name) {
-    return presets.get(name);
+    return presetsNameMap.get(name);
+  }
+
+  public Label getPreset(GUID id) {
+    return presetsIdMap.get(id);
   }
 
   public String getPresetName(Label label) {
     if (label == null) {
       return null;
     }
-    for (var entry : presets.entrySet()) {
+    for (var entry : presetsNameMap.entrySet()) {
       if (entry.getValue().equals(label)) {
         return entry.getKey();
       }
@@ -49,13 +59,18 @@ public class LabelPresets {
   public void addPreset(String name, Label label) {
     // TODO: Check that the name doesn't already exist.
 
-    label.setPresetsId(label.getPresetsId()); // The presets for a presets is it's self.
-    presets.put(name, label);
+    label.setPresetId(label.getPresetId()); // The presets for a presets is it's self.
+    presetsNameMap.put(name, label);
+    presetsIdMap.put(label.getId(), label);
+  }
+
+  public Collection<Label> getPresets() {
+    return Collections.list(presetsNameMap.elements());
   }
 
   public LabelPresetsDto toDto() {
     var presetsDto = LabelPresetsDto.newBuilder();
-    for (var entry : presets.entrySet()) {
+    for (var entry : presetsNameMap.entrySet()) {
       var dto = LabelPresetDto.newBuilder();
       var preset = entry.getValue();
       dto.setId(preset.getId().toString()).setName(entry.getKey()).setPreset(preset.toDto());
@@ -74,18 +89,22 @@ public class LabelPresets {
 
   public void setPresets(LabelPresets newPresets) {
     clear();
-    presets.putAll(newPresets.presets);
+    presetsNameMap.putAll(newPresets.presetsNameMap);
   }
 
   public void rename(String oldName, String newName) {
     // TODO: Check that name does not already exist.
-    var value = presets.remove(oldName);
+    var value = presetsNameMap.remove(oldName);
     if (value != null) {
-      presets.put(newName, value);
+      presetsNameMap.put(newName, value);
     }
   }
 
+  public int count() {
+    return presetsNameMap.size();
+  }
+
   public void clear() {
-    presets.clear();
+    presetsNameMap.clear();
   }
 }

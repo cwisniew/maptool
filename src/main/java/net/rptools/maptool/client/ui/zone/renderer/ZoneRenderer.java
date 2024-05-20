@@ -1212,6 +1212,10 @@ public class ZoneRenderer extends JComponent
     var labelRenderFactory = new FlatImageLabelFactory();
     labelLocationList.clear();
     for (Label label : zone.getLabels()) {
+      if (label.isGmOnly() && !view.isGMView()) {
+        continue;
+      }
+
       var flabel = labelRenderFactory.getMapImageLabel(label);
       ZonePoint zp = new ZonePoint(label.getX(), label.getY());
       if (!zone.isPointVisible(zp, view)) {

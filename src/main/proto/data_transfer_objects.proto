@@ -504,6 +504,8 @@ message LabelDto {
   int32 horizontal_padding = 14;
   int32 vertical_padding = 15;
   string shape = 16;
+  bool gm_only = 17;
+  bool preset = 18;
 }
 
 message LabelPresetDto {

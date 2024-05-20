@@ -187,9 +187,11 @@ public class FlatImageLabel {
       case RECTANGLE, ELLIPSE -> new Dimension(
           innerRectWidth + borderWidth * 2, innerRectHeight + borderWidth * 2);
       case DIAMOND -> new Dimension(
-          innerRectWidth + innerRectHeight, innerRectHeight + innerRectHeight);
+          innerRectWidth + innerRectHeight + borderWidth * 2,
+          innerRectHeight + innerRectHeight + borderWidth * 2);
       case TRIANGLE -> new Dimension(
-          innerRectWidth + innerRectWidth, innerRectHeight + innerRectHeight / 2);
+          innerRectWidth + innerRectWidth + borderWidth * 2,
+          innerRectHeight + innerRectHeight / 2 + borderWidth * 2);
     };
   }
 
@@ -309,9 +311,9 @@ public class FlatImageLabel {
             new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics(), string);
     int width = (int) dim.getWidth();
     int height = (int) dim.getHeight();
-    var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    var image = new BufferedImage(width + 4, height + 4, BufferedImage.TYPE_INT_ARGB);
     var g2d = (Graphics2D) image.getGraphics();
-    render(g2d, 0, 0, string);
+    render(g2d, 2, 2, string);
     g2d.dispose();
     return image;
   }

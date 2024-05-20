@@ -107,6 +107,9 @@ public class Label {
   /** The vertical padding of the label. */
   private int verticalPadding = DEFAULT_PADDING;
 
+  /** Whether the label is only visible to the GM. */
+  private boolean gmOnly = false;
+
   /**
    * The preset label ID to copy properties from.
    *
@@ -114,10 +117,13 @@ public class Label {
    * @see LabelManager#getPresets()
    * @see GUID
    */
-  private GUID presetsId;
+  private GUID presetId;
+
+  /** Indicates whether the label is a preset. */
+  private boolean preset = false;
 
   /** The preset label object to copy properties from. */
-  private volatile Label preset;
+  private volatile Label presetLabel;
 
   /**
    * Creates a new instance of the {@link Label} class.
@@ -135,7 +141,8 @@ public class Label {
    * @param horizontalPadding the horizontal padding of the label
    * @param verticalPadding the vertical padding of the label
    * @param shape the shape of the label
-   * @param presetsId the preset id to copy values from
+   * @param gmOnly indicates whether the label is only visible to the GM
+   * @param presetId the preset id to copy values from
    */
   private Label(
       GUID id,
@@ -153,7 +160,9 @@ public class Label {
       int horizontalPadding,
       int verticalPadding,
       LabelShape shape,
-      GUID presetsId) {
+      boolean gmOnly,
+      GUID presetId,
+      boolean preset) {
     this.id = id;
     this.label = label;
     this.x = x;
@@ -169,7 +178,9 @@ public class Label {
     this.horizontalPadding = horizontalPadding;
     this.verticalPadding = verticalPadding;
     this.shape = shape;
-    this.presetsId = presetsId;
+    this.gmOnly = gmOnly;
+    this.presetId = presetId;
+    this.preset = preset;
   }
 
   /**
@@ -179,36 +190,43 @@ public class Label {
    * @param label the text content of the label
    * @param x the x-coordinate of the label's position
    * @param y the y-coordinate of the label's position
-   * @param presetsId the preset id to copy properties from
+   * @param presetId the preset id to copy properties from
+   * @param isPreset indicates whether the label is a preset
    */
-  public Label(GUID id, String label, int x, int y, GUID presetsId) {
+  public Label(GUID id, String label, int x, int y, GUID presetId, boolean isPreset) {
     this.id = id;
     this.label = label;
     this.x = x;
     this.y = y;
-    this.presetsId = presetsId;
+    this.presetId = isPreset ? null : presetId;
+    this.preset = isPreset;
     setFromPreset();
   }
 
   /** Sets the properties of the label object based on the preset label object. */
   private void setFromPreset() {
-    if (id.equals(presetsId)) {
-      return; // If this is a preset, don't copy from itself.
+    if (preset) {
+      return; // If this is a preset there is nothing to do
     }
 
-    if (preset == null && presetsId != null) {
-      preset = new LabelManager().getPresets().getPreset(presetsId.toString());
+    if (presetId == null) {
+      presetLabel = null;
+    } else {
+      presetLabel = new LabelManager().getPresets().getPreset(presetId);
     }
-    if (preset != null) {
-      showBackground = preset.isShowBackground();
-      foregroundColor = preset.getForegroundColorValue();
-      backgroundColor = preset.getBackgroundColorValue();
-      showBorder = preset.isShowBorder();
-      borderWidth = preset.getBorderWidth();
-      borderArc = preset.getBorderArc();
-      fontSize = preset.getFontSize();
-      horizontalPadding = preset.getHorizontalPadding();
-      verticalPadding = preset.getVerticalPadding();
+
+    if (presetLabel != null) {
+      showBackground = presetLabel.isShowBackground();
+      foregroundColor = presetLabel.getForegroundColorValue();
+      backgroundColor = presetLabel.getBackgroundColorValue();
+      showBorder = presetLabel.isShowBorder();
+      borderWidth = presetLabel.getBorderWidth();
+      borderArc = presetLabel.getBorderArc();
+      fontSize = presetLabel.getFontSize();
+      horizontalPadding = presetLabel.getHorizontalPadding();
+      verticalPadding = presetLabel.getVerticalPadding();
+      shape = presetLabel.getShape();
+      gmOnly = presetLabel.isGmOnly();
     }
   }
 
@@ -322,8 +340,8 @@ public class Label {
    * @return true if the background should be shown, false otherwise
    */
   public boolean isShowBackground() {
-    if (preset != null) {
-      return preset.isShowBackground();
+    if (!preset && presetLabel != null) {
+      return presetLabel.isShowBackground();
     } else {
       return showBackground;
     }
@@ -335,7 +353,7 @@ public class Label {
    * @param showBackground indicates whether the background should be shown
    */
   public void setShowBackground(boolean showBackground) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.showBackground = showBackground;
     } // else ignore
   }
@@ -346,8 +364,8 @@ public class Label {
    * @return the foreground color
    */
   public Color getForegroundColor() {
-    if (preset != null) {
-      return preset.getForegroundColor();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getForegroundColor();
     } else {
       return new Color(foregroundColor, true);
     }
@@ -359,8 +377,8 @@ public class Label {
    * @return the background color
    */
   public Color getBackgroundColor() {
-    if (preset != null) {
-      return preset.getBackgroundColor();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getBackgroundColor();
     } else {
       return new Color(backgroundColor, true);
     }
@@ -372,8 +390,8 @@ public class Label {
    * @return the font size
    */
   public int getFontSize() {
-    if (preset != null) {
-      return preset.getFontSize();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getFontSize();
     } else {
       return fontSize;
     }
@@ -385,8 +403,8 @@ public class Label {
    * @return the foreground color value
    */
   public int getForegroundColorValue() {
-    if (preset != null) {
-      return preset.getForegroundColorValue();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getForegroundColorValue();
     } else {
       return foregroundColor;
     }
@@ -398,8 +416,8 @@ public class Label {
    * @return the background color value
    */
   public int getBackgroundColorValue() {
-    if (preset != null) {
-      return preset.getBackgroundColorValue();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getBackgroundColorValue();
     } else {
       return backgroundColor;
     }
@@ -411,7 +429,7 @@ public class Label {
    * @param foregroundColor the foreground color to set
    */
   public void setForegroundColor(Color foregroundColor) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.foregroundColor = foregroundColor.getRGB();
     } // else ignore
   }
@@ -422,7 +440,7 @@ public class Label {
    * @param backgroundColor the color to set as the background color
    */
   public void setBackgroundColor(Color backgroundColor) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.backgroundColor = backgroundColor.getRGB();
     } // else ignore
   }
@@ -433,7 +451,7 @@ public class Label {
    * @param fontSize the font size to set
    */
   public void setFontSize(int fontSize) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.fontSize = fontSize;
     } // else ignore
   }
@@ -444,8 +462,8 @@ public class Label {
    * @return the border color
    */
   public boolean isShowBorder() {
-    if (preset != null) {
-      return preset.isShowBorder();
+    if (!preset && presetLabel != null) {
+      return presetLabel.isShowBorder();
     } else {
       return showBorder;
     }
@@ -457,7 +475,7 @@ public class Label {
    * @param showBorder indicates whether the border should be shown
    */
   public void setShowBorder(boolean showBorder) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.showBorder = showBorder;
     } // else ignore
   }
@@ -468,8 +486,8 @@ public class Label {
    * @return the border color
    */
   public Color getBorderColor() {
-    if (preset != null) {
-      return preset.getBorderColor();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getBorderColor();
     } else {
       return new Color(borderColor, true);
     }
@@ -481,7 +499,7 @@ public class Label {
    * @param borderColor the color to set as the border color
    */
   public void setBorderColor(Color borderColor) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.borderColor = borderColor.getRGB();
     } // else ignore
   }
@@ -492,8 +510,8 @@ public class Label {
    * @return the width of the border
    */
   public int getBorderWidth() {
-    if (preset != null) {
-      return preset.getBorderWidth();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getBorderWidth();
     } else {
       return borderWidth;
     }
@@ -505,7 +523,7 @@ public class Label {
    * @param borderWidth the width of the border to set
    */
   public void setBorderWidth(int borderWidth) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.borderWidth = borderWidth;
     } // else ignore
   }
@@ -516,8 +534,8 @@ public class Label {
    * @return the arc of the border
    */
   public int getBorderArc() {
-    if (preset != null) {
-      return preset.getBorderArc();
+    if (!preset && presetLabel != null) {
+      return presetLabel.getBorderArc();
     } else {
       return borderArc;
     }
@@ -529,7 +547,7 @@ public class Label {
    * @param borderArc the arc of the border to set
    */
   public void setBorderArc(int borderArc) {
-    if (preset == null) {
+    if (preset || presetLabel == null) {
       this.borderArc = borderArc;
     } // else ignore
   }
@@ -539,8 +557,8 @@ public class Label {
    *
    * @return the preset ID of the Label object
    */
-  public GUID getPresetsId() {
-    return presetsId;
+  public GUID getPresetId() {
+    return presetId;
   }
 
   /**
@@ -548,9 +566,11 @@ public class Label {
    *
    * @param presetId the preset ID to set.
    */
-  public void setPresetsId(GUID presetId) {
-    this.presetsId = presetId;
-    setFromPreset();
+  public void setPresetId(GUID presetId) {
+    if (!preset) { // If this is a preset there is nothing to do
+      this.presetId = presetId;
+      setFromPreset();
+    }
   }
 
   /**
@@ -560,7 +580,7 @@ public class Label {
    */
   public Label getPreset() {
     setFromPreset();
-    return preset;
+    return presetLabel;
   }
 
   /**
@@ -617,6 +637,12 @@ public class Label {
     this.verticalPadding = verticalPadding;
   }
 
+  /**
+   * Copies the properties of the provided Label object to the current Label object. This will not
+   * copy the value of is a preset flag.
+   *
+   * @param from The label to copy the properties of.
+   */
   public void copyValuesFrom(Label from) {
     this.label = from.label;
     this.x = from.x;
@@ -632,16 +658,32 @@ public class Label {
     this.horizontalPadding = from.horizontalPadding;
     this.verticalPadding = from.verticalPadding;
     this.shape = from.shape;
-    this.presetsId = from.presetsId;
-    this.preset = from.preset;
+    this.presetId = from.presetId;
+    this.presetLabel = from.presetLabel;
+    this.gmOnly = from.gmOnly;
   }
 
-  public void setIsPresets() {
-    this.presetsId = id;
-  }
-
+  /** Checks whether the label is a preset. */
   public boolean isPresets() {
-    return presetsId != null && presetsId.equals(id);
+    return preset;
+  }
+
+  /**
+   * Sets whether the label is only visible to the GM.
+   *
+   * @return true if the label is only visible to the GM, false otherwise
+   */
+  public boolean isGmOnly() {
+    return gmOnly;
+  }
+
+  /**
+   * Sets whether the label is only visible to the GM.
+   *
+   * @param gmOnly indicates whether the label is only visible to the GM
+   */
+  public void setGmOnly(boolean gmOnly) {
+    this.gmOnly = gmOnly;
   }
 
   /**
@@ -667,7 +709,9 @@ public class Label {
         dto.getHorizontalPadding(),
         dto.getVerticalPadding(),
         LabelShape.valueOf(dto.getShape()),
-        dto.getPresetsId().isEmpty() ? null : GUID.valueOf(dto.getPresetsId()));
+        dto.getGmOnly(),
+        dto.getPresetsId().isEmpty() ? null : GUID.valueOf(dto.getPresetsId()),
+        dto.getPreset());
   }
 
   /**
@@ -693,10 +737,21 @@ public class Label {
             .setBorderArc(borderArc)
             .setHorizontalPadding(horizontalPadding)
             .setVerticalPadding(verticalPadding)
-            .setShape(shape.name());
-    if (presetsId != null) {
-      dto.setPresetsId(presetsId.toString());
+            .setShape(shape.name())
+            .setGmOnly(gmOnly)
+            .setPreset(preset);
+    if (presetId != null) {
+      dto.setPresetsId(presetId.toString());
     }
     return dto.build();
+  }
+
+  /** Sets the label as a preset. */
+  public void setIsPreset(boolean isPreset) {
+    preset = isPreset;
+    if (preset) { // A preset can not have another label as its preset.
+      presetId = null;
+      presetLabel = null;
+    }
   }
 }
