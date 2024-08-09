@@ -29,8 +29,8 @@ public class LabelPresetsDialog extends JDialog {
 
   private JPanel contentPane;
   private JButton closeButton;
-  private JButton editButton;
-  private JButton deleteButton;
+  private JButton editButton; // TODO: CDW implement edit functionality
+  private JButton deleteButton; // TODO: CDW implement delete functionality
   private JTable labelPresetsTable;
   private JButton addButton;
 
@@ -58,12 +58,22 @@ public class LabelPresetsDialog extends JDialog {
 
     var presetName =
         JOptionPane.showInputDialog(this, I18N.getText("Label.presetsDialog.addPreset"));
-    if (presetName != null && !presetName.isBlank()) {
+    if (presetName == null || !presetName.isBlank()) {
+      if (labelManager.getPresets().getPresetNames().contains(presetName)) {
+        JOptionPane.showMessageDialog(
+            this, I18N.getText("Label.presetsDialog.presetExists", presetName));
+        return;
+      }
       preset.setLabel(presetName);
 
       var dialog = new EditLabelDialog(preset, labelManager, true);
       dialog.setVisible(true);
       if (dialog.isAccepted()) {
+        // As the dialog sets the label with the entered text we need to swap the label and
+        // preview text
+        String previewText = preset.getLabel();
+        preset.setLabel(presetName);
+        preset.setPreviewText(previewText);
         labelManager.getPresets().addPreset(presetName, preset);
         ((LabelPresetsTableModel) labelPresetsTable.getModel()).fireTableDataChanged();
       }

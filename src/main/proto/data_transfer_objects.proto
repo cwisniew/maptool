@@ -506,6 +506,7 @@ message LabelDto {
   string shape = 16;
   bool gm_only = 17;
   bool preset = 18;
+  string preview_text = 19;
 }
 
 message LabelPresetDto {

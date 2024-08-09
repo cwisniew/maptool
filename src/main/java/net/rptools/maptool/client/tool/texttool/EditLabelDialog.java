@@ -69,7 +69,7 @@ public class EditLabelDialog extends JDialog {
 
     editingPresets = isPresets;
 
-    EditLabelPanel panel = new EditLabelPanel(this, labelManager);
+    EditLabelPanel panel = new EditLabelPanel(this, labelManager, isPresets);
     panel.bind(label);
 
     add(panel);
@@ -112,7 +112,7 @@ public class EditLabelDialog extends JDialog {
     /** The values being edited in the dialog. */
     private Label workingLabel = new Label();
 
-    public EditLabelPanel(EditLabelDialog dialog, LabelManager labelManager) {
+    public EditLabelPanel(EditLabelDialog dialog, LabelManager labelManager, boolean isPreset) {
       super(new EditLabelDialogView().getRootComponent());
 
       this.dialog = dialog;
@@ -122,6 +122,10 @@ public class EditLabelDialog extends JDialog {
       getLabelTextField().setSelectionStart(0);
       getLabelTextField().setSelectionEnd(getLabelTextField().getText().length());
       getLabelTextField().setCaretPosition(getLabelTextField().getText().length());
+
+      getNameLabel()
+          .setText(
+              isPreset ? I18N.getText("Label.labelPreviewText") : I18N.getText("Label.labelText"));
     }
 
     @Override
@@ -269,6 +273,10 @@ public class EditLabelDialog extends JDialog {
 
     public JComboBox<String> getLabelPresetsComboBox() {
       return (JComboBox<String>) getComponent("presetsComboBox");
+    }
+
+    public JLabel getNameLabel() {
+      return (JLabel) getComponent("nameLabel");
     }
 
     public JCheckBox getShowBorderCheckBox() {

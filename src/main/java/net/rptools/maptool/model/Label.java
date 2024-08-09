@@ -110,6 +110,9 @@ public class Label {
   /** Whether the label is only visible to the GM. */
   private boolean gmOnly = false;
 
+  /** The preview text of the label. */
+  private String previewText;
+
   /**
    * The preset label ID to copy properties from.
    *
@@ -143,6 +146,7 @@ public class Label {
    * @param shape the shape of the label
    * @param gmOnly indicates whether the label is only visible to the GM
    * @param presetId the preset id to copy values from
+   * @param previewText the preview text of the label
    */
   private Label(
       GUID id,
@@ -162,7 +166,8 @@ public class Label {
       LabelShape shape,
       boolean gmOnly,
       GUID presetId,
-      boolean preset) {
+      boolean preset,
+      String previewText) {
     this.id = id;
     this.label = label;
     this.x = x;
@@ -181,6 +186,11 @@ public class Label {
     this.gmOnly = gmOnly;
     this.presetId = presetId;
     this.preset = preset;
+    if (previewText == null || previewText.isBlank() || previewText.equals(label)) {
+      this.previewText = label;
+    } else {
+      this.previewText = previewText;
+    }
   }
 
   /**
@@ -687,6 +697,28 @@ public class Label {
   }
 
   /**
+   * Sets the preview text of the label.
+   *
+   * @param previewText the preview text to set.
+   */
+  public void setPreviewText(String previewText) {
+    this.previewText = previewText;
+  }
+
+  /**
+   * Retrieves the preview text of the label.
+   *
+   * @return the preview text of the label.
+   */
+  public String getPreviewText() {
+    if (previewText == null || previewText.isBlank()) {
+      return label;
+    } else {
+      return previewText;
+    }
+  }
+
+  /**
    * Creates a new instance of the {@link Label} class based on the provided LabelDto object.
    *
    * @param dto the LabelDto object used to create the Label
@@ -711,7 +743,8 @@ public class Label {
         LabelShape.valueOf(dto.getShape()),
         dto.getGmOnly(),
         dto.getPresetsId().isEmpty() ? null : GUID.valueOf(dto.getPresetsId()),
-        dto.getPreset());
+        dto.getPreset(),
+        dto.getPreviewText());
   }
 
   /**

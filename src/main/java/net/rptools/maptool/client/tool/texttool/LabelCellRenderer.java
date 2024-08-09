@@ -31,7 +31,7 @@ public class LabelCellRenderer extends DefaultTableCellRenderer {
     if (value instanceof Label label) {
       var flatLabel = new FlatImageLabelFactory().getMapImageLabel(label);
 
-      var text = label.getLabel();
+      var text = label.getPreviewText();
       if (text == null || text.isEmpty()) {
         text = "";
       }
