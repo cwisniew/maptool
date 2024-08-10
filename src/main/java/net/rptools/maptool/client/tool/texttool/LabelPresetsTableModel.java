@@ -61,6 +61,7 @@ public class LabelPresetsTableModel extends AbstractTableModel {
       case 0 -> presets.get(rowIndex).getLabel();
       case 1 -> true;
       case 2 -> presets.get(rowIndex);
+        // should never happen
       default -> throw new IllegalArgumentException("Invalid column index: " + columnIndex);
     };
   }

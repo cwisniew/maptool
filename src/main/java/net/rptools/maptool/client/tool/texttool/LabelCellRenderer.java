@@ -36,8 +36,11 @@ public class LabelCellRenderer extends DefaultTableCellRenderer {
         text = "";
       }
       var img = flatLabel.renderImage(text);
-
       preview.setIcon(new ImageIcon(img));
+      if (isSelected) {
+        preview.setBackground(table.getSelectionBackground());
+        preview.setOpaque(true);
+      }
     }
     table.setRowHeight(row, preview.getPreferredSize().height + 4);
     return preview;
