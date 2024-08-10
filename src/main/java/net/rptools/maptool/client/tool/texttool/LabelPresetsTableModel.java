@@ -59,7 +59,7 @@ public class LabelPresetsTableModel extends AbstractTableModel {
   public Object getValueAt(int rowIndex, int columnIndex) {
     return switch (columnIndex) {
       case 0 -> presets.get(rowIndex).getLabel();
-      case 1 -> true;
+      case 1 -> presets.get(rowIndex).isGmOnly();
       case 2 -> presets.get(rowIndex);
         // should never happen
       default -> throw new IllegalArgumentException("Invalid column index: " + columnIndex);

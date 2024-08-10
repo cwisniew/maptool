@@ -16,10 +16,20 @@ package net.rptools.maptool.model.label;
 
 import net.rptools.maptool.model.label.presets.LabelPresets;
 
+/**
+ * Manages labels.
+ */
 public class LabelManager {
 
+  /**
+   * The {@link net.rptools.maptool.model.Label} presets.
+   */
   private static LabelPresets presets = new LabelPresets();
 
+  /**
+   * Gets the {@link net.rptools.maptool.model.Label} presets.
+   * @return the label presets.
+   */
   public LabelPresets getPresets() {
     return presets;
   }
