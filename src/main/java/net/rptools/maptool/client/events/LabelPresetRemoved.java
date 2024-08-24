@@ -12,22 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.label;
+package net.rptools.maptool.client.events;
 
-import net.rptools.maptool.model.label.presets.LabelPresets;
+import java.util.List;
+import net.rptools.maptool.model.GUID;
 
-/** Manages labels. */
-public class LabelManager {
-
-  /** The {@link net.rptools.maptool.model.Label} presets. */
-  private static final LabelPresets presets = LabelPresets.createTrackedLabelPresets();
-
-  /**
-   * Gets the {@link net.rptools.maptool.model.Label} presets.
-   *
-   * @return the label presets.
-   */
-  public LabelPresets getPresets() {
-    return presets;
-  }
-}
+/**
+ * Event that is fired when a label preset is removed.
+ *
+ * @param ids the ids of the label presets that were removed.
+ */
+public record LabelPresetRemoved(List<GUID> ids) {}

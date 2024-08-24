@@ -101,7 +101,12 @@ public class LabelPresetsDialog extends JDialog {
 
   /** Edit preset. */
   private void editPreset() {
-    // TODO: CDW implement edit functionality
+    var preset = (Label) labelPresetsTable.getValueAt(labelPresetsTable.getSelectedRow(), 2);
+    var dialog = new EditLabelDialog(preset, labelManager, true);
+    dialog.setVisible(true);
+    if (dialog.isAccepted()) {
+      ((LabelPresetsTableModel) labelPresetsTable.getModel()).fireTableDataChanged();
+    }
   }
 
   /** Delete preset. */

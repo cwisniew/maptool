@@ -17,16 +17,19 @@ package net.rptools.maptool.model.label.presets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import net.rptools.maptool.client.events.LabelPresetAdded;
+import net.rptools.maptool.client.events.LabelPresetChanged;
+import net.rptools.maptool.client.events.LabelPresetRemoved;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.server.proto.LabelPresetDto;
 import net.rptools.maptool.server.proto.LabelPresetsDto;
 
-/**
- * The label presets.
- */
+/** The label presets. */
 public class LabelPresets {
 
   /** Maps the name of the preset to the preset. */
@@ -35,8 +38,34 @@ public class LabelPresets {
   /** Maps the id of the preset to the preset. */
   private final ConcurrentHashMap<GUID, Label> presetsIdMap = new ConcurrentHashMap<>();
 
+  /** Whether changes are tracked. */
+  private final boolean tracked;
+
+  /** Instantiates a new {@code LabelPresets} that notifies when changes occur. */
+  public static LabelPresets createTrackedLabelPresets() {
+    return new LabelPresets(true);
+  }
+
+  /** Instantiates a new {@code LabelPresets} that does not notify when changes occur. */
+  public static LabelPresets createUntrackedLabelPresets() {
+    return new LabelPresets(false);
+  }
+
+  /**
+   * Instantiates a new {@code LabelPresets}. If {@code isTracked} is {@code true}, then changes,
+   * including adding, removing, and renaming preset generate events on the event bus. If creating a
+   * temporary {@code LabelPresets} that should not generate events, then {@code isTracked} should
+   * be {@code false}.
+   *
+   * @param isTracked whether changes are tracked.
+   */
+  public LabelPresets(boolean isTracked) {
+    tracked = isTracked;
+  }
+
   /**
    * Returns the {@code Label} preset names.
+   *
    * @return the {@code Label} preset names.
    */
   public Set<String> getPresetNames() {
@@ -45,6 +74,7 @@ public class LabelPresets {
 
   /**
    * Returns the {@code Label} for the given name.
+   *
    * @param name the name of the preset.
    * @return the {@code Label} for the given name.
    */
@@ -54,6 +84,7 @@ public class LabelPresets {
 
   /**
    * Returns the {@code Label} for the given id.
+   *
    * @param id the id of the preset.
    * @return the {@code Label} for the given id.
    */
@@ -63,6 +94,7 @@ public class LabelPresets {
 
   /**
    * Renames the preset with the given id.
+   *
    * @param id the id of the preset.
    * @param newName the new name of the preset.
    */
@@ -71,11 +103,17 @@ public class LabelPresets {
     if (label != null) {
       presetsNameMap.remove(getPresetName(label));
       presetsNameMap.put(newName, label);
+      label.setLabel(newName);
+      if (tracked) {
+        final var eventBus = new MapToolEventBus().getMainEventBus();
+        eventBus.post(new LabelPresetChanged(List.of(label.getId())));
+      }
     }
   }
 
   /**
    * Returns the name of the preset for the given {@code Label}.
+   *
    * @param label the {@code Label}.
    * @return the name of the preset for the given {@code Label}.
    */
@@ -93,8 +131,10 @@ public class LabelPresets {
 
   /**
    * Adds a preset.
+   *
    * @param name the name of the preset.
    * @param label the preset.
+   * @throws IllegalArgumentException if the preset already exists.
    */
   public void addPreset(String name, Label label) {
     if (presetsNameMap.containsKey(name)) {
@@ -103,10 +143,15 @@ public class LabelPresets {
     label.setPresetId(label.getPresetId()); // The preset id for a presets is it's self.
     presetsNameMap.put(name, label);
     presetsIdMap.put(label.getId(), label);
+    if (tracked) {
+      final var eventBus = new MapToolEventBus().getMainEventBus();
+      eventBus.post(new LabelPresetAdded(List.of(label.getId())));
+    }
   }
 
   /**
    * Returns the {@code Label} presets.
+   *
    * @return the {@code Label} presets.
    */
   public Collection<Label> getPresets() {
@@ -115,6 +160,7 @@ public class LabelPresets {
 
   /**
    * Returns the {@code LabelPresetsDto} for this {@code LabelPresets}.
+   *
    * @return the {@code LabelPresetsDto} for this {@code LabelPresets}.
    */
   public LabelPresetsDto toDto() {
@@ -130,11 +176,12 @@ public class LabelPresets {
 
   /**
    * Returns the {@code LabelPresets} for the given {@code LabelPresetsDto}.
+   *
    * @param dto the {@code LabelPresetsDto}.
    * @return the {@code LabelPresets} for the given {@code LabelPresetsDto}.
    */
   public static LabelPresets fromDto(LabelPresetsDto dto) {
-    var presets = new LabelPresets();
+    var presets = LabelPresets.createUntrackedLabelPresets();
     for (var preset : dto.getPresetsList()) {
       presets.addPreset(preset.getName(), Label.fromDto(preset.getPreset()));
     }
@@ -143,26 +190,40 @@ public class LabelPresets {
 
   /**
    * Sets the presets for {@code Label}s.
+   *
    * @param newPresets the new presets.
    */
   public void setPresets(LabelPresets newPresets) {
-    clear();
+    var old = List.copyOf(presetsIdMap.keySet());
+    presetsNameMap.clear();
     presetsNameMap.putAll(newPresets.presetsNameMap);
+    presetsIdMap.putAll(newPresets.presetsIdMap);
+    if (tracked) {
+      final var eventBus = new MapToolEventBus().getMainEventBus();
+      if (!old.isEmpty()) {
+        eventBus.post(new LabelPresetRemoved(old));
+      }
+      eventBus.post(new LabelPresetRemoved(List.copyOf(presetsIdMap.keySet())));
+    }
   }
-
 
   /**
    * Returns the number of presets.
+   *
    * @return the number of presets.
    */
   public int count() {
     return presetsNameMap.size();
   }
 
-  /**
-   * Clears the presets.
-   */
+  /** Clears the presets. */
   public void clear() {
+    var ids = List.copyOf(presetsIdMap.keySet());
     presetsNameMap.clear();
+    presetsIdMap.clear();
+    if (tracked) {
+      final var eventBus = new MapToolEventBus().getMainEventBus();
+      eventBus.post(new LabelPresetAdded(ids));
+    }
   }
 }
