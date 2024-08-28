@@ -103,6 +103,12 @@ public interface ServerCommand {
 
   void removeLabel(GUID zoneGUID, GUID labelGUID);
 
+  void putLabelPreset(Label label);
+
+  void removeLabelPreset(GUID labelGUID);
+
+  void updateLabelPreset(Label label);
+
   void draw(GUID zoneGUID, Pen pen, Drawable drawable);
 
   void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement);

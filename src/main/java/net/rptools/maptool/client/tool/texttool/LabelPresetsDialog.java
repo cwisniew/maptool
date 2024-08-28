@@ -105,13 +105,26 @@ public class LabelPresetsDialog extends JDialog {
     var dialog = new EditLabelDialog(preset, labelManager, true);
     dialog.setVisible(true);
     if (dialog.isAccepted()) {
+      labelManager.getPresets().updatePreset(preset);
       ((LabelPresetsTableModel) labelPresetsTable.getModel()).fireTableDataChanged();
     }
   }
 
   /** Delete preset. */
   private void deletePreset() {
-    // TODO: CDW implement delete functionality
+    var preset = (Label) labelPresetsTable.getValueAt(labelPresetsTable.getSelectedRow(), 2);
+    var labels = new LabelManager().getLabelsWithPresetId(preset.getId());
+    if (!labels.isEmpty()) {
+      if (JOptionPane.showConfirmDialog(
+              this,
+              I18N.getText("Label.presetsDialog.deletePresetWithLabels", labels.size()),
+              I18N.getText("Label.presetsDialog.deletePreset"),
+              JOptionPane.YES_NO_OPTION)
+          == JOptionPane.NO_OPTION) {
+        return; // Do nothing
+      }
+    }
+    labelManager.getPresets().removePreset(preset.getId());
   }
 
   /** Adds a new preset. */
@@ -201,3 +214,5 @@ public class LabelPresetsDialog extends JDialog {
             });
   }
 }
+
+// TODO: CDW update on client

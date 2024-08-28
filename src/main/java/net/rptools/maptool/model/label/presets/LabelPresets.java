@@ -218,12 +218,103 @@ public class LabelPresets {
 
   /** Clears the presets. */
   public void clear() {
+    clear(false);
+  }
+
+  /** Clears the presets at request of a remote client. */
+  public void remoteClear() {
+    clear(true);
+  }
+
+  /**
+   * Clears the presets. If {@code isRemote} is {@code true}, then the request is from a remote
+   * client and will not generate events.
+   *
+   * @param isRemote whether the request is from a remote client.
+   */
+  private void clear(boolean isRemote) {
     var ids = List.copyOf(presetsIdMap.keySet());
     presetsNameMap.clear();
     presetsIdMap.clear();
-    if (tracked) {
+    if (tracked && !isRemote) {
       final var eventBus = new MapToolEventBus().getMainEventBus();
       eventBus.post(new LabelPresetAdded(ids));
+    }
+  }
+
+  /**
+   * Removes the preset with the given id at request of a remote client. This will not generate
+   * remove events.
+   *
+   * @param id the id of the preset to remove.
+   */
+  public void remoteRemovePreset(GUID id) {
+    removePreset(id, true);
+  }
+
+  /**
+   * Removes the preset with the given id.
+   *
+   * @param id the id of the preset to remove.
+   */
+  public void removePreset(GUID id) {
+    removePreset(id, false);
+  }
+
+  /**
+   * Removes the preset with the given id. If {@code isRemote} is {@code true}, then the request is
+   * from a remote client and will not generate events.
+   *
+   * @param id the id of the preset to remove.
+   * @param isRemote whether the request is from a remote client.
+   */
+  private void removePreset(GUID id, boolean isRemote) {
+    Label label = presetsIdMap.get(id);
+    if (label != null) {
+      presetsNameMap.remove(getPresetName(label));
+      presetsIdMap.remove(id);
+      if (tracked && !isRemote) {
+        final var eventBus = new MapToolEventBus().getMainEventBus();
+        eventBus.post(new LabelPresetRemoved(List.of(label.getId())));
+      }
+    }
+  }
+
+  /**
+   * Updates the preset with the given id at request of a remote client.
+   *
+   * @param label the new preset.
+   */
+  public void remoteUpdatePreset(Label label) {
+    updatePreset(label, true);
+  }
+
+  /**
+   * Updates the preset with the given id.
+   *
+   * @param label the new preset.
+   */
+  public void updatePreset(Label label) {
+    updatePreset(label, false);
+  }
+
+  /**
+   * Updates the preset with the given id. If {@code isRemote} is {@code true}, then the request is
+   * from a remote client and will not generate events.
+   *
+   * @param label the new preset values.
+   * @param isRemote whether the request is from a remote client.
+   */
+  public void updatePreset(Label label, boolean isRemote) {
+    Label old = presetsIdMap.get(label.getId());
+    if (old != null) {
+      presetsNameMap.remove(getPresetName(old));
+    }
+    presetsNameMap.put(label.getLabel(), label);
+    presetsIdMap.put(label.getId(), label);
+    if (tracked && !isRemote) {
+      final var eventBus = new MapToolEventBus().getMainEventBus();
+      eventBus.post(new LabelPresetChanged(List.of(label.getId())));
     }
   }
 }

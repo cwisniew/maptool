@@ -89,5 +89,8 @@ message Message {
     RemoveDataNamespaceMsg remove_data_namespace_msg = 72;
     RemoveDataMsg remove_data_msg = 73;
     UpdatePlayerStatusMsg update_player_status_msg = 74;
+    PutLabelPresetMsg put_label_preset_msg = 75;
+    RemoveLabelPresetMsg remove_label_preset_msg = 76;
+    UpdateLabelPresetMsg update_label_preset_msg = 77;
   }
 }

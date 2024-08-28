@@ -89,6 +89,8 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.label.LabelManager;
+import net.rptools.maptool.model.label.presets.LabelPresetListener;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
@@ -1298,6 +1300,9 @@ public class MapTool {
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
     new MapToolEventBus().getMainEventBus().register(new TokenHoverListener());
+
+    // Register the instance that will listen for Label Preset Changes
+    new MapToolEventBus().getMainEventBus().register(new LabelPresetListener(new LabelManager()));
 
     final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();
     if (!enabledDeveloperOptions.isEmpty()) {

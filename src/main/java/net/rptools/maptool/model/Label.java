@@ -579,7 +579,7 @@ public class Label {
   public void setPresetId(GUID presetId) {
     if (!preset) { // If this is a preset there is nothing to do
       this.presetId = presetId;
-      setFromPreset();
+      presetWasUpdated();
     }
   }
 
@@ -589,7 +589,6 @@ public class Label {
    * @return the preset label object of the Label object
    */
   public Label getPreset() {
-    setFromPreset();
     return presetLabel;
   }
 
@@ -786,5 +785,10 @@ public class Label {
       presetId = null;
       presetLabel = null;
     }
+  }
+
+  /** Inform the label that the preset was updated. */
+  public void presetWasUpdated() {
+    setFromPreset();
   }
 }

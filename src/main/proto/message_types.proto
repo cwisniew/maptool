@@ -150,6 +150,13 @@ message PutLabelMsg {
   string zone_guid = 1;
   LabelDto label = 2;
 }
+message PutLabelPresetMsg {
+  LabelDto preset = 1;
+}
+
+message UpdateLabelPresetMsg {
+  LabelDto preset = 1;
+}
 
 message PutZoneMsg {
   ZoneDto zone = 1;
@@ -162,6 +169,10 @@ message RemoveAssetMsg {
 message RemoveLabelMsg {
   string zone_guid = 1;
   string label_guid = 2;
+}
+
+message RemoveLabelPresetMsg {
+  string label_guid = 1;
 }
 
 message RemoveTokenMsg {

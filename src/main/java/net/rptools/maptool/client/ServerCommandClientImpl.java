@@ -250,6 +250,24 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(Message.newBuilder().setRemoveLabelMsg(msg).build());
   }
 
+  @Override
+  public void putLabelPreset(Label label) {
+    var msg = PutLabelPresetMsg.newBuilder().setPreset(label.toDto());
+    makeServerCall(Message.newBuilder().setPutLabelPresetMsg(msg).build());
+  }
+
+  @Override
+  public void removeLabelPreset(GUID labelGUID) {
+    var msg = RemoveLabelPresetMsg.newBuilder().setLabelGuid(labelGUID.toString());
+    makeServerCall(Message.newBuilder().setRemoveLabelPresetMsg(msg).build());
+  }
+
+  @Override
+  public void updateLabelPreset(Label label) {
+    var msg = UpdateLabelPresetMsg.newBuilder().setPreset(label.toDto());
+    makeServerCall(Message.newBuilder().setUpdateLabelPresetMsg(msg).build());
+  }
+
   public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
     var msg =
         DrawMsg.newBuilder()
