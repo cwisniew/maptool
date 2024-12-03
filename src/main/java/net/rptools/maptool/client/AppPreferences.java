@@ -216,9 +216,6 @@ public class AppPreferences {
   public static final Preference<File> mapSaveDirectory =
       FileType.create("saveMapDir", saveDirectory::get);
 
-  public static final Preference<File> addOnLoadDirectory =
-      FileType.create("addOnLoadDir", saveDirectory::get);
-
   public static final Preference<File> loadDirectory =
       FileType.create("loadDir", () -> new File(File.separator));
 
@@ -398,6 +395,9 @@ public class AppPreferences {
 
   public static final Preference<Boolean> externalAddOnLibrariesEnabled =
       BooleanType.create("externalAddOnLibrariesEnabled", false);
+
+  public static final Preference<Integer> externalAddOnLibrariesRefreshInterval =
+      IntegerType.create("externalAddOnLibrariesRefreshInterval", 2);
 
   public static final Preference<String> createAddOnParentDir =
       StringType.create("createAddOnParentDir", System.getProperty("user.home"));

@@ -34,14 +34,14 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
 
   @Override
   public int getColumnCount() {
-    return 7;
+    return 6;
   }
 
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     return switch (columnIndex) {
-      case 4, 5 -> Boolean.class;
-      case 6 -> ExternalLibraryInfo.class;
+      case 4 -> Boolean.class;
+      case 5 -> ExternalLibraryInfo.class;
       default -> String.class;
     };
   }
@@ -62,8 +62,7 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
       case 2 -> info.libraryInfo().namespace();
       case 3 -> info.subDirectoryName();
       case 4 -> info.isInstalled();
-      case 5 -> info.updatedOnDisk();
-      case 6 -> info;
+      case 5 -> info;
       default -> null;
     };
   }
@@ -76,8 +75,7 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
       case 2 -> I18N.getText("library.dialog.addon.namespace");
       case 3 -> I18N.getText("library.dialog.addon.subdir");
       case 4 -> I18N.getText("library.dialog.addon.imported");
-      case 5 -> I18N.getText("library.dialog.addon.updated");
-      case 6 -> I18N.getText("library.dialog.addon.refresh");
+      case 5 -> I18N.getText("library.dialog.addon.refresh");
       default -> null;
     };
   }

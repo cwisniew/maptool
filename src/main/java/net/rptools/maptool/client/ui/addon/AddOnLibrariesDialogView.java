@@ -31,11 +31,13 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.AppConstants;
@@ -52,6 +54,7 @@ import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
+import org.checkerframework.checker.units.qual.A;
 
 /** Dialog for managing add-on libraries. */
 public class AddOnLibrariesDialogView extends JDialog {
@@ -121,6 +124,9 @@ public class AddOnLibrariesDialogView extends JDialog {
 
   /** The text field for the add-on development directory. */
   private JTextField directoryTextField;
+
+  /** How often (in minutes) the refresh of the external directory contents should occur. */
+  private JSpinner refreshMinuteSpinner;
 
   /** The button for browsing to select the add-on development directory. */
   private JButton browseButton;
@@ -318,6 +324,27 @@ public class AddOnLibrariesDialogView extends JDialog {
               enableExternalAddOnCheckBox.isSelected());
         });
 
+    int numMinRefresh = AppPreferences.externalAddOnLibrariesRefreshInterval.get();
+    var spinnerModel = new SpinnerNumberModel(numMinRefresh, 1, 60, 1);
+    refreshMinuteSpinner.setModel(spinnerModel);
+    refreshMinuteSpinner.addChangeListener(
+        e -> {
+          int minutes = (int) refreshMinuteSpinner.getValue();
+          AppPreferences.externalAddOnLibrariesRefreshInterval.set(minutes);
+          var libManager = new LibraryManager();
+          try {
+            libManager.setExternalLibraryRefreshInterval(minutes);
+          } catch (IOException ex) {
+            try {
+              libManager.setExternalLibrariesEnabled(false);
+            } catch (IOException ioException) {
+              // do nothing
+            }
+            AppPreferences.externalAddOnLibrariesEnabled.set(false);
+            MapTool.showError( I18N.getText("library.dialog.read.failed", libManager.getEternalLibraryPath()));
+          }
+        });
+
     browseButton.addActionListener(
         e -> {
           JFileChooser chooser = new JFileChooser();
@@ -325,9 +352,21 @@ public class AddOnLibrariesDialogView extends JDialog {
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.showOpenDialog(MapTool.getFrame());
           if (chooser.getSelectedFile() != null) {
-            directoryTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-            AppPreferences.externalAddOnLibrariesPath.set(
-                chooser.getSelectedFile().getAbsolutePath());
+            var dir = chooser.getSelectedFile();
+            directoryTextField.setText(dir.getAbsolutePath());
+            AppPreferences.externalAddOnLibrariesPath.set(dir.getAbsolutePath());
+            var libManager = new LibraryManager();
+            try {
+              libManager.setExternalLibraryPath(dir.toPath());
+            } catch (IOException ex) {
+              try {
+                libManager.setExternalLibrariesEnabled(false);
+              } catch (IOException ioException) {
+                // do nothing
+              }
+              AppPreferences.externalAddOnLibrariesEnabled.set(false);
+              MapTool.showError( I18N.getText("library.dialog.read.failed", libManager.getEternalLibraryPath()));
+            }
           }
         });
 
@@ -364,6 +403,7 @@ public class AddOnLibrariesDialogView extends JDialog {
     if (enableExternalAddOnCheckBox.isSelected()) {
       refreshLibraries();
     }
+
     pack();
   }
 

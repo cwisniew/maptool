@@ -15,14 +15,17 @@
 package net.rptools.maptool.model.library.addon;
 
 import com.google.common.eventbus.Subscribe;
-import io.methvin.watcher.DirectoryWatcher;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
@@ -44,20 +47,23 @@ public class ExternalAddOnLibraryManager {
   /** The add-on libraries that are registered. */
   private final Map<String, ExternalLibraryInfo> namespaceInfoMap = new ConcurrentHashMap<>();
 
-  /** Is the external add-on library manager enabled. */
-  private boolean enabled = false;
 
-  /** The path to the external add-on libraries. */
-  private Path externalLibraryPath = null;
+  /**
+   * @param path the path to watch for add-on libraries.
+   * @param initialised whether the external add-on library manager is initialised.
+   * @param enabled whether the external add-on library manager is enabled.
+   * @param refreshMs the amount of time to sleep between refreshes.
+   */
+  private record ExternalDirectoryInfo(Path path, boolean initialised, boolean enabled,
+                                       int refreshMs) {}
 
-  /** Is the external add-on library manager initialised. */
-  private boolean initialised = false;
+  /** Information about the external add-on library directory. */
+  private AtomicReference<ExternalDirectoryInfo> externalDirectoryInfo =
+      new AtomicReference<>(new ExternalDirectoryInfo(null, false, false, 2 * 60 * 1000));
 
-  /** Directory watcher for watching the external add-on library directory. */
-  private DirectoryWatcher directoryWatcher;
+  /** The thread for refreshing the external add-on libraries. */
+  private Thread refreshThread;
 
-  /** Lock for managing enabled and path states. */
-  private final ReentrantLock lock = new ReentrantLock();
 
   /**
    * Creates a new instance of the external add-on library manager. {@code init()} must be called
@@ -79,16 +85,16 @@ public class ExternalAddOnLibraryManager {
    *     initialised.
    */
   public void init() throws IOException {
-    try {
-      lock.lock();
-      if (initialised) {
-        throw new IllegalStateException("External add-on library manager already initialised");
-      }
-      initialised = true;
-      startWatching();
-    } finally {
-      lock.unlock();
+    if (externalDirectoryInfo.get().initialised) {
+      throw new IllegalStateException("External add-on library manager already initialised");
     }
+    var path = Path.of(AppPreferences.externalAddOnLibrariesPath.get());
+    var enabled = AppPreferences.externalAddOnLibrariesEnabled.get();
+    var refreshMs = AppPreferences.externalAddOnLibrariesRefreshInterval.get() * 60 * 1000;
+    externalDirectoryInfo.set(new ExternalDirectoryInfo(path, true, enabled, refreshMs));
+
+    startWatching();
+
     var eventBus = new MapToolEventBus().getMainEventBus();
     eventBus.register(this);
   }
@@ -103,6 +109,10 @@ public class ExternalAddOnLibraryManager {
     boolean updated = false;
     for (LibraryInfo libraryInfo : event.addOns()) {
       var namespace = libraryInfo.namespace().toLowerCase();
+      var path = externalDirectoryInfo.get().path();
+      if (path == null) {
+        return;
+      }
       if (namespaceInfoMap.containsKey(namespace)) {
         var oldInfo = namespaceInfoMap.get(namespace);
         var newInfo =
@@ -112,7 +122,7 @@ public class ExternalAddOnLibraryManager {
                 false,
                 true,
                 oldInfo.backingDirectory(),
-                externalLibraryPath.relativize(oldInfo.backingDirectory()).toString());
+                path.relativize(oldInfo.backingDirectory()).toString());
         namespaceInfoMap.put(namespace, newInfo);
         updated = true;
       }
@@ -132,6 +142,10 @@ public class ExternalAddOnLibraryManager {
     boolean updated = false;
     for (LibraryInfo libraryInfo : event.addOns()) {
       var namespace = libraryInfo.namespace().toLowerCase();
+      var path = externalDirectoryInfo.get().path();
+      if (path == null) {
+        return;
+      }
       if (namespaceInfoMap.containsKey(namespace)) {
         var oldInfo = namespaceInfoMap.get(namespace);
         var newInfo =
@@ -141,7 +155,7 @@ public class ExternalAddOnLibraryManager {
                 true,
                 false,
                 oldInfo.backingDirectory(),
-                externalLibraryPath.relativize(oldInfo.backingDirectory()).toString());
+                path.relativize(oldInfo.backingDirectory()).toString());
         namespaceInfoMap.put(namespace, newInfo);
         updated = true;
       }
@@ -158,6 +172,10 @@ public class ExternalAddOnLibraryManager {
    */
   private void registerExternalAddOnLibrary(ExternalLibraryInfo info) {
     boolean isInstalled = addOnLibraryManager.isNamespaceRegistered(info.namespace());
+    var path = externalDirectoryInfo.get().path();
+    if (path == null) {
+      return;
+    }
     var externalInfo =
         new ExternalLibraryInfo(
             info.namespace(),
@@ -165,8 +183,13 @@ public class ExternalAddOnLibraryManager {
             true,
             isInstalled,
             info.backingDirectory(),
-            externalLibraryPath.relativize(info.backingDirectory()).toString());
+            path.relativize(info.backingDirectory()).toString());
     namespaceInfoMap.put(info.namespace().toLowerCase(), externalInfo);
+  }
+
+  /** Clears the external add-on libraries. */
+  private void clearExternalAddOnLibrary() {
+    namespaceInfoMap.clear();
   }
 
   /**
@@ -205,6 +228,10 @@ public class ExternalAddOnLibraryManager {
       return;
     }
     boolean isInstalled = addOnLibraryManager.isNamespaceRegistered(lib.namespace());
+    var extpath = externalDirectoryInfo.get().path();
+    if (extpath == null) {
+      return;
+    }
     var info =
         new ExternalLibraryInfo(
             lib.namespace(),
@@ -212,7 +239,7 @@ public class ExternalAddOnLibraryManager {
             false,
             isInstalled,
             path,
-            externalLibraryPath.relativize(path).toString());
+            extpath.relativize(path).toString());
     registerExternalAddOnLibrary(info);
     var eventBus = new MapToolEventBus().getMainEventBus();
     eventBus.post(new ExternalAddonsUpdateEvent());
@@ -233,12 +260,7 @@ public class ExternalAddOnLibraryManager {
    * @return {@code true} if the external add-on library manager is enabled.
    */
   public boolean isEnabled() {
-    try {
-      lock.lock();
-      return enabled;
-    } finally {
-      lock.unlock();
-    }
+    return externalDirectoryInfo.get().enabled();
   }
 
   /**
@@ -248,18 +270,14 @@ public class ExternalAddOnLibraryManager {
    * @throws IOException if an error occurs.
    */
   public void setEnabled(boolean enabled) throws IOException {
-    try {
-      lock.lock();
-      if (this.enabled != enabled) {
-        this.enabled = enabled;
-        if (enabled) {
-          startWatching();
-        } else {
-          stopWatching();
-        }
-      }
-    } finally {
-      lock.unlock();
+    var info = externalDirectoryInfo.get();
+    if (info.enabled() == enabled) {
+      return;
+    }
+    if (enabled) {
+      startWatching();
+    } else {
+      stopWatching();
     }
   }
 
@@ -269,12 +287,7 @@ public class ExternalAddOnLibraryManager {
    * @return the path to the external add-on libraries.
    */
   public Path getExternalLibraryPath() {
-    try {
-      lock.lock();
-      return externalLibraryPath;
-    } finally {
-      lock.unlock();
-    }
+    return externalDirectoryInfo.get().path();
   }
 
   /**
@@ -284,55 +297,57 @@ public class ExternalAddOnLibraryManager {
    * @throws IOException if an error occurs.
    */
   public void setExternalLibraryPath(Path path) throws IOException {
-    if (path != null && path.equals(externalLibraryPath)) {
+    refreshAll();
+    var info = externalDirectoryInfo.get();
+    if (path != null && path.equals(info.path())) {
       return;
     }
-    try {
-      lock.lock();
-      externalLibraryPath = path;
-      stopWatching();
-      if (path != null && enabled) {
+    stopWatching();
+    if (path != null && info.enabled()) {
         startWatching();
-      }
-    } finally {
-      lock.unlock();
     }
   }
 
   /** Stops watching the external add-on library directory. */
   private void stopWatching() throws IOException {
-    try {
-      lock.lock();
-      if (directoryWatcher != null) {
-        directoryWatcher.close();
-        directoryWatcher = null;
-      }
-    } finally {
-      lock.unlock();
+    var info = externalDirectoryInfo.get();
+    externalDirectoryInfo.set(new ExternalDirectoryInfo(info.path(), info.initialised(), false, info.refreshMs()));
+    if (refreshThread != null) {
+      refreshThread.interrupt();
+      refreshThread = null;
+      clearExternalAddOnLibrary();
     }
   }
 
   /**
    * Starts watching the external add-on library directory.
    *
-   * @throws IOException if an error occurs.
    */
   private void startWatching() throws IOException {
-    try {
-      lock.lock();
-      refreshAll();
-      if (enabled && externalLibraryPath != null && Files.exists(externalLibraryPath)) {
-        if (directoryWatcher != null) {
-          directoryWatcher.watchAsync();
-        } else {
-          directoryWatcher = createDirectoryWatcher();
-          directoryWatcher.watchAsync();
-        }
+    var info = externalDirectoryInfo.get();
+    externalDirectoryInfo.set(new ExternalDirectoryInfo(info.path(), info.initialised(), true, info.refreshMs()));
+    refreshAll();
+    if (refreshThread == null) {
+        refreshThread =
+            new Thread(() -> {
+                  while (externalDirectoryInfo.get().enabled()) {
+                    var extInfo = externalDirectoryInfo.get();
+                    try {
+                      Thread.sleep(extInfo.refreshMs());
+                      refreshAll();
+                    } catch (InterruptedException ie) {
+                      // Ignore
+                    } catch (IOException e) {
+                    EventQueue.invokeLater(
+                      () ->
+                          MapTool.showError(
+                              I18N.getText("library.dialog.read.failed", extInfo.path())));
+                }
+              }
+        });
+        refreshThread.start();
       }
-    } finally {
-      lock.unlock();
     }
-  }
 
   /**
    * Refreshes all the external add-on libraries.
@@ -340,21 +355,18 @@ public class ExternalAddOnLibraryManager {
    * @throws IOException if an error occurs.
    */
   private void refreshAll() throws IOException {
-    if (!initialised || !enabled || externalLibraryPath == null) {
+    clearExternalAddOnLibrary();
+    var info = externalDirectoryInfo.get();
+    if (!info.initialised() || !info.enabled() || info.path() == null) {
       return;
     }
-    File[] directories = externalLibraryPath.toFile().listFiles(File::isDirectory);
+
+    File[] directories = info.path.toFile().listFiles(File::isDirectory);
     if (directories != null) {
       for (File directory : directories) {
-        try {
-          registerExternalAddOnLibrary(directory.toPath());
-        } catch (IOException e) {
-          MapTool.showError(I18N.getText("library.dialog.read.failed", directory));
-        }
+        registerExternalAddOnLibrary(directory.toPath());
       }
     }
-    var eventBus = new MapToolEventBus().getMainEventBus();
-    eventBus.post(new ExternalAddonsUpdateEvent());
   }
 
   /**
@@ -363,7 +375,7 @@ public class ExternalAddOnLibraryManager {
    * @param namespace the namespace of the add-on library to make available.
    */
   public void importLibrary(String namespace) throws IOException {
-    if (enabled) {
+    if (externalDirectoryInfo.get().enabled()) {
       var libInfo = namespaceInfoMap.get(namespace.toLowerCase());
       if (libInfo != null) {
         var lib = new AddOnLibraryImporter().importFromDirectory(libInfo.backingDirectory());
@@ -391,45 +403,21 @@ public class ExternalAddOnLibraryManager {
   }
 
   /**
-   * Stops the add-on library with the specified namespace from being available to MapTool.
+   * Sets the refresh interval for the external add-on libraries.
+   * @param minutes the number of minutes to wait between refreshes.
    *
-   * @return the namespace of the add-on library to stop being available.
    * @throws IOException if an error occurs.
    */
-  private DirectoryWatcher createDirectoryWatcher() throws IOException {
-    return DirectoryWatcher.builder()
-        .path(externalLibraryPath)
-        .listener(
-            event -> {
-              try {
-                int basePathNameCount = externalLibraryPath.getNameCount();
-                var path = event.path();
-                if (path.getNameCount() <= basePathNameCount) {
-                  return;
-                }
-                if (!path.startsWith(externalLibraryPath)) {
-                  return;
-                }
-                var subPath = externalLibraryPath.relativize(path);
-                if (isIgnoredSubPath(subPath)) {
-                  return;
-                }
-                path = externalLibraryPath.resolve(path.getName(basePathNameCount));
-                switch (event.eventType()) {
-                  case CREATE -> registerExternalAddOnLibrary(path);
-                  case DELETE -> {
-                    if (path.toFile().exists()) {
-                      refreshExternalAddOnLibrary(path);
-                    } else {
-                      deregisterExternalAddOnLibrary(path);
-                    }
-                  }
-                  case MODIFY -> refreshExternalAddOnLibrary(path);
-                }
-              } catch (IOException e) {
-                MapTool.showError(I18N.getText("library.dialog.read.failed", event.path()));
-              }
-            })
-        .build();
+  public void setRefreshInterval(int minutes) throws IOException {
+    int refreshSleepMS = minutes * 60 * 1000;
+    var info = externalDirectoryInfo.get();
+    if (info.refreshMs() == refreshSleepMS) {
+      return;
+    }
+    externalDirectoryInfo.set(new ExternalDirectoryInfo(info.path(), info.initialised(), info.enabled(), refreshSleepMS));
+    if (info.enabled()) {
+      stopWatching();
+      startWatching();
+    }
   }
 }

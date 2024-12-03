@@ -130,6 +130,17 @@ public class LibraryManager {
   }
 
   /**
+   * Returns the refresh interval for external libraries.
+   * @param minutes The number of minutes between refreshes.
+   *
+   * @throws IOException if an error occurs while setting the refresh interval.
+   */
+  public void setExternalLibraryRefreshInterval(int minutes) throws IOException {
+    addOnLibraryManager.setExternalLibraryRefreshInterval(minutes);
+  }
+
+
+  /**
    * Checks to see if this library name used a reserved prefix.
    *
    * @param name the name of the library

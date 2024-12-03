@@ -311,4 +311,14 @@ public class AddOnLibraryManager {
   public void importFromExternal(String namespace) throws IOException {
     externalAddOnLibraryManager.importLibrary(namespace);
   }
+
+  /**
+   * Sets the interval at which external libraries are refreshed.
+   * @param minutes The interval in minutes.
+   *
+   * @throws IOException if an I/O error occurs.
+   */
+  public void setExternalLibraryRefreshInterval(int minutes) throws IOException {
+    externalAddOnLibraryManager.setRefreshInterval(minutes);
+  }
 }
