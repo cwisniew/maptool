@@ -8,10 +8,8 @@ repositories {
     maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
+apply from: rootProject.file('buildSrc/java-version.gradle')
+
 
 spotless {
     java {

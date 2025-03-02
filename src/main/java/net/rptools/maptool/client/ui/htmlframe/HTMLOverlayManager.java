@@ -119,6 +119,10 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     this.zOrder = zOrder;
   }
 
+  void setLocked(boolean locked) {
+    this.locked = locked;
+  }
+
   /**
    * @return the name of the overlay.
    */
