@@ -28,4 +28,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
-          gh release list -R ${{ github.repository}} | grep nightly | awk '{ print $1}' | xargs -n 1 gh release delete -R ${{ github.repository}} -y
+          gh release list -R ${{ github.repository}} | grep nightly | awk '{ print $5}' | xargs -n 1 gh release delete -R ${{ github.repository}} -y
