@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public record TokenEdited() implements TokenEvent, MapToolEvent {
-}
+public record TokenEdited() implements TokenEvent, MapToolEvent {}

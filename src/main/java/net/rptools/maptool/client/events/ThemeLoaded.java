@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public record ThemeLoaded() implements MapToolEvent {
-}
+public record ThemeLoaded() implements MapToolEvent {}

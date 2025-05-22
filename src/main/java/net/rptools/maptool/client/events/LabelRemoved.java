@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public record LabelRemoved() implements LabelEvent, MapToolEvent {
-}
+public record LabelRemoved() implements LabelEvent, MapToolEvent {}

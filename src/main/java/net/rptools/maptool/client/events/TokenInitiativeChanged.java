@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record TokenInitiativeChanged() implements InitiativeEvent, SaveStateChangedEvent, MapToolEvent {
-}
+public record TokenInitiativeChanged()
+    implements InitiativeEvent, SaveStateChangedEvent, MapToolEvent {}

@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public record ZoneLandingChanged() implements ZoneEvent, SaveStateChangedEvent, MapToolEvent {
-}
+public record ZoneLandingChanged() implements ZoneEvent, SaveStateChangedEvent, MapToolEvent {}

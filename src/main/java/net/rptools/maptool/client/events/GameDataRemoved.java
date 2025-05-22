@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public record GameDataRemoved() implements GameDataEvent, SaveStateChangedEvent, MapToolEvent {
-}
+public record GameDataRemoved() implements GameDataEvent, SaveStateChangedEvent, MapToolEvent {}

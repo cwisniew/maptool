@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public interface TokenEvent extends ZoneContentChangedEvent, SaveStateChangedEvent {
-}
+public interface TokenEvent extends ZoneContentChangedEvent, SaveStateChangedEvent {}

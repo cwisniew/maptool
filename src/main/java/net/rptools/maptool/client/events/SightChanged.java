@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record SightChanged() implements CampaignPropertiesEvent, SaveStateChangedEvent, MapToolEvent {
-}
+public record SightChanged()
+    implements CampaignPropertiesEvent, SaveStateChangedEvent, MapToolEvent {}

@@ -14,5 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public interface DrawableEvent {
-}
+public interface DrawableEvent {}
