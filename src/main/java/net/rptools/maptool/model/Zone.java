@@ -19,7 +19,19 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -29,6 +41,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.model.listeners.EventListenerConfig;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -422,6 +435,8 @@ public class Zone {
   private int width;
 
   private transient Map<String, Integer> tokenNumberCache;
+  private List<EventListenerConfig> mapSpecificEventListeners = new ArrayList<>();
+  private boolean overrideGlobalMapListeners = false;
 
   {
     drawablesByLayer = new EnumMap<>(Layer.class);
@@ -2159,6 +2174,11 @@ public class Zone {
       walls = new WallTopology();
     }
 
+    if (this.mapSpecificEventListeners == null) {
+      this.mapSpecificEventListeners = new ArrayList<>();
+    }
+    // overrideGlobalMapListeners is a primitive boolean, defaults to false, which is fine.
+
     return this;
   }
 
@@ -2281,6 +2301,21 @@ public class Zone {
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
 
+    // Deserialize mapSpecificEventListeners
+    if (dto.getMapSpecificEventListenersList() != null) {
+      if (zone.mapSpecificEventListeners == null) {
+        zone.mapSpecificEventListeners = new ArrayList<>();
+      } else {
+        zone.mapSpecificEventListeners.clear();
+      }
+      for (net.rptools.maptool.server.proto.EventListenerConfigDto configDto : dto.getMapSpecificEventListenersList()) {
+        zone.mapSpecificEventListeners.add(eventListenerConfigFromDto(configDto));
+      }
+    }
+
+    // Deserialize overrideGlobalMapListeners
+    zone.overrideGlobalMapListeners = dto.getOverrideGlobalMapListeners();
+
     return zone;
   }
 
@@ -2292,6 +2327,17 @@ public class Zone {
     }
     dto.setCreationTime(creationTime);
     dto.setId(id.toString());
+
+    // Serialize mapSpecificEventListeners
+    if (this.mapSpecificEventListeners != null) {
+      for (net.rptools.maptool.model.listeners.EventListenerConfig config : this.mapSpecificEventListeners) {
+        dto.addMapSpecificEventListeners(eventListenerConfigToDto(config));
+      }
+    }
+
+    // Serialize overrideGlobalMapListeners
+    dto.setOverrideGlobalMapListeners(this.overrideGlobalMapListeners);
+
     dto.setGrid(grid.toDto());
     dto.setGridColor(gridColor);
     dto.setImageScaleX(imageScaleX);
@@ -2345,5 +2391,68 @@ public class Zone {
     dto.setHeight(height);
     dto.setWidth(width);
     return dto.build();
+  }
+
+  public List<EventListenerConfig> getMapSpecificEventListeners() {
+    return Collections.unmodifiableList(mapSpecificEventListeners);
+  }
+
+  public void addMapSpecificEventListener(EventListenerConfig config) {
+    this.mapSpecificEventListeners.add(config);
+  }
+
+  public void removeMapSpecificEventListener(String configId) {
+    this.mapSpecificEventListeners.removeIf(lec -> lec.getId().equals(configId));
+  }
+
+  public boolean isOverrideGlobalMapListeners() {
+    return overrideGlobalMapListeners;
+  }
+
+  public void setOverrideGlobalMapListeners(boolean override) {
+    this.overrideGlobalMapListeners = override;
+  }
+
+  // Helper methods for DTO conversion
+  private static net.rptools.maptool.server.proto.ListenerTypeDto mapListenerTypeToDto(net.rptools.maptool.model.listeners.ListenerType modelType) {
+    return switch (modelType) {
+      case MACRO_CODE -> net.rptools.maptool.server.proto.ListenerTypeDto.MACRO_CODE_DTO;
+      case PREDEFINED_ACTION -> net.rptools.maptool.server.proto.ListenerTypeDto.PREDEFINED_ACTION_DTO;
+      case ADD_ON_LISTENER -> net.rptools.maptool.server.proto.ListenerTypeDto.ADD_ON_LISTENER_DTO;
+      default -> throw new IllegalArgumentException("Unexpected ListenerType: " + modelType);
+    };
+  }
+
+  private static net.rptools.maptool.model.listeners.ListenerType mapListenerTypeFromDto(net.rptools.maptool.server.proto.ListenerTypeDto dtoType) {
+    return switch (dtoType) {
+      case MACRO_CODE_DTO -> net.rptools.maptool.model.listeners.ListenerType.MACRO_CODE;
+      case PREDEFINED_ACTION_DTO -> net.rptools.maptool.model.listeners.ListenerType.PREDEFINED_ACTION;
+      case ADD_ON_LISTENER_DTO -> net.rptools.maptool.model.listeners.ListenerType.ADD_ON_LISTENER;
+      default -> throw new IllegalArgumentException("Unexpected ListenerTypeDto: " + dtoType);
+    };
+  }
+
+  private static net.rptools.maptool.server.proto.EventListenerConfigDto eventListenerConfigToDto(net.rptools.maptool.model.listeners.EventListenerConfig config) {
+    net.rptools.maptool.server.proto.EventListenerConfigDto.Builder builder = net.rptools.maptool.server.proto.EventListenerConfigDto.newBuilder();
+    builder.setId(config.getId());
+    builder.setName(config.getName());
+    builder.setTargetEvent(config.getTargetEvent());
+    builder.setActionReference(config.getActionReference());
+    builder.setEnabled(config.isEnabled());
+    builder.setExecutionOrder(config.getExecutionOrder());
+    builder.setListenerType(mapListenerTypeToDto(config.getListenerType()));
+    return builder.build();
+  }
+
+  private static net.rptools.maptool.model.listeners.EventListenerConfig eventListenerConfigFromDto(net.rptools.maptool.server.proto.EventListenerConfigDto dto) {
+    return new net.rptools.maptool.model.listeners.EventListenerConfig(
+            dto.getId(),
+            dto.getName(),
+            mapListenerTypeFromDto(dto.getListenerType()),
+            dto.getTargetEvent(),
+            dto.getActionReference(),
+            dto.getEnabled(),
+            dto.getExecutionOrder()
+    );
   }
 }

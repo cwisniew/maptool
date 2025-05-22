@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record ZoneRenamed() implements ZoneEvent, SaveStateChangedEvent, MapToolEvent {}
+public record ZoneRenamed() implements ZoneEvent, SaveStateChangedEvent, MapToolEvent {
+}

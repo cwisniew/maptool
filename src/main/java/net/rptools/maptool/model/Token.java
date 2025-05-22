@@ -36,7 +36,20 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,6 +65,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.model.listeners.EventListenerConfig;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -380,6 +394,8 @@ public class Token implements Cloneable {
   private HeroLabData heroLabData;
 
   private boolean allowURIAccess = false;
+  private List<EventListenerConfig> eventListeners = new ArrayList<>();
+  private boolean overrideTokenTypeListeners = false;
 
   /**
    * Constructor from another token, with the option to keep the token id
@@ -500,6 +516,8 @@ public class Token implements Cloneable {
     speechName = token.speechName != null ? token.speechName : "";
     allowURIAccess = token.allowURIAccess;
     statSheet = token.statSheet;
+    eventListeners.addAll(token.eventListeners); // Shallow copy, consider if deep copy is needed
+    overrideTokenTypeListeners = token.overrideTokenTypeListeners;
   }
 
   public Token() {}
@@ -2651,6 +2669,11 @@ public class Token implements Cloneable {
     }
     tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
 
+    if (this.eventListeners == null) {
+      this.eventListeners = new ArrayList<>();
+    }
+    // overrideTokenTypeListeners is a primitive boolean, defaults to false, which is fine.
+
     return this;
   }
 
@@ -3091,6 +3114,18 @@ public class Token implements Cloneable {
     if (dto.hasStatSheetProperties()) {
       token.statSheet = StatSheetProperties.fromDto(dto.getStatSheetProperties());
     }
+
+    // Deserialize eventListeners
+    if (dto.getEventListenersList() != null) {
+      token.eventListeners.clear(); // Clear any defaults if necessary
+      for (net.rptools.maptool.server.proto.EventListenerConfigDto configDto : dto.getEventListenersList()) {
+        token.eventListeners.add(eventListenerConfigFromDto(configDto));
+      }
+    }
+
+    // Deserialize overrideTokenTypeListeners
+    token.overrideTokenTypeListeners = dto.getOverrideTokenTypeListeners();
+
     return token;
   }
 
@@ -3229,6 +3264,17 @@ public class Token implements Cloneable {
     if (statSheet != null) {
       dto.setStatSheetProperties(StatSheetProperties.toDto(statSheet));
     }
+
+    // Serialize eventListeners
+    if (this.eventListeners != null) {
+      for (net.rptools.maptool.model.listeners.EventListenerConfig config : this.eventListeners) {
+        dto.addEventListeners(eventListenerConfigToDto(config));
+      }
+    }
+
+    // Serialize overrideTokenTypeListeners
+    dto.setOverrideTokenTypeListeners(this.overrideTokenTypeListeners);
+
     return dto.build();
   }
 
@@ -3267,5 +3313,68 @@ public class Token implements Cloneable {
   /** Use the default stat sheet for the tokens token type. */
   public void useDefaultStatSheet() {
     setStatSheet(null);
+  }
+
+  public List<EventListenerConfig> getEventListeners() {
+    return Collections.unmodifiableList(eventListeners);
+  }
+
+  public void addEventListenerConfig(EventListenerConfig config) {
+    this.eventListeners.add(config);
+  }
+
+  public void removeEventListenerConfig(String configId) {
+    this.eventListeners.removeIf(lec -> lec.getId().equals(configId));
+  }
+
+  public boolean isOverrideTokenTypeListeners() {
+    return overrideTokenTypeListeners;
+  }
+
+  public void setOverrideTokenTypeListeners(boolean override) {
+    this.overrideTokenTypeListeners = override;
+  }
+
+  // Helper methods for DTO conversion (replicated from CampaignProperties approach)
+  private static net.rptools.maptool.server.proto.ListenerTypeDto mapListenerTypeToDto(net.rptools.maptool.model.listeners.ListenerType modelType) {
+    return switch (modelType) {
+      case MACRO_CODE -> net.rptools.maptool.server.proto.ListenerTypeDto.MACRO_CODE_DTO;
+      case PREDEFINED_ACTION -> net.rptools.maptool.server.proto.ListenerTypeDto.PREDEFINED_ACTION_DTO;
+      case ADD_ON_LISTENER -> net.rptools.maptool.server.proto.ListenerTypeDto.ADD_ON_LISTENER_DTO;
+      default -> throw new IllegalArgumentException("Unexpected ListenerType: " + modelType); // Should not happen
+    };
+  }
+
+  private static net.rptools.maptool.model.listeners.ListenerType mapListenerTypeFromDto(net.rptools.maptool.server.proto.ListenerTypeDto dtoType) {
+    return switch (dtoType) {
+      case MACRO_CODE_DTO -> net.rptools.maptool.model.listeners.ListenerType.MACRO_CODE;
+      case PREDEFINED_ACTION_DTO -> net.rptools.maptool.model.listeners.ListenerType.PREDEFINED_ACTION;
+      case ADD_ON_LISTENER_DTO -> net.rptools.maptool.model.listeners.ListenerType.ADD_ON_LISTENER;
+      default -> throw new IllegalArgumentException("Unexpected ListenerTypeDto: " + dtoType); // Should not happen with UNRECOGNIZED
+    };
+  }
+
+  private static net.rptools.maptool.server.proto.EventListenerConfigDto eventListenerConfigToDto(net.rptools.maptool.model.listeners.EventListenerConfig config) {
+    net.rptools.maptool.server.proto.EventListenerConfigDto.Builder builder = net.rptools.maptool.server.proto.EventListenerConfigDto.newBuilder();
+    builder.setId(config.getId());
+    builder.setName(config.getName());
+    builder.setTargetEvent(config.getTargetEvent());
+    builder.setActionReference(config.getActionReference());
+    builder.setEnabled(config.isEnabled());
+    builder.setExecutionOrder(config.getExecutionOrder());
+    builder.setListenerType(mapListenerTypeToDto(config.getListenerType()));
+    return builder.build();
+  }
+
+  private static net.rptools.maptool.model.listeners.EventListenerConfig eventListenerConfigFromDto(net.rptools.maptool.server.proto.EventListenerConfigDto dto) {
+    return new net.rptools.maptool.model.listeners.EventListenerConfig(
+            dto.getId(),
+            dto.getName(),
+            mapListenerTypeFromDto(dto.getListenerType()),
+            dto.getTargetEvent(),
+            dto.getActionReference(),
+            dto.getEnabled(),
+            dto.getExecutionOrder()
+    );
   }
 }

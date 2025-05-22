@@ -12,7 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.events;
+package net.rptools.maptool.model.listeners;
 
-public record ZoneLightingChanged() implements ZoneContentChangedEvent, SaveStateChangedEvent, ZoneVisibilityEvent, MapToolEvent {
+public enum ListenerType {
+    MACRO_CODE,
+    PREDEFINED_ACTION, // For mt.token.move, mt.token.setState etc.
+    ADD_ON_LISTENER   // Reference to a listener provided by an Add-on
 }

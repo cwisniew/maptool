@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record GridChanged()
-    implements ZoneContentChangedEvent, SaveStateChangedEvent, MapToolEvent {}
+public record GridChanged() implements ZoneContentChangedEvent, SaveStateChangedEvent, MapToolEvent {
+}

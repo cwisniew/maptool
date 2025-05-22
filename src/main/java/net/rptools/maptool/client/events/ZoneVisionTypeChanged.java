@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record ZoneVisionTypeChanged()
-    implements ZoneContentChangedEvent, ZoneVisibilityEvent, SaveStateChangedEvent, MapToolEvent {}
+public record ZoneVisionTypeChanged() implements ZoneContentChangedEvent, ZoneVisibilityEvent, SaveStateChangedEvent, MapToolEvent {
+}

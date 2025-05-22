@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record TokenMacroChanged() implements TokenEvent, MapToolEvent {}
+public record TokenMacroChanged() implements TokenEvent, MapToolEvent {
+}

@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record SelectionChanged() implements ZoneContentChangedEvent, MapToolEvent {}
+public record SelectionChanged() implements ZoneContentChangedEvent, MapToolEvent {
+}

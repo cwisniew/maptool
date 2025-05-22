@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public interface PlayerEvent {}
+public interface PlayerEvent {
+}

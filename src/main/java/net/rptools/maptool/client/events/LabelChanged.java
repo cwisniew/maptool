@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record LabelChanged() implements LabelEvent, MapToolEvent {}
+public record LabelChanged() implements LabelEvent, MapToolEvent {
+}

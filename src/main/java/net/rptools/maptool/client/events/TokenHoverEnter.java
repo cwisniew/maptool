@@ -17,5 +17,4 @@ package net.rptools.maptool.client.events;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
-public record TokenHoverEnter(Token token, Zone zone, boolean shiftDown, boolean controlDown)
-    implements TokenHoverEvent, MapToolEvent {}
+public record TokenHoverEnter(Token token, Zone zone) implements TokenHoverEvent, MapToolEvent {}

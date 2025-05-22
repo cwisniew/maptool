@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record BarsChanged()
-    implements CampaignPropertiesEvent, SaveStateChangedEvent, MapToolEvent {}
+public record BarsChanged() implements CampaignPropertiesEvent, SaveStateChangedEvent, MapToolEvent {
+}

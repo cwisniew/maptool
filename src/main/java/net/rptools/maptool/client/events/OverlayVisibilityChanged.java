@@ -16,5 +16,4 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 
-public record OverlayVisibilityChanged(HTMLOverlayManager overlay, boolean isVisible)
-    implements MapToolEvent {}
+public record OverlayVisibilityChanged(HTMLOverlayManager overlay, boolean isVisible) implements MapToolEvent {}

@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record DrawableRemoved()
-    implements DrawableEvent, ZoneContentChangedEvent, SaveStateChangedEvent, MapToolEvent {}
+public record DrawableRemoved() implements DrawableEvent, ZoneContentChangedEvent, SaveStateChangedEvent, MapToolEvent {
+}

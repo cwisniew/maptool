@@ -14,9 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record MaskTopologyChanged()
-    implements BlockingLayerEvent,
-        ZoneContentChangedEvent,
-        ZoneVisibilityEvent,
-        SaveStateChangedEvent,
-        MapToolEvent {}
+public record MaskTopologyChanged() implements BlockingLayerEvent, ZoneContentChangedEvent, ZoneVisibilityEvent, SaveStateChangedEvent, MapToolEvent {
+}

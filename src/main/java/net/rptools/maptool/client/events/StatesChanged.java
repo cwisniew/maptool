@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record StatesChanged()
-    implements CampaignPropertiesEvent, SaveStateChangedEvent, MapToolEvent {}
+public record StatesChanged() implements CampaignPropertiesEvent, SaveStateChangedEvent, MapToolEvent {
+}

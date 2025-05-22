@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public interface CampaignPropertiesEvent {}
+public interface CampaignPropertiesEvent {
+}

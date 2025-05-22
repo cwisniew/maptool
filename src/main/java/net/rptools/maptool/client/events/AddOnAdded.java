@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record AddOnAdded() implements AddOnEvent, SaveStateChangedEvent, MapToolEvent {}
+public record AddOnAdded() implements AddOnEvent, SaveStateChangedEvent, MapToolEvent {
+}

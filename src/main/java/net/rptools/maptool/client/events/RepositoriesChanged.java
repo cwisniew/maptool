@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record RepositoriesChanged() implements SaveStateChangedEvent, MapToolEvent {}
+public record RepositoriesChanged() implements SaveStateChangedEvent, MapToolEvent {
+}

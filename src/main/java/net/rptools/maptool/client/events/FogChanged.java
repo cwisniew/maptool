@@ -14,5 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record FogChanged()
-    implements ZoneContentChangedEvent, SaveStateChangedEvent, MapToolEvent {}
+public record FogChanged() implements ZoneContentChangedEvent, SaveStateChangedEvent, MapToolEvent {
+}

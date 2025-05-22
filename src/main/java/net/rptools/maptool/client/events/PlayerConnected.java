@@ -16,5 +16,4 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.model.player.Player;
 
-public record PlayerConnected(Player player, boolean isLocal)
-    implements PlayerEvent, MapToolEvent {}
+public record PlayerConnected(Player player, boolean isLocal) implements PlayerEvent, MapToolEvent {}

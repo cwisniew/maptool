@@ -14,4 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-public record BoardChanged() implements ZoneContentChangedEvent, MapToolEvent {}
+public record BoardChanged() implements ZoneContentChangedEvent, MapToolEvent {
+}
