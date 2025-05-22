@@ -14,6 +14,5 @@
  */
 package net.rptools.maptool.client.events;
 
-import net.rptools.maptool.model.Zone;
-
-public record ZoneDeactivated(Zone zone) implements ZoneEvent, MapToolEvent {}
+public record AddOnRemoved() implements AddOnEvent, SaveStateChangedEvent, MapToolEvent {
+}

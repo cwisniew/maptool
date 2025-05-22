@@ -14,4 +14,4 @@
  */
 package net.rptools.maptool.client.events;
 
-public record PreferencesChanged() {}
+public record PreferencesChanged() implements MapToolEvent {}

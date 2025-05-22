@@ -17,12 +17,4 @@ package net.rptools.maptool.client.events;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
-/**
- * Event fired when the mouse pointer hovers over a token.
- *
- * @param token the token that the mouse pointer is hovering over.
- * @param zone the zone that the token is in.
- * @param shiftDown is the shift key down.
- * @param controlDown is the control key down.
- */
-public record TokenHoverEnter(Token token, Zone zone, boolean shiftDown, boolean controlDown) {}
+public record TokenHoverEnter(Token token, Zone zone) implements TokenHoverEvent, MapToolEvent {}

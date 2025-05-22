@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.events;
 
+import java.awt.image.BufferedImage;
 import net.rptools.maptool.model.Zone;
 
-public record ZoneLoading(Zone zone) {}
+public record ZoneLoading(Zone zone, BufferedImage image) implements ZoneEvent, MapToolEvent {}

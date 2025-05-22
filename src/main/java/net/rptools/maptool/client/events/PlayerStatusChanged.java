@@ -16,4 +16,4 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.model.player.Player;
 
-public record PlayerStatusChanged(Player player) {}
+public record PlayerStatusChanged(Player player) implements PlayerEvent, MapToolEvent {}

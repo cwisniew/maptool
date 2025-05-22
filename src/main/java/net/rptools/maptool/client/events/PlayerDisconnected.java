@@ -16,4 +16,4 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.model.player.Player;
 
-public record PlayerDisconnected(Player player) {}
+public record PlayerDisconnected(Player player) implements PlayerEvent, MapToolEvent {}

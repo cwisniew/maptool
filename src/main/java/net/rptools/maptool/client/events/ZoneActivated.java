@@ -16,4 +16,4 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.model.Zone;
 
-public record ZoneActivated(Zone zone) {}
+public record ZoneActivated(Zone zone) implements ZoneEvent, MapToolEvent {}
