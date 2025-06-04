@@ -20,24 +20,15 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.model.Zone;
 
 public class GridRenderer {
-  private Zone zone;
-  private ZoneRenderer renderer;
+  private final Zone zone;
+  private final ZoneRenderer renderer;
 
-  private boolean initialised = false;
-
-  public boolean isInitialised() {
-    return initialised;
+  public GridRenderer(ZoneRenderer renderer) {
+    this.renderer = renderer;
+    this.zone = renderer.getZone();
   }
 
-  GridRenderer() {}
-
-  public void setRenderer(ZoneRenderer zoneRenderer) {
-    renderer = zoneRenderer;
-    zone = renderer.getZone();
-    initialised = true;
-  }
-
-  protected void renderGrid(Graphics2D g, PlayerView view) {
+  public void renderGrid(Graphics2D g, PlayerView view) {
     int gridSize = (int) (zone.getGrid().getSize() * renderer.getScale());
     if (!AppState.isShowGrid() || gridSize < ZoneRendererConstants.MIN_GRID_SIZE) {
       return;
@@ -45,7 +36,7 @@ public class GridRenderer {
     zone.getGrid().draw(renderer, g, g.getClipBounds());
   }
 
-  protected void renderCoordinates(Graphics2D g, PlayerView view) {
+  public void renderCoordinates(Graphics2D g, PlayerView view) {
     if (AppState.isShowCoordinates()) {
       zone.getGrid().drawCoordinatesOverlay(g, renderer);
     }
