@@ -418,6 +418,10 @@ dependencies {
     implementation(libs.rptools.dice.roller)
     implementation(libs.noiselib)
 
+    testImplementation(libs.bundles.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
+
     // libgdx
     implementation 'com.github.thelsing:libgdx-jogl-backend:becdde406e'
     implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.13.1'

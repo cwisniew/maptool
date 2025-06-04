@@ -179,6 +179,7 @@ public class MapTool {
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
   @Nullable private static RemoteServerConfig remoteServerConfig = null;
+  private static boolean isHeadlessMode = false;
 
   static {
     try {
@@ -192,6 +193,9 @@ public class MapTool {
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
+    // Any other UI-related exceptions during this static init should ideally be caught
+    // and logged if they are recoverable, or rethrown if critical.
+    // For now, relying on CampaignFactory and Campaign constructors being headless-safe.
   }
 
   public static Dimension getThumbnailSize() {
@@ -239,6 +243,21 @@ public class MapTool {
     return msg;
   }
 
+  private static void logHeadlessMessage(String title, String content, int messageType) {
+    String logMessage = "Title: " + title + " | Message: " + content;
+    switch (messageType) {
+      case JOptionPane.ERROR_MESSAGE:
+        log.error(logMessage);
+        break;
+      case JOptionPane.WARNING_MESSAGE:
+        log.warn(logMessage);
+        break;
+      default: // JOptionPane.INFORMATION_MESSAGE and others
+        log.info(logMessage);
+        break;
+    }
+  }
+
   /**
    * This method is the base method for putting a dialog box up on the screen that might be an
    * error, a warning, or just an information message. Do not use this method if the desired result
@@ -254,8 +273,12 @@ public class MapTool {
   public static void showMessage(
       String message, String titleKey, int messageType, Object... params) {
     String title = I18N.getText(titleKey, params);
-    JOptionPane.showMessageDialog(
-        clientFrame, "<html>" + I18N.getText(message, params), title, messageType);
+    String messageText = I18N.getText(message, params);
+    if (isHeadlessMode) {
+      logHeadlessMessage(title, messageText, messageType);
+      return;
+    }
+    JOptionPane.showMessageDialog(clientFrame, "<html>" + messageText, title, messageType);
   }
 
   /**
@@ -276,6 +299,14 @@ public class MapTool {
   public static void showMessage(
       Object[] messages, String titleKey, int messageType, Object... params) {
     String title = I18N.getText(titleKey, params);
+    if (isHeadlessMode) {
+      StringBuilder messageContent = new StringBuilder();
+      for (Object msg : messages) {
+        messageContent.append(msg != null ? msg.toString() : "null").append(System.lineSeparator());
+      }
+      logHeadlessMessage(title, messageContent.toString().trim(), messageType);
+      return;
+    }
     JList list = new JList(messages);
     JOptionPane.showMessageDialog(clientFrame, list, title, messageType);
   }
@@ -389,6 +420,10 @@ public class MapTool {
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
    */
   public static boolean confirm(String message, Object... params) {
+    if (isHeadlessMode) {
+      log.warn("confirm() called in headless mode. Title: msg.title.messageDialogConfirm, Message: " + message);
+      return false;
+    }
     String title = I18N.getText("msg.title.messageDialogConfirm");
     return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == JOptionPane.OK_OPTION;
   }
@@ -405,6 +440,10 @@ public class MapTool {
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
    */
   public static int confirmImpl(String title, int buttons, String message, Object... params) {
+    if (isHeadlessMode) {
+      log.warn("confirmImpl() called in headless mode. Title: " + title + ", Message: " + message);
+      return JOptionPane.NO_OPTION; // Or CANCEL_OPTION depending on desired default
+    }
     String msg = I18N.getText(message, params);
     log.debug(message);
     return JOptionPane.showConfirmDialog(clientFrame, msg, title, buttons);
@@ -417,6 +456,10 @@ public class MapTool {
    * @return true if the token should be deleted.
    */
   public static boolean confirmTokenDelete() {
+    if (isHeadlessMode) {
+      log.warn("confirmTokenDelete() called in headless mode. Returning false.");
+      return false;
+    }
     if (!AppPreferences.tokensWarnWhenDeleted.get()) {
       return true;
     }
@@ -441,6 +484,10 @@ public class MapTool {
    * @return <code>true</code> if the user clicks either Yes button, <code>falsee</code> otherwise.
    */
   public static boolean confirmDrawDelete() {
+    if (isHeadlessMode) {
+      log.warn("confirmDrawDelete() called in headless mode. Returning false.");
+      return false;
+    }
     if (!AppPreferences.drawingsWarnWhenDeleted.get()) {
       return true;
     }
@@ -458,6 +505,10 @@ public class MapTool {
   }
 
   private static int confirmDelete(String msg) {
+    if (isHeadlessMode) {
+      log.warn("confirmDelete() called in headless mode. Message: " + msg + ". Returning NO_OPTION.");
+      return JOptionPane.NO_OPTION;
+    }
     log.debug(msg);
     Object[] options = {
       // getText() strips out the & as when the button text is specified this way the mnemonics
@@ -512,6 +563,10 @@ public class MapTool {
    * @param url the URL to pass to the browser.
    */
   public static void showDocument(String url) {
+    if (isHeadlessMode) {
+      log.warn("showDocument() called in headless mode with URL: " + url + ". Doing nothing.");
+      return;
+    }
     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
       String urlToBrowse = url;
       Desktop desktop = Desktop.getDesktop();
@@ -557,6 +612,9 @@ public class MapTool {
    * @param eventId the eventId of the sound.
    */
   public static void playSound(String eventId) {
+    if (isHeadlessMode) {
+      return;
+    }
     if (AppPreferences.playSystemSounds.get()) {
       if (AppPreferences.playSystemSoundsOnlyWhenNotFocused.get() && isInFocus()) {
         return;
@@ -566,10 +624,17 @@ public class MapTool {
   }
 
   public static boolean isInFocus() {
+    if (isHeadlessMode) {
+      return false;
+    }
     return getFrame().isFocused();
   }
 
   public static BufferedImage takeMapScreenShot(final PlayerView view) {
+    if (isHeadlessMode) {
+      log.warn("takeMapScreenShot() called in headless mode. Returning null.");
+      return null;
+    }
     final ZoneRenderer renderer = clientFrame.getCurrentZoneRenderer();
     if (renderer == null) {
       return null;
@@ -683,8 +748,10 @@ public class MapTool {
     assetTransferManager = new AssetTransferManager();
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
-    setClientFrame(new MapToolFrame(menuBar));
-    taskbarFlasher = new TaskBarFlasher(clientFrame);
+    if (!isHeadlessMode) {
+      setClientFrame(new MapToolFrame(menuBar));
+      taskbarFlasher = new TaskBarFlasher(clientFrame);
+    }
 
     // Make sure the user sees something right away so that they aren't staring at a black screen.
     // Technically this call does too much, but since it is a blank campaign it's okay.
@@ -715,6 +782,10 @@ public class MapTool {
   }
 
   public static NoteFrame getProfilingNoteFrame() {
+    if (isHeadlessMode) {
+      log.warn("getProfilingNoteFrame() called in headless mode. Returning null.");
+      return null;
+    }
     if (profilingNoteFrame == null) {
       profilingNoteFrame = new NoteFrame();
       profilingNoteFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -738,6 +809,10 @@ public class MapTool {
   }
 
   public static JFrame getLogConsoleNoteFrame() {
+    if (isHeadlessMode) {
+      log.warn("getLogConsoleNoteFrame() called in headless mode. Returning null.");
+      return null;
+    }
     if (logConsoleFrame == null) {
       logConsoleFrame = new LogConsoleFrame();
       logConsoleFrame.setVisible(true);
@@ -1345,7 +1420,9 @@ public class MapTool {
 
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
-    MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+    if (!isHeadlessMode) {
+      MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+    }
 
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
@@ -1558,20 +1635,6 @@ public class MapTool {
     String versionImplementation = version;
     String versionOverride = version;
 
-    if (AppUtil.MAC_OS_X) {
-      // On OSX the menu bar at the top of the screen can be enabled at any time, but the
-      // title (ie. name of the application) has to be set before the GUI is initialized (by
-      // creating a frame, loading a splash screen, etc). So we do it here.
-      System.setProperty("apple.laf.useScreenMenuBar", "true");
-      String appName = "MapTool";
-      if (MapTool.isDevelopment()) {
-        appName += " (Development)";
-      }
-      System.setProperty("apple.awt.application.name", appName);
-      System.setProperty("apple.awt.application.appearance", "system");
-      System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
-    }
-
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
       versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
       log.info("getting MapTool version from manifest: " + versionImplementation);
@@ -1601,6 +1664,7 @@ public class MapTool {
     cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
     cmdOptions.addOption("F", "file", true, "load campaign on startup");
+    cmdOptions.addOption("H", "headless", false, "Run MapTool in headless server mode (no GUI). UI-related macro functions will be disabled or restricted.");
 
     CommandLineParser cmdParser = new DefaultParser();
     CommandLine cmd = null;
@@ -1624,6 +1688,10 @@ public class MapTool {
 
       if (getCommandLineOption(cmd, "reset")) {
         UserJvmOptions.resetJvmOptions();
+      }
+      isHeadlessMode = getCommandLineOption(cmd, "headless");
+      if (isHeadlessMode) {
+        System.setProperty("java.awt.headless", "true");
       }
     } catch (ParseException e) {
       // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
@@ -1687,25 +1755,44 @@ public class MapTool {
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    initJavaFX();
+    RPTURLStreamHandlerFactory factory = null;
+    SplashScreen splash = null;
 
-    final SplashScreen splash = new SplashScreen(getVersion());
-    splash.setVisible(true);
+    if (!isHeadlessMode) {
+      if (AppUtil.MAC_OS_X) {
+        // On OSX the menu bar at the top of the screen can be enabled at any time, but the
+        // title (ie. name of the application) has to be set before the GUI is initialized (by
+        // creating a frame, loading a splash screen, etc). So we do it here.
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        String appName = "MapTool";
+        if (MapTool.isDevelopment()) {
+          appName += " (Development)";
+        }
+        System.setProperty("apple.awt.application.name", appName);
+        System.setProperty("apple.awt.application.appearance", "system");
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
+      }
 
-    try {
-      ThemeSupport.loadTheme();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      initJavaFX();
+
+      splash = new SplashScreen(getVersion());
+      splash.setVisible(true);
+
+      try {
+        ThemeSupport.loadTheme();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
 
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
-    RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
+    factory = new RPTURLStreamHandlerFactory();
     factory.registerProtocol("asset", new AssetURLStreamHandler());
     factory.registerProtocol("lib", new LibraryURLStreamHandler());
 
     // Syrinscape Protocols
-    if (AppPreferences.syrinscapeActive.get()) {
+    if (!isHeadlessMode && AppPreferences.syrinscapeActive.get()) {
       factory.registerProtocol("syrinscape-fantasy", new SyrinscapeURLStreamHandler());
       factory.registerProtocol("syrinscape-sci-fi", new SyrinscapeURLStreamHandler());
       factory.registerProtocol("syrinscape-boardgame", new SyrinscapeURLStreamHandler());
@@ -1713,95 +1800,106 @@ public class MapTool {
 
     URL.setURLStreamHandlerFactory(factory);
 
-    final Toolkit tk = Toolkit.getDefaultToolkit();
-    tk.getSystemEventQueue().push(new MapToolEventQueue());
+    if (!isHeadlessMode) {
+      final Toolkit tk = Toolkit.getDefaultToolkit();
+      tk.getSystemEventQueue().push(new MapToolEventQueue());
 
-    // LAF
-    try {
-      // If we are running under Mac OS X then save native menu bar look & feel components
-      // Note the order of creation for the AppMenuBar, this specific chronology
-      // allows the system to set up system defaults before we go and modify things.
-      // That is, please don't move these lines around unless you test the result on windows
-      // and mac
-      if (AppUtil.MAC_OS_X) {
-        menuBar = new AppMenuBar();
-        OSXAdapter.macOSXicon();
-      } else {
-        menuBar = new AppMenuBar();
+      // LAF
+      try {
+        // If we are running under Mac OS X then save native menu bar look & feel components
+        // Note the order of creation for the AppMenuBar, this specific chronology
+        // allows the system to set up system defaults before we go and modify things.
+        // That is, please don't move these lines around unless you test the result on windows
+        // and mac
+        if (AppUtil.MAC_OS_X) {
+          menuBar = new AppMenuBar();
+          OSXAdapter.macOSXicon();
+        } else {
+          menuBar = new AppMenuBar();
+        }
+
+        com.jidesoft.utils.Lm.verifyLicense(
+            "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
+
+        configureJide();
+      } catch (Exception e) {
+        MapTool.showError("msg.error.lafSetup", e);
+        System.exit(1);
       }
 
-      com.jidesoft.utils.Lm.verifyLicense(
-          "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
+      /*
+       * Load GenSys and SW RPG fonts
+       */
+      try {
+        var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        var genFont =
+            Font.createFont(
+                Font.TRUETYPE_FONT,
+                Objects.requireNonNull(
+                    MapTool.class
+                        .getClassLoader()
+                        .getResourceAsStream(
+                            "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
+        genv.registerFont(genFont);
+        var swGenFont =
+            Font.createFont(
+                Font.TRUETYPE_FONT,
+                Objects.requireNonNull(
+                    MapTool.class
+                        .getClassLoader()
+                        .getResourceAsStream(
+                            "net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
+        genv.registerFont(swGenFont);
+      } catch (Exception e) {
+        log.error("msg.error.genesysFont", e);
+      }
 
-      configureJide();
-    } catch (Exception e) {
-      MapTool.showError("msg.error.lafSetup", e);
-      System.exit(1);
-    }
-
-    /*
-     * Load GenSys and SW RPG fonts
-     */
-    try {
-      var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      var genFont =
-          Font.createFont(
-              Font.TRUETYPE_FONT,
-              Objects.requireNonNull(
-                  MapTool.class
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
-      genv.registerFont(genFont);
-      var swGenFont =
-          Font.createFont(
-              Font.TRUETYPE_FONT,
-              Objects.requireNonNull(
-                  MapTool.class
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
-      genv.registerFont(swGenFont);
-    } catch (Exception e) {
-      log.error("msg.error.genesysFont", e);
-    }
-
-    /**
-     * This is a tweak that makes the Chinese version work better.
-     *
-     * <p>Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
-     * wikipedia.org/wiki/CJK_characters</a> before making changes. And
-     * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
-     */
-    if (Locale.CHINA.equals(Locale.getDefault())) {
-      // The following font name appears to be "Sim Sun". It can be downloaded
-      // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
-      Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
-      FontUIResource fontRes = new FontUIResource(f);
-      for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
-          iterator.hasNext(); ) {
-        Object key = iterator.next();
-        Object value = UIManager.get(key);
-        if (value instanceof FontUIResource) {
-          UIManager.put(key, fontRes);
+      /**
+       * This is a tweak that makes the Chinese version work better.
+       *
+       * <p>Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
+       * wikipedia.org/wiki/CJK_characters</a> before making changes. And
+       * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
+       */
+      if (Locale.CHINA.equals(Locale.getDefault())) {
+        // The following font name appears to be "Sim Sun". It can be downloaded
+        // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
+        Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
+        FontUIResource fontRes = new FontUIResource(f);
+        for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
+            iterator.hasNext(); ) {
+          Object key = iterator.next();
+          Object value = UIManager.get(key);
+          if (value instanceof FontUIResource) {
+            UIManager.put(key, fontRes);
+          }
         }
       }
+
+      // Draw frame contents on resize
+      tk.setDynamicLayout(true);
     }
 
-    // Draw frame contents on resize
-    tk.setDynamicLayout(true);
-
+    final SplashScreen finalSplash = splash;
     EventQueue.invokeLater(
         () -> {
           initialize();
 
-          EventQueue.invokeLater(
-              () -> {
-                clientFrame.setVisible(true);
-                splash.setVisible(false);
-                splash.dispose();
-                EventQueue.invokeLater(MapTool::postInitialize);
-              });
+          if (!isHeadlessMode) {
+            EventQueue.invokeLater(
+                () -> {
+                  clientFrame.setVisible(true);
+                  if (finalSplash != null) {
+                    finalSplash.setVisible(false);
+                    finalSplash.dispose();
+                  }
+                  EventQueue.invokeLater(MapTool::postInitialize);
+                });
+          } else {
+            // In headless mode, directly call postInitialize if needed, or handle other logic.
+            // For now, let's assume some parts of postInitialize might be relevant even in headless.
+             EventQueue.invokeLater(MapTool::postInitialize);
+          }
         });
   }
 }

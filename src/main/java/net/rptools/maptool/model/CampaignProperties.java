@@ -367,6 +367,12 @@ public class CampaignProperties {
 
   private void initTokenStatesMap() {
     tokenStates.clear();
+    if (java.awt.GraphicsEnvironment.isHeadless()) {
+      // Do not initialize UI components in headless mode
+      // Or, provide non-UI placeholders if the map structure is essential,
+      // but for overlays, it's often fine to just not have them.
+      return;
+    }
     tokenStates.put("Dead", (new XTokenOverlay("Dead", Color.RED, 5)));
     tokenStates.put("Disabled", (new XTokenOverlay("Disabled", Color.GRAY, 5)));
     tokenStates.put("Hidden", (new ShadedTokenOverlay("Hidden", Color.BLACK)));
@@ -380,6 +386,10 @@ public class CampaignProperties {
 
   private void initTokenBarsMap() {
     tokenBars.clear();
+    if (java.awt.GraphicsEnvironment.isHeadless()) {
+      // Do not initialize UI components in headless mode
+      return;
+    }
     tokenBars.put(
         "Health", new TwoToneBarTokenOverlay("Health", new Color(0x20b420), Color.BLACK, 6));
   }

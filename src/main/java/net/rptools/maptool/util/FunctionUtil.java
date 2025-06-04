@@ -48,6 +48,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides static methods to help handle macro functions.
@@ -56,6 +58,9 @@ import net.rptools.parser.function.Function;
  * @since 1.5.5
  */
 public class FunctionUtil {
+  private static final Logger log = LogManager.getLogger(FunctionUtil.class);
+  public static final Object PROCEED_WITH_NORMAL_EXECUTION = new Object();
+
   private static final String KEY_WRONG_NUM_PARAM = "macro.function.general.wrongNumParam";
   private static final String KEY_NOT_ENOUGH_PARAM = "macro.function.general.notEnoughParam";
   private static final String KEY_TOO_MANY_PARAM = "macro.function.general.tooManyParam";
@@ -696,5 +701,21 @@ public class FunctionUtil {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
+  }
+
+  public static void checkHeadlessAndThrow(String functionName) throws ParserException {
+    if (MapTool.getFrame() == null) { // Indicates headless mode
+      String errorMessage = functionName + " function is not available in headless mode.";
+      log.warn(functionName + " macro function cannot be used in headless mode. Throwing exception.");
+      throw new ParserException(errorMessage);
+    }
+  }
+
+  public static Object checkHeadlessAndReturnDefault(String functionName, Object headlessReturnValue) {
+    if (MapTool.getFrame() == null) { // Indicates headless mode
+      log.warn(functionName + " macro function called in headless mode. Returning default value: " + headlessReturnValue);
+      return headlessReturnValue;
+    }
+    return PROCEED_WITH_NORMAL_EXECUTION;
   }
 }

@@ -52,9 +52,7 @@ public class Campaign {
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
-  private static ExportDialog exportDialog =
-      ExportDialog
-          .getInstance(); // this is the new export dialog (different name for upward compatibility)
+  private static ExportDialog exportDialog = null; // Deferred initialization
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
@@ -723,9 +721,15 @@ public class Campaign {
   }
 
   public ExportDialog getExportDialog() {
-    exportDialog.setExportSettings(exportSettings);
-    exportDialog.setExportLocation(exportLocation);
-    return exportDialog;
+    // Initialize on first access if not in headless mode
+    if (exportDialog == null && !java.awt.GraphicsEnvironment.isHeadless()) {
+      exportDialog = ExportDialog.getInstance();
+    }
+    if (exportDialog != null) { // Still check if it was initialized
+        exportDialog.setExportSettings(exportSettings);
+        exportDialog.setExportLocation(exportLocation);
+    }
+    return exportDialog; // Could be null in headless mode
   }
 
   public void setExportDialog(ExportDialog d) {

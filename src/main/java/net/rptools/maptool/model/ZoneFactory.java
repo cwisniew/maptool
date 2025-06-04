@@ -38,6 +38,9 @@ public class ZoneFactory {
   private static @Nullable MD5Key defaultImageId;
 
   private static DrawablePaint getDefaultBackgroundPaint() {
+    if (java.awt.GraphicsEnvironment.isHeadless()) {
+      return fallbackBackgroundPaint;
+    }
     if (defaultImageId != null) {
       return new DrawableTexturePaint(defaultImageId);
     }

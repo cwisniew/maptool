@@ -972,6 +972,7 @@ public class InputFunction extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
+    FunctionUtil.checkHeadlessAndThrow("input");
     // Extract the list of specifier strings from the parameters
     // "name | value | prompt | inputType | options"
     List<String> varStrings = new ArrayList<String>();

@@ -80,119 +80,154 @@ public class MacroDialogFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("msg.error.frame.reservedName", parameters.get(0).toString()));
     }
-    if (functionName.equalsIgnoreCase("isDialogVisible")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())
-          ? BigDecimal.ONE
-          : BigDecimal.ZERO;
-    }
-    if (functionName.equalsIgnoreCase("isFrameVisible")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      return HTMLFrameFactory.isVisible(true, parameters.get(0).toString())
-          ? BigDecimal.ONE
-          : BigDecimal.ZERO;
-    }
-    if (functionName.equalsIgnoreCase("isOverlayRegistered")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      String name = parameters.get(0).toString();
-      return isOverlayRegistered(name) ? BigDecimal.ONE : BigDecimal.ZERO;
-    }
-    if (functionName.equalsIgnoreCase("closeDialog")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      HTMLFrameFactory.close(false, parameters.get(0).toString());
-      return "";
-    }
-    if (functionName.equalsIgnoreCase("closeFrame")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      HTMLFrameFactory.close(true, parameters.get(0).toString());
-      return "";
-    }
-    if (functionName.equalsIgnoreCase("closeOverlay")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      String name = parameters.get(0).toString();
-      removeOverlay(name);
-      return "";
-    }
-    if (functionName.equalsIgnoreCase("setOverlayVisible")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
-      String name = parameters.get(0).toString();
-      BigDecimal param = FunctionUtil.paramAsBigDecimal(functionName, parameters, 1, false);
-      setOverlayVisible(name, param.equals(BigDecimal.ONE));
-      return "";
-    }
-    if (functionName.equalsIgnoreCase("isOverlayVisible")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      String name = parameters.get(0).toString();
-      return isOverlayVisible(name) ? BigDecimal.ONE : BigDecimal.ZERO;
-    }
-    if (functionName.equalsIgnoreCase("isOverlayLocked")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      String name = parameters.get(0).toString();
-      return isOverlayLocked(name) ? BigDecimal.ONE : BigDecimal.ZERO;
-    }
-    if (functionName.equalsIgnoreCase("resetFrame")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      HTMLFrame.center(parameters.get(0).toString());
-      return "";
-    }
-    if (functionName.equalsIgnoreCase("getFrameProperties")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      Optional<JsonObject> props = HTMLFrame.getFrameProperties(parameters.get(0).toString());
-      if (props.isPresent()) return props.get();
-      else return "";
-    }
-    if (functionName.equalsIgnoreCase("getDialogProperties")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      Optional<JsonObject> props = HTMLDialog.getDialogProperties(parameters.get(0).toString());
-      if (props.isPresent()) return props.get();
-      else return "";
-    }
-    if (functionName.equalsIgnoreCase("getOverlayProperties")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      String name = parameters.get(0).toString();
-      return getOverlayProperties(name);
-    }
-    if (functionName.equalsIgnoreCase("runJsFunction")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 4, 5);
-      String name = parameters.get(0).toString();
-      String type = parameters.get(1).toString().trim().toLowerCase();
-      String func = parameters.get(2).toString();
-      String thisArg = parameters.get(3).toString();
-      JsonArray argsArray;
+
+    String fnLowerCase = functionName.toLowerCase();
+
+    // Note: parameter validation (checkNumberParam) should happen AFTER headless checks
+    // if the function isn't supposed to run at all in headless mode (throws exception).
+    // For functions that return a default value, param validation might be skippable
+    // in headless, but doing it first is safer if the number of params could affect
+    // which default is returned (not the case here, but good practice).
+    // For this refactoring, we'll keep checkNumberParam where it was if the function proceeds.
+
+    switch (fnLowerCase) {
+      case "isdialogvisible":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object fdvResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, BigDecimal.ZERO);
+        if (fdvResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return fdvResult;
+        }
+        return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())
+            ? BigDecimal.ONE
+            : BigDecimal.ZERO;
+      case "isframevisible":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object ffvResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, BigDecimal.ZERO);
+        if (ffvResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return ffvResult;
+        }
+        return HTMLFrameFactory.isVisible(true, parameters.get(0).toString())
+            ? BigDecimal.ONE
+            : BigDecimal.ZERO;
+      case "isoverlayregistered":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object forResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, BigDecimal.ZERO);
+        if (forResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return forResult;
+        }
+        return isOverlayRegistered(parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
+      case "closedialog":
+        FunctionUtil.checkHeadlessAndThrow(functionName);
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        HTMLFrameFactory.close(false, parameters.get(0).toString());
+        return "";
+      case "closeframe":
+        FunctionUtil.checkHeadlessAndThrow(functionName);
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        HTMLFrameFactory.close(true, parameters.get(0).toString());
+        return "";
+      case "closeoverlay":
+        FunctionUtil.checkHeadlessAndThrow(functionName);
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        removeOverlay(parameters.get(0).toString());
+        return "";
+      case "setoverlayvisible":
+        FunctionUtil.checkHeadlessAndThrow(functionName);
+        FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+        String sovName = parameters.get(0).toString();
+        BigDecimal sovParam = FunctionUtil.paramAsBigDecimal(functionName, parameters, 1, false);
+        setOverlayVisible(sovName, sovParam.equals(BigDecimal.ONE));
+        return "";
+      case "isoverlayvisible":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object fovResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, BigDecimal.ZERO);
+        if (fovResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return fovResult;
+        }
+        return isOverlayVisible(parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
+      case "isoverlaylocked":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object folResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, BigDecimal.ZERO);
+        if (folResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return folResult;
+        }
+        return isOverlayLocked(parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
+      case "resetframe":
+        FunctionUtil.checkHeadlessAndThrow(functionName);
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        HTMLFrame.center(parameters.get(0).toString());
+        return "";
+      case "getframeproperties":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object gfpResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, "");
+        if (gfpResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return gfpResult;
+        }
+        Optional<JsonObject> gfpProps = HTMLFrame.getFrameProperties(parameters.get(0).toString());
+        return gfpProps.isPresent() ? gfpProps.get() : "";
+      case "getdialogproperties":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        Object gdpResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, "");
+        if (gdpResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return gdpResult;
+        }
+        Optional<JsonObject> gdpProps = HTMLDialog.getDialogProperties(parameters.get(0).toString());
+        return gdpProps.isPresent() ? gdpProps.get() : "";
+      case "getoverlayproperties":
+        FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+        String gopName = parameters.get(0).toString();
+        Object gopResult = FunctionUtil.checkHeadlessAndReturnDefault(functionName, gopName.equals("*") ? "[]" : "");
+        if (gopResult != FunctionUtil.PROCEED_WITH_NORMAL_EXECUTION) {
+          return gopResult;
+        }
+        return getOverlayProperties(gopName);
+      case "runjsfunction":
+        FunctionUtil.checkHeadlessAndThrow(functionName);
+        FunctionUtil.checkNumberParam(functionName, parameters, 4, 5);
+        String rjfName = parameters.get(0).toString();
+        String rjfType = parameters.get(1).toString().trim().toLowerCase();
+        String rjfFunc = parameters.get(2).toString();
+      String rjfThisArg = parameters.get(3).toString();
+      JsonArray rjfArgsArray;
       if (parameters.size() > 4) {
-        argsArray = FunctionUtil.paramAsJsonArray(functionName, parameters, 4);
+        rjfArgsArray = FunctionUtil.paramAsJsonArray(functionName, parameters, 4);
       } else {
-        argsArray = new JsonArray();
+        rjfArgsArray = new JsonArray();
       }
-      runJsFunction(name, type, func, thisArg, argsArray);
+      runJsFunction(rjfName, rjfType, rjfFunc, rjfThisArg, rjfArgsArray);
       return "";
-    }
-    if (functionName.toLowerCase().startsWith("html.")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      String name = parameters.get(0).toString();
-      String opts = parameters.size() > 2 ? parameters.get(2).toString() : "";
-      URL url = null;
-      try {
-        url = new URI(parameters.get(1).toString()).toURL();
-      } catch (MalformedURLException | URISyntaxException e) {
-        throw new ParserException(e);
-      }
+      default:
+        // Handle html.* functions
+        if (fnLowerCase.startsWith("html.")) {
+          FunctionUtil.checkHeadlessAndThrow(functionName); // All html.* functions create UI
+          FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+          String htmlName = parameters.get(0).toString();
+          String htmlOpts = parameters.size() > 2 ? parameters.get(2).toString() : "";
+          URL htmlUrl = null;
+          try {
+            htmlUrl = new URI(parameters.get(1).toString()).toURL();
+          } catch (MalformedURLException | URISyntaxException e) {
+            throw new ParserException(e);
+          }
 
-      return switch (functionName.toLowerCase()) {
-        case "html.frame5" -> showURL(name, url, opts, FrameType.FRAME, true);
-        case "html.dialog5" -> showURL(name, url, opts, FrameType.DIALOG, true);
-        case "html.frame" -> showURL(name, url, opts, FrameType.FRAME, false);
-        case "html.dialog" -> showURL(name, url, opts, FrameType.DIALOG, false);
-        case "html.overlay" -> showURL(name, url, opts, FrameType.OVERLAY, true);
-        default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
-      };
+          return switch (fnLowerCase) {
+            case "html.frame5" -> showURL(htmlName, htmlUrl, htmlOpts, FrameType.FRAME, true);
+            case "html.dialog5" -> showURL(htmlName, htmlUrl, htmlOpts, FrameType.DIALOG, true);
+            case "html.frame" -> showURL(htmlName, htmlUrl, htmlOpts, FrameType.FRAME, false);
+            case "html.dialog" -> showURL(htmlName, htmlUrl, htmlOpts, FrameType.DIALOG, false);
+            case "html.overlay" -> showURL(htmlName, htmlUrl, htmlOpts, FrameType.OVERLAY, true);
+            default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
+          };
+        }
+        // If no case matched
+        throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
     }
-
-    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   private String showURL(String name, URL url, String opts, FrameType frameType, boolean isHTML5)
       throws ParserException {
+    // This method is only called by html.* functions which are already guarded by checkHeadlessAndThrow
+
     try {
       Optional<Library> library = new LibraryManager().getLibrary(url).get();
       if (library.isEmpty()) {
@@ -212,6 +247,10 @@ public class MacroDialogFunctions extends AbstractFunction {
     HTMLFrameFactory.show(name, frameType, true, opts, htmlContent);
     return "";
   }
+      // Old html.* handling was here, now moved into the switch under default.
+
+    // throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+
 
   /**
    * Returns the overlay properties. If the name is found, returns a json object of the properties;
@@ -222,6 +261,7 @@ public class MacroDialogFunctions extends AbstractFunction {
    * @return either a json array, a json object, or an empty string
    */
   private Object getOverlayProperties(String name) {
+    // This method is only called by getOverlayProperties which is already guarded
     if (name.equals("*")) {
       ConcurrentSkipListSet<HTMLOverlayManager> overlays =
           MapTool.getFrame().getOverlayPanel().getOverlays();

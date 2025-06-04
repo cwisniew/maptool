@@ -16,6 +16,7 @@ package net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -25,16 +26,16 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
  */
 public class AppStyle {
 
-  public static ImageBorder border = RessourceManager.getBorder(Borders.GRAY2);
-  public static ImageBorder selectedBorder = RessourceManager.getBorder(Borders.RED);
-  public static ImageBorder selectedStampBorder = RessourceManager.getBorder(Borders.BLUE);
-  public static ImageBorder selectedUnownedBorder = RessourceManager.getBorder(Borders.GREEN);
-  public static ImageBorder miniMapBorder = RessourceManager.getBorder(Borders.GRAY);
-  public static ImageBorder shadowBorder = RessourceManager.getBorder(Borders.SHADOW);
-  public static ImageBorder commonMacroBorder = RessourceManager.getBorder(Borders.HIGHLIGHT);
-  public static Font labelFont = Font.decode("serif-NORMAL-12");
-  public static Color selectionBoxOutline = Color.black;
-  public static Color selectionBoxFill = Color.blue;
+  public static ImageBorder border;
+  public static ImageBorder selectedBorder;
+  public static ImageBorder selectedStampBorder;
+  public static ImageBorder selectedUnownedBorder;
+  public static ImageBorder miniMapBorder;
+  public static ImageBorder shadowBorder;
+  public static ImageBorder commonMacroBorder;
+  public static Font labelFont;
+  public static Color selectionBoxOutline;
+  public static Color selectionBoxFill;
   public static Color resizeBoxOutline = Color.red;
   public static Color resizeBoxFill = Color.yellow;
   public static Color wallTopologyColor = new Color(255, 182, 0, 255);
@@ -53,4 +54,26 @@ public class AppStyle {
   public static Color tokenPitVblColor = new Color(255, 0, 0, 128);
   public static Color tokenCoverVblColor = new Color(245, 0, 0, 128);
   public static Color tokenMblColor = new Color(255, 128, 255, 128);
+
+  static {
+    if (!GraphicsEnvironment.isHeadless()) {
+      border = RessourceManager.getBorder(Borders.GRAY2);
+      selectedBorder = RessourceManager.getBorder(Borders.RED);
+      selectedStampBorder = RessourceManager.getBorder(Borders.BLUE);
+      selectedUnownedBorder = RessourceManager.getBorder(Borders.GREEN);
+      miniMapBorder = RessourceManager.getBorder(Borders.GRAY);
+      shadowBorder = RessourceManager.getBorder(Borders.SHADOW);
+      commonMacroBorder = RessourceManager.getBorder(Borders.HIGHLIGHT);
+      labelFont = Font.decode("serif-NORMAL-12");
+      selectionBoxOutline = Color.black;
+      selectionBoxFill = Color.blue;
+    } else {
+      // Provide sensible defaults for headless mode if any code tries to access these
+      // Though ideally, code using these would also check for headless mode
+      labelFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+      selectionBoxOutline = Color.black; // Or some other non-null default
+      selectionBoxFill = Color.blue;    // Or some other non-null default
+      // Borders will remain null, which is acceptable if drawing code handles null.
+    }
+  }
 }
