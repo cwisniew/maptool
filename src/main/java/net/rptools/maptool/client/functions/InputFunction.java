@@ -1040,6 +1040,17 @@ public class InputFunction extends AbstractFunction {
     }
 
     // UI step 3 - show the dialog
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      MapTool.getHeadlessModeManager().handleDialog("InputFunction", "Title: " + dialogTitle);
+      // In headless mode, the input() function cannot prompt the user.
+      // We should assign default values or indicate failure.
+      // Returning 0 (like CANCEL) is one option.
+      // Assigning default values as if the user hit OK with no changes is another.
+      // For now, let's simulate cancel. The macro should check the return value.
+      log.warn("InputFunction called in headless mode. Dialog suppressed. Returning 0 (cancel). Variables will not be set by this function.");
+      return BigDecimal.ZERO;
+    }
+
     JOptionPane jop = new JOptionPane(ip, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
     fixLayoutForTabPanes(jop);
 
@@ -1053,6 +1064,7 @@ public class InputFunction extends AbstractFunction {
     try {
       dlgResult = (Integer) jop.getValue();
     } catch (NullPointerException npe) {
+      // This can happen if the dialog is closed by other means (e.g. window X button)
     }
     dlg.dispose();
 

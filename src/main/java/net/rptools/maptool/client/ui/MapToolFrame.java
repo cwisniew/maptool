@@ -353,126 +353,155 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public MapToolFrame(JMenuBar menuBar) {
     // Set up the frame
-    super(AppConstants.APP_LOCAL_NAME);
+    super(AppConstants.APP_LOCAL_NAME); // Still call super for JFrame initialization
 
-    this.menuBar = menuBar;
+    boolean isHeadless = MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless();
 
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    addWindowListener(this);
-    setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    SwingUtil.centerOnScreen(this);
-    setFocusTraversalPolicy(new MapToolFocusTraversalPolicy());
+    this.menuBar = menuBar; // menuBar might be null in headless if AppMenuBar creation is skipped
 
-    setIconImage(RessourceManager.getImage(Images.MAPTOOL_LOGO_MINI));
-    chatNotifyDuration = AppPreferences.typingNotificationDurationInSeconds.get();
+    if (!isHeadless) {
+      setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+      addWindowListener(this);
+      setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+      SwingUtil.centerOnScreen(this);
+      setFocusTraversalPolicy(new MapToolFocusTraversalPolicy());
+      setIconImage(RessourceManager.getImage(Images.MAPTOOL_LOGO_MINI));
+    }
+
+    chatNotifyDuration = AppPreferences.typingNotificationDurationInSeconds.get(); // Non-UI preference
     AppPreferences.typingNotificationDurationInSeconds.onChange(
         value -> chatNotifyDuration = value);
 
-    // Components
-    glassPane = new GlassPane();
-    assetPanel = createAssetPanel();
-    connectionPanel = createConnectionPanel();
-    toolbox = new Toolbox();
-    initiativePanel = new InitiativePanel();
-    overlayPanel = new HTMLOverlayPanel();
+    // Initialize fields to null or default values, then conditionally create Swing components
+    glassPane = isHeadless ? null : new GlassPane();
+    assetPanel = isHeadless ? null : createAssetPanel();
+    connectionPanel = isHeadless ? null : createConnectionPanel();
+    toolbox = isHeadless ? null : new Toolbox();
+    initiativePanel = isHeadless ? null : new InitiativePanel();
+    overlayPanel = isHeadless ? null : new HTMLOverlayPanel();
 
-    zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
-    pointerOverlay = new PointerOverlay();
-    colorPicker = new ColorPicker(this);
-    textureChooserPanel =
-        new TextureChooserPanel(
-            colorPicker.getPaintChooser(), assetPanel.getModel(), "imageExplorerTextureChooser");
-    colorPicker.getPaintChooser().addPaintChooser(textureChooserPanel);
+    zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>(); // Used by non-UI logic too
+    pointerOverlay = isHeadless ? null : new PointerOverlay();
 
-    String credits = "";
-    String version = "";
-    Image logo = null;
-    try {
-      credits = new String(FileUtil.loadResource(CREDITS_HTML), StandardCharsets.UTF_8);
-      version = MapTool.getVersion();
-      credits = credits.replace("%VERSION%", version);
-      logo = RessourceManager.getImage(Images.MAPTOOL_LOGO);
-    } catch (Exception ioe) {
-      log.error(I18N.getText("msg.error.credits"), ioe);
+    if (!isHeadless) {
+      colorPicker = new ColorPicker(this);
+      textureChooserPanel =
+          new TextureChooserPanel(
+              colorPicker.getPaintChooser(), assetPanel.getModel(), "imageExplorerTextureChooser");
+      colorPicker.getPaintChooser().addPaintChooser(textureChooserPanel);
+
+      String credits = "";
+      String version = "";
+      Image logo = null;
+      try {
+        credits = new String(FileUtil.loadResource(CREDITS_HTML), StandardCharsets.UTF_8);
+        version = MapTool.getVersion();
+        credits = credits.replace("%VERSION%", version);
+        logo = RessourceManager.getImage(Images.MAPTOOL_LOGO);
+      } catch (Exception ioe) {
+        log.error(I18N.getText("msg.error.credits"), ioe);
+      }
+      aboutDialog = new AboutDialog(this, logo, credits);
+      aboutDialog.setSize(354, 400);
+
+      statusPanel = new StatusPanel();
+      statusPanel.addPanel(getAssetCacheStatusBar());
+      statusPanel.addPanel(getImageCacheStatusBar());
+      statusPanel.addPanel(getAppHomeDiskSpaceStatusBar());
+      statusPanel.addPanel(getCoordinateStatusBar());
+      statusPanel.addPanel(getZoomStatusBar());
+      statusPanel.addPanel(getPlayersLoadingStatusBar());
+      statusPanel.addPanel(MemoryStatusBar.getInstance());
+      statusPanel.addPanel(connectionStatusPanel); // connectionStatusPanel itself is fine
+      statusPanel.addPanel(activityMonitor); // activityMonitor itself is fine
+      statusPanel.addPanel(new SpacerStatusBar(25));
+
+      zoneMiniMapPanel = new ZoneMiniMapPanel();
+      zoneRendererPanel = new JPanel(new PositionalLayout(5));
+      zoneRendererPanel.setBackground(Color.black);
+      currentRenderPanel = zoneRendererPanel;
+      initGdx();
+
+      zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
+      zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
+      zoneRendererPanel.add(gdxPanel, PositionalLayout.Position.CENTER);
+
+      commandPanel = new CommandPanel();
+
+      rendererBorderPanel = new JPanel(new GridLayout());
+      rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
+      rendererBorderPanel.add(zoneRendererPanel);
+      toolbarPanel = new ToolbarPanel(toolbox);
+
+      zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
+      overlayPanel.setVisible(false); // disabled by default
+
+      pointerToolOverlay = new PointerToolOverlay();
+      zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
+
+      // Put it all together
+      if (this.menuBar != null) { // menuBar might be null if AppMenuBar creation is skipped
+        setJMenuBar(this.menuBar);
+      }
+      add(BorderLayout.NORTH, toolbarPanel);
+      add(BorderLayout.SOUTH, statusPanel);
+
+      JLayeredPane glassPaneComposite = new JLayeredPane();
+      glassPaneComposite.setLayout(new GridBagLayout());
+      GridBagConstraints constraints = new GridBagConstraints();
+      constraints.gridx = 1;
+      constraints.gridy = 1;
+      constraints.fill = GridBagConstraints.BOTH;
+      constraints.weightx = 1;
+      constraints.weighty = 1;
+
+      glassPaneComposite.add(glassPane, constraints);
+      glassPaneComposite.add(dragImageGlassPane, constraints);
+
+      setGlassPane(glassPane);
+      glassPaneComposite.setVisible(true);
+
+      if (!AppUtil.MAC_OS_X) removeWindowsF10();
+      else registerForMacOSXEvents();
+
+      restorePreferences(); // Non-UI preferences should be fine
+      updateKeyStrokes();
+      initializeFrames(); // This creates DockableFrames, needs to be conditional or its contents made conditional
+
+      new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
+      chatTyperTimers = new ChatNotificationTimers(); // This seems non-UI
+      chatTimer = getChatTimer(); // This also seems non-UI
+      setChatTypingLabelColor(AppPreferences.chatNotificationColor.get()); // UI related, but color is just data
+    } else {
+      // Headless specific initializations if any.
+      // For now, many fields will remain null.
+      // Ensure essential non-UI logic that might have been tied to these components is handled.
+      this.aboutDialog = null;
+      this.statusPanel = null;
+      this.zoneMiniMapPanel = null;
+      this.zoneRendererPanel = null;
+      this.currentRenderPanel = null;
+      this.gdxPanel = null;
+      this.commandPanel = null;
+      this.rendererBorderPanel = null;
+      this.toolbarPanel = null;
+      this.pointerToolOverlay = null;
+      this.colorPicker = null;
+      this.textureChooserPanel = null;
+      // Non-UI initializations that must happen even in headless mode
+      chatTyperTimers = new ChatNotificationTimers();
+      // chatTimer might not be needed if chat typing UI is not shown
     }
-    aboutDialog = new AboutDialog(this, logo, credits);
-    aboutDialog.setSize(354, 400);
 
-    statusPanel = new StatusPanel();
-
-    statusPanel.addPanel(getAssetCacheStatusBar());
-    statusPanel.addPanel(getImageCacheStatusBar());
-    statusPanel.addPanel(getAppHomeDiskSpaceStatusBar());
-    statusPanel.addPanel(getCoordinateStatusBar());
-    statusPanel.addPanel(getZoomStatusBar());
-    statusPanel.addPanel(getPlayersLoadingStatusBar());
-    statusPanel.addPanel(MemoryStatusBar.getInstance());
-    statusPanel.addPanel(connectionStatusPanel);
-    statusPanel.addPanel(activityMonitor);
-    statusPanel.addPanel(new SpacerStatusBar(25));
-
-    zoneMiniMapPanel = new ZoneMiniMapPanel();
-
-    zoneRendererPanel = new JPanel(new PositionalLayout(5));
-    zoneRendererPanel.setBackground(Color.black);
-    currentRenderPanel = zoneRendererPanel;
-    initGdx();
-
-    zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
-    zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
-    zoneRendererPanel.add(gdxPanel, PositionalLayout.Position.CENTER);
-
-    commandPanel = new CommandPanel();
-
-    rendererBorderPanel = new JPanel(new GridLayout());
-    rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
-    rendererBorderPanel.add(zoneRendererPanel);
-    toolbarPanel = new ToolbarPanel(toolbox);
-
-    zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
-    overlayPanel.setVisible(false); // disabled by default
-
-    pointerToolOverlay = new PointerToolOverlay();
-    zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
-
-    // Put it all together
-    setJMenuBar(menuBar);
-    add(BorderLayout.NORTH, toolbarPanel);
-    add(BorderLayout.SOUTH, statusPanel);
-
-    JLayeredPane glassPaneComposite = new JLayeredPane();
-    glassPaneComposite.setLayout(new GridBagLayout());
-    GridBagConstraints constraints = new GridBagConstraints();
-    constraints.gridx = 1;
-    constraints.gridy = 1;
-    constraints.fill = GridBagConstraints.BOTH;
-    constraints.weightx = 1;
-    constraints.weighty = 1;
-
-    glassPaneComposite.add(glassPane, constraints);
-    glassPaneComposite.add(dragImageGlassPane, constraints);
-
-    setGlassPane(glassPane);
-
-    glassPaneComposite.setVisible(true);
-
-    if (!AppUtil.MAC_OS_X) removeWindowsF10();
-    else registerForMacOSXEvents();
-
-    new MapToolEventBus().getMainEventBus().register(this);
-
-    restorePreferences();
-    updateKeyStrokes();
-
-    initializeFrames();
-
-    new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
-    chatTyperTimers = new ChatNotificationTimers();
-    chatTimer = getChatTimer();
-    setChatTypingLabelColor(AppPreferences.chatNotificationColor.get());
+    // Common initializations
+    new MapToolEventBus().getMainEventBus().register(this); // Event bus registration is fine
+    // restorePreferences() was called in non-headless block, ensure any non-UI prefs are loaded if needed here too
+    // updateKeyStrokes() is UI related.
+    // initializeFrames() is UI related.
   }
 
   private void initGdx() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) return;
     var config = new JoglAwtApplicationConfiguration();
     // config.foregroundFPS = 300;
     // config.backgroundFPS = 10;
@@ -535,6 +564,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public ImageChooserDialog getImageChooserDialog() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getImageChooserDialog() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("ImageChooserDialog");
+      return null;
+    }
     if (imageChooserDialog == null) {
       imageChooserDialog = new ImageChooserDialog(this);
     }
@@ -582,6 +616,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private void configureDocking() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.info("Headless mode: Skipping docking configuration.");
+      return;
+    }
     getDockingManager().setProfileKey(DOCKING_PROFILE_NAME);
     getDockingManager().setOutlineMode(com.jidesoft.docking.DockingManager.PARTIAL_OUTLINE_MODE);
     getDockingManager().setUsePref(false);
@@ -656,15 +694,30 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   @Override
   public void setVisible(boolean b) {
-    if (!dockingConfigured) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.info("Headless mode: setVisible({}) called, but frame will not be made visible.", b);
+      // In headless mode, we might still need to set the internal state if 'b' is false
+      // for some reason, but generally, we don't want to call super.setVisible(true).
+      // For now, just prevent visibility.
+      if (b) {
+        return;
+      }
+    }
+
+    if (!dockingConfigured && b) { // Only configure docking if we are about to become visible
       dockingConfigured = true;
       configureDocking();
     }
 
-    super.setVisible(b);
+    if (!(MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) || !b) {
+      super.setVisible(b);
+    }
   }
 
   public DockableFrame getFrame(MTFrame frame) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      return null; // Or throw exception, or return a dummy frame
+    }
     return frameMap.get(frame);
   }
 
@@ -674,6 +727,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private void initializeFrames() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.info("Headless mode: Skipping UI frame initialization (DockableFrames).");
+      return;
+    }
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
@@ -797,14 +854,23 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @param zr the ZoneRenderer of the token
    */
   public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("Attempted to show TokenPropertiesDialog in headless mode for token {}. Operation skipped.", token != null ? token.getId() : "null");
+      // In headless mode, perhaps we automatically "save" the token if changes were made programmatically?
+      // For now, just skip showing the dialog. The serverCommand().editToken would happen if changes
+      // were made and then this method was called.
+      return;
+    }
     if (token != null && zr != null) {
       if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().isTokenEditorLocked()) {
-        EditTokenDialog dialog = MapTool.getFrame().getTokenPropertiesDialog();
-        dialog.showDialog(token);
-        if (dialog.isTokenSaved()) {
-          // Checks if the map still exists. Fixes #1646.
-          if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
-            MapTool.serverCommand().editToken(zr.getZone().getId(), token);
+        EditTokenDialog dialog = getTokenPropertiesDialog(); // Ensure dialog is created if not headless
+        if (dialog != null) {
+          dialog.showDialog(token);
+          if (dialog.isTokenSaved()) {
+            // Checks if the map still exists. Fixes #1646.
+            if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
+              MapTool.serverCommand().editToken(zr.getZone().getId(), token);
+            }
           }
         }
       }
@@ -812,6 +878,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private EditTokenDialog getTokenPropertiesDialog() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      return null;
+    }
     if (tokenPropertiesDialog == null) {
       tokenPropertiesDialog = new EditTokenDialog();
     }
@@ -886,6 +955,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getLoadPropsFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getLoadPropsFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "LoadProps");
+      return null;
+    }
     if (loadPropsFileChooser == null) {
       loadPropsFileChooser = new JFileChooser();
       loadPropsFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
@@ -897,6 +971,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getLoadFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getLoadFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "LoadGeneric");
+      return null;
+    }
     if (loadFileChooser == null) {
       loadFileChooser = new JFileChooser();
       loadFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
@@ -905,6 +984,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getSaveCmpgnFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveCmpgnFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveCampaign");
+      return null;
+    }
     if (saveCmpgnFileChooser == null) {
       saveCmpgnFileChooser = new JFileChooser();
       saveCmpgnFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
@@ -916,6 +1000,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getSaveCampaignPropsFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveCampaignPropsFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveCampaignProps");
+      return null;
+    }
     if (savePropsFileChooser == null) {
       savePropsFileChooser = new JFileChooser();
       savePropsFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
@@ -1027,6 +1116,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getSaveTokenFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveTokenFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveToken");
+      return null;
+    }
     if (saveTokenFileChooser == null) {
       saveTokenFileChooser = new JFileChooser();
       saveTokenFileChooser.setCurrentDirectory(AppPreferences.tokenSaveDirectory.get());
@@ -1035,6 +1129,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getSaveMapFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveMapFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveMap");
+      return null;
+    }
     if (saveMapFileChooser == null) {
       saveMapFileChooser = new JFileChooser();
       saveMapFileChooser.setCurrentDirectory(AppPreferences.mapSaveDirectory.get());
@@ -1043,6 +1142,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getSaveFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveGeneric");
+      return null;
+    }
     if (saveFileChooser == null) {
       saveFileChooser = new JFileChooser();
       saveFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
@@ -1059,6 +1163,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @see #hideControlPanel()
    */
   public void showControlPanel(JPanel... panels) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("showControlPanel() called in headless mode. Operation skipped.");
+      MapTool.getHeadlessModeManager().handleDialog("ShowControlPanel");
+      return;
+    }
     if (panels.length == 0) {
       if (visibleControlPanel != null) {
         visibleControlPanel.setVisible(true);
@@ -1081,10 +1190,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
 
     layoutPanel.setSize(layoutPanel.getPreferredSize());
-    currentRenderPanel.add(layoutPanel, PositionalLayout.Position.NE);
-    currentRenderPanel.setComponentZOrder(layoutPanel, 0);
-    currentRenderPanel.revalidate();
-    currentRenderPanel.repaint();
+    if (currentRenderPanel != null) {
+      currentRenderPanel.add(layoutPanel, PositionalLayout.Position.NE);
+      currentRenderPanel.setComponentZOrder(layoutPanel, 0);
+      currentRenderPanel.revalidate();
+      currentRenderPanel.repaint();
+    }
     visibleControlPanel = layoutPanel;
   }
 
@@ -1155,20 +1266,37 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @see #removeControlPanel()
    */
   public void hideControlPanel() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      // In headless mode, there's no control panel to hide.
+      return;
+    }
     if (visibleControlPanel != null) {
       visibleControlPanel.setVisible(false);
     }
   }
 
   public void showNonModalGlassPane(JComponent component, int x, int y) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("showNonModalGlassPane() called in headless mode. Operation skipped.");
+      MapTool.getHeadlessModeManager().handleDialog("ShowGlassPane", "NonModal");
+      return;
+    }
     showGlassPane(component, x, y, false);
   }
 
   public void showModalGlassPane(JComponent component, int x, int y) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("showModalGlassPane() called in headless mode. Operation skipped.");
+      MapTool.getHeadlessModeManager().handleDialog("ShowGlassPane", "Modal");
+      return;
+    }
     showGlassPane(component, x, y, true);
   }
 
   private void showGlassPane(JComponent component, int x, int y, boolean modal) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless() || glassPane == null) {
+      return;
+    }
     glassPane.removeAll();
     component.setSize(component.getPreferredSize());
     component.setLocation(x, y);
@@ -1179,6 +1307,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void showFilledGlassPane(JComponent component) {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless() || glassPane == null) {
+      log.warn("showFilledGlassPane() called in headless mode or glassPane is null. Operation skipped.");
+      if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+        MapTool.getHeadlessModeManager().handleDialog("ShowGlassPane", "Filled");
+      }
+      return;
+    }
     glassPane.removeAll();
     glassPane.setLayout(new GridLayout());
     glassPane.add(component);
@@ -1186,6 +1321,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void hideGlassPane() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless() || glassPane == null) {
+      // No glass pane to hide in headless mode, or if it was never created.
+      return;
+    }
     glassPane.removeAll();
     glassPane.setVisible(false);
   }
@@ -1249,6 +1388,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void showAboutDialog() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless() || aboutDialog == null) {
+      log.warn("showAboutDialog() called in headless mode or aboutDialog is null. Operation skipped.");
+      if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+        MapTool.getHeadlessModeManager().handleDialog("AboutDialog");
+      }
+      return;
+    }
     aboutDialog.setVisible(true);
   }
 
@@ -1852,6 +1998,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void showFullScreen() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("showFullScreen() called in headless mode. Operation skipped.");
+      MapTool.getHeadlessModeManager().handleDialog("FullScreen", "Show");
+      return;
+    }
     GraphicsConfiguration graphicsConfig = getGraphicsConfiguration();
     Rectangle bounds = graphicsConfig.getBounds();
 
@@ -1867,15 +2018,19 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
     fullScreenFrame.setJMenuBar(menuBar);
     // Menu bar is visible anyways on MAC so leave menu items on it
-    if (!AppUtil.MAC_OS_X) menuBar.setVisible(false);
+    if (!AppUtil.MAC_OS_X && menuBar != null) menuBar.setVisible(false);
 
     fullScreenFrame.setVisible(true);
-    showFullScreenTools();
+    showFullScreenTools(); // This is also conditionalized
     this.setVisible(false);
   }
 
   public void showFullScreenTools() {
-    if (!AppState.isFullScreenUIEnabled()) return;
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      // No tools to show in headless.
+      return;
+    }
+    if (!AppState.isFullScreenUIEnabled() || toolbarPanel == null || zoneRendererPanel == null || initiativePanel == null) return;
 
     fullScreenToolPanel = new JPanel();
     fullScreenToolPanel.setLayout(new BoxLayout(fullScreenToolPanel, BoxLayout.LINE_AXIS));
@@ -1951,7 +2106,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void hideFullScreenTools() {
-    if (!fullScreenToolsShown) return;
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      return;
+    }
+    if (!fullScreenToolsShown || toolbarPanel == null || zoneRendererPanel == null || initiativePanel == null) return;
 
     toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
 
@@ -1968,30 +2126,48 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     zoneRendererPanel.remove(fullScreenToolPanel);
     fullScreenToolPanel = null;
-    var initiativeFrame = frameMap.get(MTFrame.INITIATIVE);
-    initiativePanel.setVisible(true);
-    initiativeFrame.add(initiativePanel);
+    var initiativeFrame = frameMap.get(MTFrame.INITIATIVE); // frameMap might be empty
+    if (initiativeFrame != null) {
+      initiativePanel.setVisible(true);
+      initiativeFrame.add(initiativePanel);
+    }
+
 
     fullScreenToolsShown = false;
   }
 
   public boolean isFullScreen() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      return false;
+    }
     return fullScreenFrame != null;
   }
 
   public boolean areFullScreenToolsShown() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      return false;
+    }
     return fullScreenToolsShown;
   }
 
   public void showWindowed() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("showWindowed() called in headless mode. Operation skipped.");
+      MapTool.getHeadlessModeManager().handleDialog("WindowedMode", "Show");
+      return;
+    }
     if (fullScreenFrame == null) {
       return;
     }
-    hideFullScreenTools();
+    hideFullScreenTools(); // This is also conditionalized
 
-    rendererBorderPanel.add(zoneRendererPanel);
-    setJMenuBar(menuBar);
-    menuBar.setVisible(true);
+    if (rendererBorderPanel != null && zoneRendererPanel != null) {
+      rendererBorderPanel.add(zoneRendererPanel);
+    }
+    if (menuBar != null) {
+      setJMenuBar(menuBar);
+      menuBar.setVisible(true);
+    }
     this.setVisible(true);
 
     fullScreenFrame.dispose();
@@ -2071,32 +2247,43 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     MapTool.disconnect();
     MapTool.stopServer();
 
-    getDockingManager()
-        .saveLayoutDataToFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
+    if (!(MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) && getDockingManager() != null) {
+      try {
+        getDockingManager()
+                .saveLayoutDataToFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
 
-    /* Issue #2485
-     * Write the name of macro created frames to frames.dat so they can be used to create
-     * placeholders the next time Maptool is launched
-     */
-    try {
-      List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
-      List<String> namesToSave =
-          getDockingManager().getAllFrames().stream()
-              .filter(frame -> !mtFrameNames.contains(frame))
-              .toList();
+        /* Issue #2485
+         * Write the name of macro created frames to frames.dat so they can be used to create
+         * placeholders the next time Maptool is launched
+         */
+        List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+        List<String> namesToSave =
+                getDockingManager().getAllFrames().stream()
+                        .filter(frame -> !mtFrameNames.contains(frame))
+                        .toList();
 
-      Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
-      Files.writeString(path, String.join("\0", namesToSave), StandardCharsets.UTF_8);
-    } catch (IOException ioe) {
-      log.error("Unable to write to frames.dat", ioe);
+        Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
+        Files.writeString(path, String.join("\0", namesToSave), StandardCharsets.UTF_8);
+      } catch (IOException ioe) {
+        log.error("Unable to write to layout.dat or frames.dat", ioe);
+      } catch (Exception e) {
+        // Catching general exception in case getDockingManager() or its methods fail unexpectedly
+        // despite the headless check, or if file operations fail for other reasons.
+        log.error("Error during docking manager save operations on close", e);
+      }
+    } else {
+      log.info("Headless mode or DockingManager not available: Skipping layout save.");
     }
     /* /Issue #2485 */
 
     // If closing cleanly, remove the autosave file
     MapTool.getAutoSaveManager().purge();
-    setVisible(false);
 
-    EventQueue.invokeLater(this::dispose);
+    if (!(MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless())) {
+      setVisible(false); // Only make invisible if it's a GUI frame
+    }
+
+    EventQueue.invokeLater(this::dispose); // Dispose should be safe even for a non-visible/headless frame
   }
 
   public void windowClosed(WindowEvent e) {
@@ -2237,6 +2424,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private JFileChooser saveMacroSetFileChooser;
 
   public JFileChooser getSaveMacroFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveMacroFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveMacro");
+      return null;
+    }
     if (saveMacroFileChooser == null) {
       saveMacroFileChooser = new JFileChooser();
       saveMacroFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
@@ -2248,6 +2440,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getSaveMacroSetFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveMacroSetFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveMacroSet");
+      return null;
+    }
     if (saveMacroSetFileChooser == null) {
       saveMacroSetFileChooser = new JFileChooser();
       saveMacroSetFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
@@ -2262,6 +2459,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private JFileChooser loadMacroSetFileChooser;
 
   public JFileChooser getLoadMacroFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getLoadMacroFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "LoadMacro");
+      return null;
+    }
     if (loadMacroFileChooser == null) {
       loadMacroFileChooser = new JFileChooser();
       loadMacroFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
@@ -2273,6 +2475,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public JFileChooser getLoadMacroSetFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getLoadMacroSetFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "LoadMacroSet");
+      return null;
+    }
     if (loadMacroSetFileChooser == null) {
       loadMacroSetFileChooser = new JFileChooser();
       loadMacroSetFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
@@ -2289,6 +2496,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private JFileChooser loadTableFileChooser;
 
   public JFileChooser getSaveTableFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getSaveTableFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "SaveTable");
+      return null;
+    }
     if (saveTableFileChooser == null) {
       saveTableFileChooser = new JFileChooser();
       saveTableFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
@@ -2303,6 +2515,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   // separate default directories
   // and when a user loads a file, don't they expect the save dialog to start at the same place??
   public JFileChooser getLoadTableFileChooser() {
+    if (MapTool.getHeadlessModeManager() != null && MapTool.getHeadlessModeManager().isHeadless()) {
+      log.warn("getLoadTableFileChooser() called in headless mode. Returning null.");
+      MapTool.getHeadlessModeManager().handleDialog("FileChooser", "LoadTable");
+      return null;
+    }
     if (loadTableFileChooser == null) {
       loadTableFileChooser = new JFileChooser();
       loadTableFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
