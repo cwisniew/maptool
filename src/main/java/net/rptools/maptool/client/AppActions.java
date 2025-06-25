@@ -47,7 +47,7 @@ import net.rptools.maptool.client.tool.Toolbox;
 import net.rptools.maptool.client.tool.boardtool.BoardTool;
 import net.rptools.maptool.client.tool.gridtool.GridTool;
 import net.rptools.maptool.client.ui.*;
-import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.MapToolSwingFrame.MTFrame; // Changed to MapToolSwingFrame.MTFrame
 import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialogView;
 import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -556,7 +556,7 @@ public class AppActions {
         @Override
         public boolean isAvailable() {
           boolean result = false;
-          MapToolFrame mtf = MapTool.getFrame();
+          MapToolFrameIF mtf = MapTool.getFrame(); // Changed to MapToolFrameIF
           if (mtf != null) {
             ZoneRenderer zr = mtf.getCurrentZoneRenderer();
             if (zr != null) {
@@ -586,7 +586,7 @@ public class AppActions {
         @Override
         public boolean isAvailable() {
           boolean result = false;
-          MapToolFrame mtf = MapTool.getFrame();
+          MapToolFrameIF mtf = MapTool.getFrame(); // Changed to MapToolFrameIF
           if (mtf != null) {
             ZoneRenderer zr = mtf.getCurrentZoneRenderer();
             if (zr != null) {

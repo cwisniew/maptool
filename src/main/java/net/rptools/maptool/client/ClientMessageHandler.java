@@ -30,7 +30,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.events.PlayerStatusChanged;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.MapToolFrameIF; // Changed to interface
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -271,7 +271,7 @@ public class ClientMessageHandler implements MessageHandler {
           CampaignProperties properties = CampaignProperties.fromDto(msg.getProperties());
 
           client.getCampaign().replaceCampaignProperties(properties);
-          MapToolFrame frame = MapTool.getFrame();
+          MapToolFrameIF frame = MapTool.getFrame(); // Changed to interface
           ZoneRenderer zr = frame.getCurrentZoneRenderer();
           if (zr != null) {
             zr.getZoneView().flush();
@@ -566,11 +566,12 @@ public class ClientMessageHandler implements MessageHandler {
           var zone = client.getCampaign().getZone(zoneGUID);
           if (zone != null) {
             zone.setVisionType(visionType);
-            if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-              MapTool.getFrame().getCurrentZoneRenderer().flushFog();
-              MapTool.getFrame().getCurrentZoneRenderer().getZoneView().flush();
+            MapToolFrameIF frame = MapTool.getFrame(); // Changed to interface
+            if (frame.getCurrentZoneRenderer() != null) {
+              frame.getCurrentZoneRenderer().flushFog();
+              frame.getCurrentZoneRenderer().getZoneView().flush();
             }
-            MapTool.getFrame().refresh();
+            frame.refresh();
           }
         });
   }

@@ -20,7 +20,7 @@ import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.client.macro.MacroManager;
-import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.MapToolFrameIF; // Changed to interface
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -32,7 +32,7 @@ import net.rptools.maptool.model.Token;
     expandRolls = false)
 public class ImpersonateMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-    final MapToolFrame frame = MapTool.getFrame(); // cached for quicker access
+    final MapToolFrameIF frame = MapTool.getFrame(); // cached for quicker access, changed to MapToolFrameIF
     final CommandPanel cpanel = frame.getCommandPanel();
     if (macro != null) macro = macro.trim();
 

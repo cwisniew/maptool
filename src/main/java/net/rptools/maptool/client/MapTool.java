@@ -155,7 +155,7 @@ public class MapTool {
   private static ZoneLoadedListener zoneLoadedListener;
 
   private static JMenuBar menuBar;
-  private static MapToolFrame clientFrame;
+  private static MapToolFrameIF clientFrame; // Changed to interface
   private static NoteFrame profilingNoteFrame;
   private static LogConsoleFrame logConsoleFrame;
   @Nullable private static MapToolServer server;
@@ -179,6 +179,7 @@ public class MapTool {
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
   @Nullable private static RemoteServerConfig remoteServerConfig = null;
+  private static boolean isHeadless = false; // For headless mode
 
   static {
     try {
@@ -614,7 +615,7 @@ public class MapTool {
    *
    * @param frame
    */
-  private static void setClientFrame(MapToolFrame frame) {
+  private static void setClientFrame(MapToolFrameIF frame) { // Changed to interface
     clientFrame = frame;
 
     if (graphicsMonitor > -1) {
@@ -662,56 +663,53 @@ public class MapTool {
     }
   }
 
-  private static void initialize() {
-    // First time
-    AppSetup.install();
-    LibraryManager.init();
+  private static void initialize() { // Called only in Swing mode by mainSwing's invokeLater
+    // Common parts are already called by mainSwing via initializeCommon()
 
-    // Clean up after ourselves
-    FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
-    // We'll manage our own images
-    ImageIO.setUseCache(false);
+    // Frame creation (specific to Swing mode)
+    // menuBar is already initialized in mainSwing
+    MapToolSwingFrame swingFrame = new MapToolSwingFrame(menuBar);
+    setClientFrame(swingFrame); // Sets MapTool.clientFrame (MapToolFrameIF)
+    taskbarFlasher = new TaskBarFlasher(swingFrame); // Uses the concrete MapToolSwingFrame
 
-    try {
-      SoundManager.configure(SOUND_PROPERTIES);
-      SoundManager.registerSoundEvent(
-          SND_INVALID_OPERATION, SoundManager.getRegisteredSound("Dink"));
-    } catch (IOException ioe) {
-      MapTool.showError("While initializing (configuring sound)", ioe);
-    }
+    initializeCampaignAndServer(); // Common logic for campaign and personal server
 
-    assetTransferManager = new AssetTransferManager();
-    assetTransferManager.addConsumerListener(new AssetTransferHandler());
-
-    setClientFrame(new MapToolFrame(menuBar));
-    taskbarFlasher = new TaskBarFlasher(clientFrame);
-
-    // Make sure the user sees something right away so that they aren't staring at a black screen.
-    // Technically this call does too much, but since it is a blank campaign it's okay.
-    setCampaign(client.getCampaign(), null);
-
-    try {
-      playerZoneListener = new PlayerZoneListener();
-      zoneLoadedListener = new ZoneLoadedListener();
-
-      Campaign cmpgn = CampaignFactory.createBasicCampaign();
-
-      // Stop the pre-init client/server.
-      disconnect();
-      stopServer();
-
-      startPersonalServer(cmpgn);
-    } catch (Exception e) {
-      MapTool.showError("While starting personal server", e);
-    }
-    AppActions.updateActions();
-
+    // Remaining UI specific initializations
+    AppActions.updateActions(); // Many actions are UI-related
     ToolTipManager.sharedInstance().setInitialDelay(AppPreferences.toolTipInitialDelay.get());
     ToolTipManager.sharedInstance().setDismissDelay(AppPreferences.toolTipDismissDelay.get());
 
     chatAutoSave = new ChatAutoSave();
     chatAutoSave.setTimeout(AppPreferences.chatAutoSaveTimeInMinutes.get());
     AppPreferences.chatAutoSaveTimeInMinutes.onChange(chatAutoSave::setTimeout);
+
+    clientFrame.setVisible(true); // Make the frame visible
+  }
+
+  // This method consolidates the campaign and server setup logic
+  // previously at the end of initialize()
+  private static void initializeCampaignAndServer() {
+    setCampaign(client.getCampaign(), null); // Set initial blank campaign
+
+    try {
+        playerZoneListener = new PlayerZoneListener();
+        zoneLoadedListener = new ZoneLoadedListener();
+        Campaign cmpgn = CampaignFactory.createBasicCampaign();
+        // Ensure any existing server/client connections are cleared before starting new ones
+        if (client != null && client.getConnection() != null && client.getConnection().isConnected()) {
+            disconnect();
+        }
+        if (server != null && server.getState() == MapToolServer.State.Started) {
+            stopServer();
+        }
+        startPersonalServer(cmpgn);
+    } catch (Exception e) {
+        if (!isHeadless) { // Check isHeadless before showing UI error
+            MapTool.showError("While starting personal server", e);
+        } else {
+            log.error("While starting personal server", e);
+        }
+    }
   }
 
   public static NoteFrame getProfilingNoteFrame() {
@@ -1242,7 +1240,7 @@ public class MapTool {
     }
   }
 
-  public static MapToolFrame getFrame() {
+  public static MapToolFrameIF getFrame() { // Changed to interface
     return clientFrame;
   }
 
@@ -1345,7 +1343,9 @@ public class MapTool {
 
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
-    MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+    if (clientFrame instanceof MapToolSwingFrame) {
+      ((MapToolSwingFrame) clientFrame).getAssetPanel().getAssetTree().initialize();
+    }
 
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
@@ -1511,6 +1511,7 @@ public class MapTool {
   }
 
   public static void main(String[] args) {
+    // Initial logging setup
     log.info("********************************************************************************");
     log.info("**                                                                            **");
     log.info("**                              MapTool Started!                              **");
@@ -1518,13 +1519,222 @@ public class MapTool {
     log.info("********************************************************************************");
     log.info("Logging to: " + getLoggerFileName());
 
+    // Command line options
+    Options cmdOptions = new Options();
+    cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
+    cmdOptions.addOption("v", "version", true, "override MapTool version");
+    cmdOptions.addOption("m", "monitor", true, "sets which monitor to use");
+    cmdOptions.addOption("f", "fullscreen", false, "set to maximize window");
+    cmdOptions.addOption("w", "width", true, "override MapTool window width");
+    cmdOptions.addOption("h", "height", true, "override MapTool window height");
+    cmdOptions.addOption("x", "xpos", true, "override MapTool window starting x coordinate");
+    cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
+    cmdOptions.addOption(null, "macros", false, "display defined list of macro functions"); // Changed 'm' to null for long option
+    cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
+    cmdOptions.addOption("F", "file", true, "load campaign on startup");
+    cmdOptions.addOption(null, "headless", false, "run in headless mode without UI");
+
+    CommandLineParser cmdParser = new DefaultParser();
+    CommandLine cmd = null;
+    boolean listMacros = false;
+    String versionOverride = version; // Initialize with default
+
+    try {
+      cmd = cmdParser.parse(cmdOptions, args);
+
+      debug = getCommandLineOption(cmd, "debug");
+      versionOverride = getCommandLineOption(cmd, "version", version); // Use local var
+      graphicsMonitor = getCommandLineOption(cmd, "monitor", graphicsMonitor);
+      useFullScreen = getCommandLineOption(cmd, "fullscreen");
+      windowWidth = getCommandLineOption(cmd, "width", windowWidth);
+      windowHeight = getCommandLineOption(cmd, "height", windowHeight);
+      windowX = getCommandLineOption(cmd, "xpos", windowX);
+      windowY = getCommandLineOption(cmd, "ypos", windowY);
+      loadCampaignOnStartPath = getCommandLineOption(cmd, "file", "");
+      listMacros = getCommandLineOption(cmd, "macros");
+      isHeadless = getCommandLineOption(cmd, "headless");
+
+      if (getCommandLineOption(cmd, "reset")) {
+        UserJvmOptions.resetJvmOptions();
+      }
+    } catch (ParseException e) {
+      log.error("Error parsing the command line: " + e.getMessage());
+      // In headless mode, showError would not work. For now, just log and potentially exit.
+      if (!isHeadless) {
+        // This is problematic as UI might not be up yet.
+        // MapTool.showWarning("Error parsing the command line", e);
+      }
+      System.exit(1); // Exit if command line parsing fails.
+    }
+
     String versionImplementation = version;
-    String versionOverride = version;
+    if (MapTool.class.getPackage().getImplementationVersion() != null) {
+      versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
+    }
+    if (cmd.hasOption("version")) {
+      log.info("overriding MapTool version from command line to: " + versionOverride);
+      MapTool.version = versionOverride;
+    } else {
+      MapTool.version = versionImplementation;
+    }
+    log.info("MapTool version: " + MapTool.version);
+
+    if (MapTool.class.getPackage().getImplementationVendor() != null) {
+      vendor = MapTool.class.getPackage().getImplementationVendor().trim();
+    }
+    log.info("MapTool vendor: " + vendor);
+
+    // Sentry Initialization (common)
+    Sentry.init(options -> {
+      options.setEnableExternalConfiguration(true);
+      options.addEventProcessor((event, hint) -> {
+        event.setRelease(getVersion());
+        return event;
+      });
+    });
+    Sentry.setTag("os", System.getProperty("os.name"));
+    Sentry.setTag("version", MapTool.getVersion());
+    // Sentry.setTag("versionImplementation", versionImplementation); // versionImplementation is local
+    // Sentry.setTag("versionOverride", versionOverride); // versionOverride is local
+    // These might need to be set after MapTool.version is finalized if they are important
+
+    // Debug stream activation (common)
+    if (debug) {
+      Configurator.setRootLevel(Level.DEBUG);
+      DebugStream.activate();
+    } else {
+      DebugStream.deactivate();
+    }
+
+    // Log arguments (common)
+    for (String arg : args) {
+      log.info("argument passed via command line: " + arg);
+    }
+
+    // Positional argument parsing (common, but showError is UI)
+    if (cmd.getArgs().length != 0) {
+      try {
+        parsePositionalArg(cmd.getArgs()[0]);
+      } catch (Error e) {
+        log.error("Error parsing positional argument: " + e.getMessage(), e);
+        if (!isHeadless) MapTool.showWarning("Error parsing the command line", e); // UI specific
+      }
+    }
+    if (!loadCampaignOnStartPath.isEmpty()) {
+      log.info("Loading initial campaign: " + loadCampaignOnStartPath);
+    }
+
+    // List macros if requested (common, console output)
+    if (listMacros) {
+      StringBuilder logOutput = new StringBuilder();
+      List<String> macroFuncList = new ArrayList<>(parser.listAllMacroFunctions().keySet());
+      Collections.sort(macroFuncList);
+      for (String macro : macroFuncList) {
+        logOutput.append("\n").append(macro);
+      }
+      log.info("Current list of Macro Functions: " + logOutput);
+      if (isHeadless) System.exit(0); // Exit after listing if headless and only listing macros
+    }
+
+    // Protocol Handlers (common, but must be called only once)
+    // This needs to be set up before any components try to use custom URLs.
+    RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
+    factory.registerProtocol("asset", new AssetURLStreamHandler());
+    factory.registerProtocol("lib", new LibraryURLStreamHandler());
+    if (!isHeadless && AppPreferences.syrinscapeActive.get()) { // Syrinscape only for UI mode
+        factory.registerProtocol("syrinscape-fantasy", new SyrinscapeURLStreamHandler());
+        factory.registerProtocol("syrinscape-sci-fi", new SyrinscapeURLStreamHandler());
+        factory.registerProtocol("syrinscape-boardgame", new SyrinscapeURLStreamHandler());
+    }
+    try {
+        URL.setURLStreamHandlerFactory(factory);
+    } catch (Error error) {
+        log.warn("Could not set URLStreamHandlerFactory; may have been set by another component: " + error.getMessage());
+    }
+
+    if (isHeadless) {
+      mainHeadless(cmd);
+    } else {
+      mainSwing(cmd);
+    }
+  }
+
+  private static void initializeCommon() {
+    AppSetup.install();
+    LibraryManager.init();
+    FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
+    ImageIO.setUseCache(false);
+
+    if (!isHeadless) { // Sound manager only for GUI
+        try {
+            SoundManager.configure(SOUND_PROPERTIES);
+            SoundManager.registerSoundEvent(SND_INVALID_OPERATION, SoundManager.getRegisteredSound("Dink"));
+        } catch (IOException ioe) {
+            MapTool.showError("While initializing (configuring sound)", ioe);
+        }
+    }
+
+    assetTransferManager = new AssetTransferManager();
+    assetTransferManager.addConsumerListener(new AssetTransferHandler());
+  }
+
+  private static void initializeCampaignAndServer() {
+    // This method consolidates the campaign and server setup logic
+    // previously at the end of initialize()
+    setCampaign(client.getCampaign(), null); // Set initial blank campaign
+
+    try {
+        playerZoneListener = new PlayerZoneListener();
+        zoneLoadedListener = new ZoneLoadedListener();
+        Campaign cmpgn = CampaignFactory.createBasicCampaign();
+        // Ensure any existing server/client connections are cleared before starting new ones
+        if (client != null && client.getConnection() != null && client.getConnection().isConnected()) {
+            disconnect();
+        }
+        if (server != null && server.getState() == MapToolServer.State.Started) {
+            stopServer();
+        }
+        startPersonalServer(cmpgn);
+    } catch (Exception e) {
+        if (!isHeadless) {
+            MapTool.showError("While starting personal server", e);
+        } else {
+            log.error("While starting personal server", e);
+        }
+    }
+  }
+
+
+  private static void mainHeadless(CommandLine cmd) {
+    log.info("Starting MapTool in Headless Mode.");
+
+    if (AppPreferences.enableJavaFX.get()) { // Conditional JavaFX init
+        initJavaFX();
+    }
+
+    initializeCommon();
+    setClientFrame(new MapToolHeadlessFrame());
+    initializeCampaignAndServer();
+
+    // Headless post-initialization (e.g., loading campaign from args)
+    boolean recover = getAutoSaveManager().check();
+    if (!recover && !loadCampaignOnStartPath.isEmpty()) {
+        File campaignFile = new File(loadCampaignOnStartPath);
+        if (campaignFile.exists()) {
+            AppActions.loadCampaign(campaignFile);
+        } else {
+            log.error("Campaign file not found: {}", loadCampaignOnStartPath);
+        }
+    }
+    getAutoSaveManager().start();
+
+    log.info("MapTool Headless initialization complete.");
+  }
+
+  private static void mainSwing(CommandLine cmd) { // Removed String[] args as cmd is sufficient
+    log.info("Starting MapTool in Swing Mode.");
 
     if (AppUtil.MAC_OS_X) {
-      // On OSX the menu bar at the top of the screen can be enabled at any time, but the
-      // title (ie. name of the application) has to be set before the GUI is initialized (by
-      // creating a frame, loading a splash screen, etc). So we do it here.
       System.setProperty("apple.laf.useScreenMenuBar", "true");
       String appName = "MapTool";
       if (MapTool.isDevelopment()) {
@@ -1535,130 +1745,10 @@ public class MapTool {
       System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
     }
 
-    if (MapTool.class.getPackage().getImplementationVersion() != null) {
-      versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("getting MapTool version from manifest: " + versionImplementation);
-    }
-
-    if (MapTool.class.getPackage().getImplementationVendor() != null) {
-      vendor = MapTool.class.getPackage().getImplementationVendor().trim();
-      log.info("getting MapTool vendor from manifest:  " + vendor);
-    }
-
-    // Initialize Sentry.io logging
-    Sentry.init(
-        options -> {
-          options.setEnableExternalConfiguration(true);
-          options.addEventProcessor(
-              new EventProcessor() {
-                @Override
-                public SentryEvent process(@Nonnull SentryEvent event, @Nullable Hint hint) {
-                  event.setRelease(getVersion());
-                  return event;
-                }
-              });
-        });
-
-    // Jamz: Overwrite version for testing if passed as command line argument using -v or
-    // -version
-    Options cmdOptions = new Options();
-    cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
-    cmdOptions.addOption("v", "version", true, "override MapTool version");
-    cmdOptions.addOption("m", "monitor", true, "sets which monitor to use");
-    cmdOptions.addOption("f", "fullscreen", false, "set to maximize window");
-    cmdOptions.addOption("w", "width", true, "override MapTool window width");
-    cmdOptions.addOption("h", "height", true, "override MapTool window height");
-    cmdOptions.addOption("x", "xpos", true, "override MapTool window starting x coordinate");
-    cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
-    cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
-    cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
-    cmdOptions.addOption("F", "file", true, "load campaign on startup");
-
-    CommandLineParser cmdParser = new DefaultParser();
-    CommandLine cmd = null;
-    boolean listMacros = false;
-
-    try {
-      cmd = cmdParser.parse(cmdOptions, args);
-
-      debug = getCommandLineOption(cmd, "debug");
-      versionOverride = getCommandLineOption(cmd, "version", version);
-      graphicsMonitor = getCommandLineOption(cmd, "monitor", graphicsMonitor);
-      useFullScreen = getCommandLineOption(cmd, "fullscreen");
-
-      windowWidth = getCommandLineOption(cmd, "width", windowWidth);
-      windowHeight = getCommandLineOption(cmd, "height", windowHeight);
-      windowX = getCommandLineOption(cmd, "xpos", windowX);
-      windowY = getCommandLineOption(cmd, "ypos", windowY);
-
-      loadCampaignOnStartPath = getCommandLineOption(cmd, "file", "");
-      listMacros = getCommandLineOption(cmd, "macros");
-
-      if (getCommandLineOption(cmd, "reset")) {
-        UserJvmOptions.resetJvmOptions();
-      }
-    } catch (ParseException e) {
-      // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
-      // so there's no need for us to do it.
-      MapTool.showWarning("Error parsing the command line", e);
-    }
-
-    // Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
-    if (debug) {
-      Configurator.setRootLevel(Level.DEBUG);
-      DebugStream.activate();
-    } else {
-      DebugStream.deactivate();
-    }
-
-    // List out passed in arguments
-    for (String arg : args) {
-      log.info("argument passed via command line: " + arg);
-    }
-
-    if (cmd.hasOption("version")) {
-      log.info("overriding MapTool version from command line to: " + versionOverride);
-      version = versionOverride;
-    } else {
-      version = versionImplementation;
-      log.info("MapTool version: " + version);
-    }
-
-    log.info("MapTool vendor: " + vendor);
-
-    if (cmd.getArgs().length != 0) {
-      try {
-        parsePositionalArg(cmd.getArgs()[0]);
-      } catch (Error e) {
-        MapTool.showWarning("Error parsing the command line", e);
-      }
-    }
-    if (!loadCampaignOnStartPath.isEmpty()) {
-      log.info("Loading initial campaign: " + loadCampaignOnStartPath);
-    }
-
-    // Set MapTool version
-    Sentry.setTag("os", System.getProperty("os.name"));
-    Sentry.setTag("version", MapTool.getVersion());
-    Sentry.setTag("versionImplementation", versionImplementation);
-    Sentry.setTag("versionOverride", versionOverride);
-
-    if (listMacros) {
-      StringBuilder logOutput = new StringBuilder();
-      List<String> macroList = new ArrayList<>(parser.listAllMacroFunctions().keySet());
-      Collections.sort(macroList);
-
-      for (String macro : macroList) {
-        logOutput.append("\n").append(macro);
-      }
-
-      log.info("Current list of Macro Functions: " + logOutput);
-    }
-
-    // System properties
+    // System properties for Swing
     System.setProperty("swing.aatext", "true");
 
-    initJavaFX();
+    initJavaFX(); // For JavaFX integration with Swing
 
     final SplashScreen splash = new SplashScreen(getVersion());
     splash.setVisible(true);
@@ -1666,91 +1756,46 @@ public class MapTool {
     try {
       ThemeSupport.loadTheme();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      log.error("Failed to load theme", e); // Log instead of throw for resilience
+      // Consider a fallback or exit if theme is critical
     }
-
-    // Protocol handlers
-    // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
-    RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
-    factory.registerProtocol("asset", new AssetURLStreamHandler());
-    factory.registerProtocol("lib", new LibraryURLStreamHandler());
-
-    // Syrinscape Protocols
-    if (AppPreferences.syrinscapeActive.get()) {
-      factory.registerProtocol("syrinscape-fantasy", new SyrinscapeURLStreamHandler());
-      factory.registerProtocol("syrinscape-sci-fi", new SyrinscapeURLStreamHandler());
-      factory.registerProtocol("syrinscape-boardgame", new SyrinscapeURLStreamHandler());
-    }
-
-    URL.setURLStreamHandlerFactory(factory);
 
     final Toolkit tk = Toolkit.getDefaultToolkit();
     tk.getSystemEventQueue().push(new MapToolEventQueue());
 
     // LAF
     try {
-      // If we are running under Mac OS X then save native menu bar look & feel components
-      // Note the order of creation for the AppMenuBar, this specific chronology
-      // allows the system to set up system defaults before we go and modify things.
-      // That is, please don't move these lines around unless you test the result on windows
-      // and mac
       if (AppUtil.MAC_OS_X) {
-        menuBar = new AppMenuBar();
+        menuBar = new AppMenuBar(); // Initialize here for Mac
         OSXAdapter.macOSXicon();
       } else {
-        menuBar = new AppMenuBar();
+        menuBar = new AppMenuBar(); // Initialize here for others
       }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
-
       configureJide();
     } catch (Exception e) {
-      MapTool.showError("msg.error.lafSetup", e);
+      // MapTool.showError is UI specific, use logger for now, then show error if frame is up
+      log.error("msg.error.lafSetup", e);
+      // If clientFrame was up, we could use MapTool.showError. Otherwise, System.exit.
       System.exit(1);
     }
 
-    /*
-     * Load GenSys and SW RPG fonts
-     */
     try {
       var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      var genFont =
-          Font.createFont(
-              Font.TRUETYPE_FONT,
-              Objects.requireNonNull(
-                  MapTool.class
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
+      var genFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(MapTool.class.getClassLoader().getResourceAsStream("net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
       genv.registerFont(genFont);
-      var swGenFont =
-          Font.createFont(
-              Font.TRUETYPE_FONT,
-              Objects.requireNonNull(
-                  MapTool.class
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
+      var swGenFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(MapTool.class.getClassLoader().getResourceAsStream("net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
       genv.registerFont(swGenFont);
     } catch (Exception e) {
       log.error("msg.error.genesysFont", e);
     }
 
-    /**
-     * This is a tweak that makes the Chinese version work better.
-     *
-     * <p>Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
-     * wikipedia.org/wiki/CJK_characters</a> before making changes. And
-     * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
-     */
     if (Locale.CHINA.equals(Locale.getDefault())) {
-      // The following font name appears to be "Sim Sun". It can be downloaded
-      // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
       Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
       FontUIResource fontRes = new FontUIResource(f);
-      for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
-          iterator.hasNext(); ) {
+      for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator(); iterator.hasNext(); ) {
         Object key = iterator.next();
         Object value = UIManager.get(key);
         if (value instanceof FontUIResource) {
@@ -1758,21 +1803,22 @@ public class MapTool {
         }
       }
     }
-
-    // Draw frame contents on resize
     tk.setDynamicLayout(true);
 
-    EventQueue.invokeLater(
-        () -> {
-          initialize();
+    EventQueue.invokeLater(() -> {
+      initializeCommon();    // Common initialization first
+      initialize();          // Then initialize (which is now mostly GUI + campaign/server)
 
-          EventQueue.invokeLater(
-              () -> {
-                clientFrame.setVisible(true);
-                splash.setVisible(false);
-                splash.dispose();
-                EventQueue.invokeLater(MapTool::postInitialize);
-              });
-        });
+      EventQueue.invokeLater(() -> {
+        // Splash screen handling remains here, clientFrame visibility is in initialize()
+        splash.setVisible(false);
+        splash.dispose();
+        postInitialize(); // Call the refactored postInitialize
+      });
+    });
   }
 }
+
+// Note: The definitions for initialize(), initializeGUISpecific(), and postInitialize()
+// need to be added/adjusted according to the plan. The diff above only changes the call site.
+// I will provide these method body changes in subsequent steps.

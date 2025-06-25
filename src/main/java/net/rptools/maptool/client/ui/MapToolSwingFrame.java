@@ -119,8 +119,9 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 /** */
-public class MapToolFrame extends DefaultDockableHolder implements WindowListener {
-  private static final Logger log = LogManager.getLogger(MapToolFrame.class);
+// Extends DefaultDockableHolder and implements MapToolFrameIF and WindowListener
+public class MapToolSwingFrame extends DefaultDockableHolder implements MapToolFrameIF, WindowListener {
+  private static final Logger log = LogManager.getLogger(MapToolSwingFrame.class);
   private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
   private static final String CREDITS_HTML = "net/rptools/maptool/client/credits.html";
   private static final long serialVersionUID = 3905523813025329458L;
@@ -132,11 +133,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final Pen pen = new Pen(Pen.DEFAULT);
   private final Map<MTFrame, DockableFrame> frameMap = new HashMap<MTFrame, DockableFrame>();
 
-  /** Are the drawing measurements being painted? */
-  private boolean paintDrawingMeasurement = true;
+  // Fields are local to MapToolSwingFrame.
 
   private ImageChooserDialog imageChooserDialog;
   private ZoneRenderer currentRenderer;
+  private boolean paintDrawingMeasurement = true;
 
   // Components
   private final AssetPanel assetPanel;
@@ -172,7 +173,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private JPanel fullScreenToolPanel;
   private final JPanel rendererBorderPanel;
   private final List<ZoneRenderer> zoneRendererList;
-  private final JMenuBar menuBar;
+  private final JMenuBar menuBar; // Keep local, specific to Swing frame
   private final StatusPanel statusPanel;
   private String statusMessage = "";
   private final ActivityMonitorPanel activityMonitor = new ActivityMonitorPanel();
@@ -213,9 +214,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private JFileChooser saveMapFileChooser;
   private JFileChooser saveTokenFileChooser;
 
+  // File filters are all local to MapToolSwingFrame now.
   private final FileFilter campaignFilter =
       new MTFileFilter(I18N.getText("file.ext.cmpgn"), "cmpgn");
-  private final FileFilter mapFilter = new MTFileFilter(I18N.getText("file.ext.rpmap"), "rpmap");
+  private final FileFilter mapFilter =
+      new MTFileFilter(I18N.getText("file.ext.rpmap"), "rpmap");
   private final FileFilter propertiesFilter =
       new MTFileFilter(I18N.getText("file.ext.mtprops"), "mtprops");
   private final FileFilter macroFilter =
@@ -311,7 +314,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     public void keyPressed(KeyEvent e) {}
   }
 
-  public class ChatNotificationTimers {
+  // Made public static to be accessible for MapToolFrameIF and other implementations
+  public static class ChatNotificationTimers {
     private final LinkedMap<String, Long> chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
@@ -351,11 +355,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
-  public MapToolFrame(JMenuBar menuBar) {
-    // Set up the frame
+  public MapToolSwingFrame(JMenuBar menuBar) {
+    // Set up the frame, DefaultDockableHolder constructor takes title
     super(AppConstants.APP_LOCAL_NAME);
 
-    this.menuBar = menuBar;
+    this.menuBar = menuBar; // Keep menuBar local
 
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     addWindowListener(this);
@@ -376,7 +380,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     initiativePanel = new InitiativePanel();
     overlayPanel = new HTMLOverlayPanel();
 
-    zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
+    this.zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>(); // Restored initialization
     pointerOverlay = new PointerOverlay();
     colorPicker = new ColorPicker(this);
     textureChooserPanel =
@@ -530,10 +534,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
+  @Override
   public DragImageGlassPane getDragImageGlassPane() {
     return dragImageGlassPane;
   }
 
+  @Override
   public ImageChooserDialog getImageChooserDialog() {
     if (imageChooserDialog == null) {
       imageChooserDialog = new ImageChooserDialog(this);
@@ -624,7 +630,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     try {
       getDockingManager()
           .loadInitialLayout(
-              MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
+              MapToolSwingFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML)); // Changed to MapToolSwingFrame
     } catch (ParserConfigurationException | SAXException | IOException e) {
       MapTool.showError("msg.error.layoutInitial", e);
     }
@@ -664,8 +670,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     super.setVisible(b);
   }
 
+  @Override
   public DockableFrame getFrame(MTFrame frame) {
     return frameMap.get(frame);
+  }
+
+  @Override
+  public DockingManager getDockingManager() { // Implements MapToolFrameIF method
+    return super.getDockingManager(); // Delegates to DefaultDockableHolder's implementation
   }
 
   @Override
@@ -783,6 +795,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
+  @Override
   public LookupTablePanel getLookupTablePanel() {
     if (lookupTablePanel == null) {
       lookupTablePanel = new LookupTablePanel();
@@ -796,6 +809,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @param token the token to edit
    * @param zr the ZoneRenderer of the token
    */
+  @Override
   public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
     if (token != null && zr != null) {
       if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().isTokenEditorLocked()) {
@@ -819,14 +833,15 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   /** Repaints the current ZoneRenderer, if it is not null. */
+  @Override
   public void refresh() {
     if (getCurrentZoneRenderer() != null) {
       getCurrentZoneRenderer().repaint();
     }
   }
 
-  /** Accepts 1 or more file extensions */
-  private static class MTFileFilter extends FileFilter {
+  /** Accepts 1 or more file extensions - Made public static for AbstractMapToolFrame */
+  public static class MTFileFilter extends FileFilter {
     private final String[] extensions;
     private final String description;
 
@@ -868,10 +883,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
+  @Override
   public FileFilter getCmpgnFileFilter() {
     return campaignFilter;
   }
 
+  @Override
   public FileFilter getMapFileFilter() {
     return mapFilter;
   }
@@ -881,10 +898,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    *
    * @return the {@link FileFilter} for Universal VTT export files.
    */
+  @Override
   public FileFilter getDungeonDraftFilter() {
     return dungeonDraftFilter;
   }
 
+  @Override
   public JFileChooser getLoadPropsFileChooser() {
     if (loadPropsFileChooser == null) {
       loadPropsFileChooser = new JFileChooser();
@@ -896,6 +915,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return loadPropsFileChooser;
   }
 
+  @Override
   public JFileChooser getLoadFileChooser() {
     if (loadFileChooser == null) {
       loadFileChooser = new JFileChooser();
@@ -904,6 +924,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return loadFileChooser;
   }
 
+  @Override
   public JFileChooser getSaveCmpgnFileChooser() {
     if (saveCmpgnFileChooser == null) {
       saveCmpgnFileChooser = new JFileChooser();
@@ -915,6 +936,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return saveCmpgnFileChooser;
   }
 
+  @Override
   public JFileChooser getSaveCampaignPropsFileChooser() {
     if (savePropsFileChooser == null) {
       savePropsFileChooser = new JFileChooser();
@@ -1026,6 +1048,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return fileName;
   }
 
+  @Override
   public JFileChooser getSaveTokenFileChooser() {
     if (saveTokenFileChooser == null) {
       saveTokenFileChooser = new JFileChooser();
@@ -1034,6 +1057,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return saveTokenFileChooser;
   }
 
+  @Override
   public JFileChooser getSaveMapFileChooser() {
     if (saveMapFileChooser == null) {
       saveMapFileChooser = new JFileChooser();
@@ -1042,6 +1066,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return saveMapFileChooser;
   }
 
+  @Override
   public JFileChooser getSaveFileChooser() {
     if (saveFileChooser == null) {
       saveFileChooser = new JFileChooser();
@@ -1201,6 +1226,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return chatTypingPanel;
   }
 
+  @Override
   public Color getChatTypingLabelColor() {
     if (chatTypingLabelColor == null) {
       chatTypingLabelColor = Color.BLACK;
@@ -1208,6 +1234,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return chatTypingLabelColor;
   }
 
+  @Override
   public void setChatTypingLabelColor(Color color) {
     if (color != null) {
       chatTypingLabelColor = color;
@@ -1230,16 +1257,19 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return chatActionLabel;
   }
 
+  @Override
   public boolean isCommandPanelVisible() {
     return getFrame(MTFrame.CHAT).isShowing();
   }
 
+  @Override
   public void showCommandPanel() {
     chatActionLabel.setVisible(false);
     getDockingManager().showFrame(MTFrame.CHAT.name());
     commandPanel.requestFocus();
   }
 
+  @Override
   public void hideCommandPanel() {
     getDockingManager().hideFrame(MTFrame.CHAT.name());
   }
@@ -1248,6 +1278,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return colorPicker;
   }
 
+  @Override
   public void showAboutDialog() {
     aboutDialog.setVisible(true);
   }
@@ -1375,6 +1406,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   // Used to redraw the Draw Tree Panel after actions have been called
+  @Override
   public void updateDrawTree() {
     if (drawPanelTreeModel != null) {
       drawPanelTreeModel.update();
@@ -1457,6 +1489,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return tree;
   }
 
+  @Override
   public void clearTokenTree() {
     if (tokenPanelTreeModel != null) {
       tokenPanelTreeModel.setZone(null);
@@ -1464,6 +1497,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   /** Update tokenPanelTreeModel and the initiativePanel. */
+  @Override
   public void updateTokenTree() {
     if (tokenPanelTreeModel != null) {
       tokenPanelTreeModel.update();
@@ -1544,15 +1578,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return panel;
   }
 
+  @Override
   public PointerOverlay getPointerOverlay() {
     return pointerOverlay;
   }
 
+  @Override
   public void setStatusMessage(final String message) {
     statusMessage = message;
     SwingUtilities.invokeLater(() -> statusPanel.setStatus("  " + message));
   }
 
+  @Override
   public String getStatusMessage() {
     return statusMessage;
   }
@@ -1561,26 +1598,32 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return activityMonitor;
   }
 
+  @Override
   public void startIndeterminateAction() {
     progressBar.startIndeterminate();
   }
 
+  @Override
   public void endIndeterminateAction() {
     progressBar.endIndeterminate();
   }
 
+  @Override
   public void startDeterminateAction(int totalWork) {
     progressBar.startDeterminate(totalWork);
   }
 
+  @Override
   public void updateDeterminateActionProgress(int additionalWorkCompleted) {
     progressBar.updateDeterminateProgress(additionalWorkCompleted);
   }
 
+  @Override
   public void endDeterminateAction() {
     progressBar.endDeterminate();
   }
 
+  @Override
   public ZoneMiniMapPanel getZoneMiniMapPanel() {
     return zoneMiniMapPanel;
   }
@@ -1589,14 +1632,17 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   // static methods
   // /////////////////////////////////////////////////////////////////////////
 
+  @Override
   public CommandPanel getCommandPanel() {
     return commandPanel;
   }
 
+  @Override
   public ClientConnectionPanel getConnectionPanel() {
     return connectionPanel;
   }
 
+  @Override
   public AssetPanel getAssetPanel() {
     return assetPanel;
   }
@@ -1605,10 +1651,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return drawablesPanel;
   }
 
+  @Override
   public void addAssetRoot(File rootDir) {
     assetPanel.addAssetRoot(new AssetDirectory(rootDir, AppConstants.IMAGE_FILE_FILTER));
   }
 
+  @Override
   public Pen getPen() {
     pen.setPaint(DrawablePaint.convertPaint(colorPicker.getForegroundPaint()));
     pen.setBackgroundPaint(DrawablePaint.convertPaint(colorPicker.getBackgroundPaint()));
@@ -1618,10 +1666,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return pen;
   }
 
+  @Override
   public List<ZoneRenderer> getZoneRenderers() {
     return zoneRendererList;
   }
 
+  @Override
   public ZoneRenderer getCurrentZoneRenderer() {
     return currentRenderer;
   }
@@ -1629,10 +1679,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   /**
    * @return the HTML Overlay Panel
    */
+  @Override
   public HTMLOverlayPanel getOverlayPanel() {
     return overlayPanel;
   }
 
+  @Override
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
     if (renderer.getZone().getId().equals(this.PreRemoveRenderGUID)) {
@@ -1653,6 +1705,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    *
    * @param renderer the ZoneRenderer to remove.
    */
+  @Override
   public void removeZoneRenderer(ZoneRenderer renderer) {
     boolean isCurrent = renderer == getCurrentZoneRenderer();
     this.PreRemoveRenderGUID = getCurrentZoneRenderer().getZone().getId();
@@ -1674,8 +1727,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneMiniMapPanel.repaint();
   }
 
+  @Override
   public void clearZoneRendererList() {
     zoneRendererList.clear();
+    // Also set currentRenderer to null if the list is empty, and update UI accordingly
+    if (zoneRendererList.isEmpty() && currentRenderer != null) {
+	setCurrentZoneRenderer(null); // This will handle UI updates
+    }
     zoneMiniMapPanel.flush();
     zoneMiniMapPanel.repaint();
   }
@@ -1693,6 +1751,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    *
    * @param renderer the ZoneRenderer
    */
+  @Override
   public void setCurrentZoneRenderer(ZoneRenderer renderer) {
     // Flush first so that the new zone renderer can inject the newly needed images
     if (renderer != null) {
@@ -1749,6 +1808,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    *
    * @param renderer the ZoneRenderer of the zone.
    */
+  @Override
   public void setTitleViaRenderer(ZoneRenderer renderer) {
     String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
     String versionString =
@@ -1771,10 +1831,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * Set the MapTool title bar. The title includes the name of the app, the player name, the
    * campaign name and the current zone name.
    */
+  @Override
   public void setTitle() {
     setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
   }
 
+  @Override
   public Toolbox getToolbox() {
     return toolbox;
   }
@@ -1790,6 +1852,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @param zone the zone.
    * @return the ZoneRenderer.
    */
+  @Override
   public ZoneRenderer getZoneRenderer(Zone zone) {
     for (ZoneRenderer renderer : zoneRendererList) {
       if (zone == renderer.getZone()) {
@@ -1805,6 +1868,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @param zoneGUID the zoneGUID of the zone.
    * @return the ZoneRenderer.
    */
+  @Override
   public ZoneRenderer getZoneRenderer(GUID zoneGUID) {
     for (ZoneRenderer renderer : zoneRendererList) {
       if (zoneGUID.equals(renderer.getZone().getId())) {
@@ -1820,6 +1884,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    * @param zoneName the name of the zone.
    * @return the ZoneRenderer.
    */
+  @Override
   public ZoneRenderer getZoneRenderer(final String zoneName) {
     for (ZoneRenderer renderer : zoneRendererList) {
       if (zoneName.equals(renderer.getZone().getName())) {
@@ -1834,6 +1899,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    *
    * @return Returns the current value of paintDrawingMeasurements.
    */
+  @Override
   public boolean isPaintDrawingMeasurement() {
     return paintDrawingMeasurement;
   }
@@ -1843,6 +1909,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
    *
    * @param aPaintDrawingMeasurements The paintDrawingMeasurements to set.
    */
+  @Override
   public void setPaintDrawingMeasurement(boolean aPaintDrawingMeasurements) {
     paintDrawingMeasurement = aPaintDrawingMeasurements;
   }
@@ -1851,6 +1918,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return fullsZoneButton;
   }
 
+  @Override
   public void showFullScreen() {
     GraphicsConfiguration graphicsConfig = getGraphicsConfiguration();
     Rectangle bounds = graphicsConfig.getBounds();
@@ -1975,6 +2043,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     fullScreenToolsShown = false;
   }
 
+  @Override
   public boolean isFullScreen() {
     return fullScreenFrame != null;
   }
@@ -1983,6 +2052,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return fullScreenToolsShown;
   }
 
+  @Override
   public void showWindowed() {
     if (fullScreenFrame == null) {
       return;
@@ -2028,8 +2098,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   // WINDOW LISTENER
+  @Override
   public void windowOpened(WindowEvent e) {}
 
+  @Override
   public void windowClosing(WindowEvent e) {
     if (!confirmClose()) {
       return;
@@ -2037,10 +2109,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     closingMaintenance();
   }
 
+  @Override
   public boolean confirmClose() {
     return !MapTool.isHostingServer() || MapTool.confirm("msg.confirm.hostingDisconnect");
   }
 
+  @Override
   public void closingMaintenance() {
     if (AppPreferences.saveReminder.get() && MapTool.isCampaignDirty()) {
       if (MapTool.getPlayer().isGM()) {
@@ -2067,6 +2141,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     close();
   }
 
+  @Override
   public void close() {
     MapTool.disconnect();
     MapTool.stopServer();
@@ -2079,7 +2154,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
      * placeholders the next time Maptool is launched
      */
     try {
-      List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+      List<String> mtFrameNames = Stream.of(MapToolSwingFrame.MTFrame.values()).map(Enum::name).toList(); // Changed to MapToolSwingFrame
       List<String> namesToSave =
           getDockingManager().getAllFrames().stream()
               .filter(frame -> !mtFrameNames.contains(frame))
@@ -2099,16 +2174,21 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     EventQueue.invokeLater(this::dispose);
   }
 
+  @Override
   public void windowClosed(WindowEvent e) {
     System.exit(0);
   }
 
+  @Override
   public void windowIconified(WindowEvent e) {}
 
+  @Override
   public void windowDeiconified(WindowEvent e) {}
 
+  @Override
   public void windowActivated(WindowEvent e) {}
 
+  @Override
   public void windowDeactivated(WindowEvent e) {}
 
   // Windows OS defaults F10 to the menu bar, noooooo!! We want for macro buttons.
@@ -2122,6 +2202,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     amap.getParent().remove(action);
   }
 
+  @Override
   public void updateKeyStrokes() {
     updateKeyStrokes(menuBar);
   }
@@ -2189,33 +2270,40 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
+  @Override
   public CampaignPanel getCampaignPanel() {
     return campaignPanel;
   }
 
+  @Override
   public GmPanel getGmPanel() {
     return gmPanel;
   }
 
+  @Override
   public GlobalPanel getGlobalPanel() {
     return globalPanel;
   }
 
+  @Override
   public ImpersonatePanel getImpersonatePanel() {
     return impersonatePanel;
   }
 
+  @Override
   public SelectionPanel getSelectionPanel() {
     return selectionPanel;
   }
 
   /** Reset the impersonatePanel and the selectionPanel. */
+  @Override
   public void resetTokenPanels() {
     impersonatePanel.reset();
     selectionPanel.reset();
   }
 
   /** Reset the macro panels. Currently only used after loading a campaign. */
+  @Override
   public void resetPanels() {
     MacroButtonHotKeyManager.clearKeyStrokes();
     campaignPanel.reset();
@@ -2229,6 +2317,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   /**
    * @return Getter for initiativePanel
    */
+  @Override
   public InitiativePanel getInitiativePanel() {
     return initiativePanel;
   }

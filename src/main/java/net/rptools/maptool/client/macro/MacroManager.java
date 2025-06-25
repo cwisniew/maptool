@@ -21,7 +21,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.macro.impl.*;
-import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.MapToolFrameIF;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -322,7 +322,7 @@ public class MacroManager {
           Token tokenInContext = null;
           ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
           if (zr != null) {
-            final MapToolFrame frame = MapTool.getFrame();
+            final MapToolFrameIF frame = MapTool.getFrame(); // Changed to MapToolFrameIF
             final CommandPanel cpanel = frame.getCommandPanel();
             if (cpanel.getIdentityGUID() != null)
               tokenInContext = zr.getZone().getToken(cpanel.getIdentityGUID());

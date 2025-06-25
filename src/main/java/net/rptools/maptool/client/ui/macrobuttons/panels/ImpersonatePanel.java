@@ -24,8 +24,9 @@ import java.util.List;
 import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.MapToolFrameIF;
+import net.rptools.maptool.client.ui.MapToolSwingFrame; // Added for MTFrame and casting
+import net.rptools.maptool.client.ui.MapToolSwingFrame.MTFrame; // Changed to MapToolSwingFrame.MTFrame
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.SelectionModel;
@@ -48,30 +49,40 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   }
 
   public void init() {
-    boolean panelVisible = true;
-    final MapToolFrame mtf = MapTool.getFrame();
-
-    // Get the current visibility / autohide state of the Impersonate panel
-    if (mtf != null) {
-      DockableFrame impersonatePanel = mtf.getDockingManager().getFrame("IMPERSONATED");
-      if (impersonatePanel != null)
-        panelVisible =
-            (impersonatePanel.isVisible() && !impersonatePanel.isAutohide())
-                || impersonatePanel.isAutohideShowing();
-    }
-    // Only repaint the panel if its visible
-    if (panelVisible && mtf != null && mtf.getCurrentZoneRenderer() != null) {
-      List<Token> selectedTokenList = mtf.getCurrentZoneRenderer().getSelectedTokensList();
-
-      if (currentlyImpersonating && getToken() != null) {
-        Token token = getToken();
-        mtf.getFrame(MTFrame.IMPERSONATED).setFrameIcon(token.getIcon(16, 16));
-        mtf.setFrameTitle(MTFrame.IMPERSONATED, getTitle(token));
-        addArea(getTokenId());
-      } else if (selectedTokenList.size() != 1) {
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    if (frameIF == null) {
+        clear();
         return;
-      } else {
-        // add the "Impersonate Selected" button
+    }
+
+    DockingManager dm = frameIF.getDockingManager(); // Call on interface
+    DockableFrame impersonateDockableFrame = null;
+    if (dm != null) { // Check if we have a docking manager (i.e., not headless)
+        impersonateDockableFrame = dm.getFrame(MapToolSwingFrame.MTFrame.IMPERSONATED.name());
+    }
+
+    boolean panelVisible = false;
+    if (impersonateDockableFrame != null) {
+        panelVisible = (impersonateDockableFrame.isVisible() && !impersonateDockableFrame.isAutohide()) || impersonateDockableFrame.isAutohideShowing();
+    }
+
+    if (!panelVisible || frameIF.getCurrentZoneRenderer() == null) {
+        if (panelVisible) clear();
+        return;
+    }
+
+    List<Token> selectedTokenList = frameIF.getCurrentZoneRenderer().getSelectedTokensList();
+    if (currentlyImpersonating && getToken() != null) {
+        Token token = getToken();
+        DockableFrame impFrame = frameIF.getFrame(MapToolSwingFrame.MTFrame.IMPERSONATED); // Call on IF
+        if (impFrame != null) { // Check for headless
+            impFrame.setFrameIcon(token.getIcon(16, 16));
+        }
+        if (frameIF instanceof MapToolSwingFrame) { // Still need cast for this specific setFrameTitle
+            ((MapToolSwingFrame) frameIF).setFrameTitle(MapToolSwingFrame.MTFrame.IMPERSONATED, getTitle(token));
+        }
+        addArea(getTokenId());
+    } else if (selectedTokenList.size() == 1) {
         final Token t = selectedTokenList.get(0);
 
         if (AppUtil.playerOwns(t)) {
@@ -128,12 +139,16 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   @Override
   public void clear() {
     removeAll();
-    MapTool.getFrame()
-        .getFrame(MTFrame.IMPERSONATED)
-        .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
-    MapTool.getFrame()
-        .setFrameTitle(
-            MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    if (frameIF != null) {
+        DockableFrame impersonateDockableFrame = frameIF.getFrame(MapToolSwingFrame.MTFrame.IMPERSONATED); // Call on IF
+        if (impersonateDockableFrame != null) { // Check for headless
+             impersonateDockableFrame.setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
+        }
+        if (frameIF instanceof MapToolSwingFrame) { // Still need cast for this specific setFrameTitle
+            ((MapToolSwingFrame) frameIF).setFrameTitle(MapToolSwingFrame.MTFrame.IMPERSONATED, I18N.getString(MapToolSwingFrame.MTFrame.IMPERSONATED.getPropertyName()));
+        }
+    }
     if (getTokenId() == null) {
       currentlyImpersonating = false;
     }

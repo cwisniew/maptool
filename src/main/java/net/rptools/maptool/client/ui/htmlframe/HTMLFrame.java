@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.MapToolSwingFrame; // Changed to MapToolSwingFrame
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
@@ -148,12 +148,16 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       frame = frames.get(name);
       if (!frame.isVisible()) {
         frame.setVisible(true);
-        frame.getDockingManager().showFrame(name);
+        MapToolFrameIF frameIF = MapTool.getFrame();
+        DockingManager dm = frameIF.getDockingManager();
+        if (dm != null) { // Handle headless case
+            dm.showFrame(name);
+        }
       }
     } else {
       // Make sure there isn't a name conflict with the normal MT frames
       boolean isMtframeName =
-          Stream.of(MapToolFrame.MTFrame.values())
+          Stream.of(MapToolSwingFrame.MTFrame.values()) // Changed to MapToolSwingFrame.MTFrame
                   .filter(e -> e.name().equals(name))
                   .findFirst()
                   .orElse(null)
@@ -167,7 +171,11 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       frame = new HTMLFrame(name, width, height, isHTML5);
       frames.put(name, frame);
 
-      frame.getDockingManager().showFrame(name);
+      MapToolFrameIF frameIF = MapTool.getFrame();
+      DockingManager dm = frameIF.getDockingManager();
+      if (dm != null) { // Handle headless case
+        dm.showFrame(name);
+      }
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
@@ -235,16 +243,18 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
      * Note: There should be no risk of MT frames being removed, as that is checked
      * for in showFrame() (the only place this constructor is called)
      */
-    DockingManager dm = MapTool.getFrame().getDockingManager();
-    if (dm.getFrame(name) != null) {
-      // The frame needs to be shown before being removed otherwise the layout gets messed up
-      dm.showFrame(name);
-      dm.removeFrame(name, true);
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    DockingManager dm = frameIF.getDockingManager();
+    if (dm != null) { // Handle headless case
+        if (dm.getFrame(name) != null) {
+          // The frame needs to be shown before being removed otherwise the layout gets messed up
+          dm.showFrame(name);
+          dm.removeFrame(name, true);
+        }
+        /* /Issue #2485 */
+        dm.addFrame(this);
     }
-    /* /Issue #2485 */
-
-    dm.addFrame(this);
-    this.setVisible(true);
+    this.setVisible(true); // setVisible is on Component, so fine for DockableFrame
     addDockableFrameListener(
         new DockableFrameAdapter() {
           @Override
@@ -263,15 +273,26 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     if (!frames.containsKey(name)) {
       return;
     }
-    HTMLFrame frame = frames.get(name);
-    Dimension outerSize = MapTool.getFrame().getSize();
+    HTMLFrame htmlFrame = frames.get(name); // Renamed local var to avoid conflict
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    // getSize() and getLocation() are on Component, which MapToolFrameIF might not guarantee.
+    // However, MapToolSwingFrame is a Component.
+    // getDockingManager is now on MapToolFrameIF.
+    if (frameIF instanceof Component) { // Check if it's a component for size/location
+        Component componentFrame = (Component) frameIF;
+        Dimension outerSize = componentFrame.getSize();
+        Point location = componentFrame.getLocation();
+        DockingManager dm = frameIF.getDockingManager();
 
-    int x = MapTool.getFrame().getLocation().x + (outerSize.width - frame.getWidth()) / 2;
-    int y = MapTool.getFrame().getLocation().y + (outerSize.height - frame.getHeight()) / 2;
+        if (dm != null) { // Handle headless case for docking manager
+            int x = location.x + (outerSize.width - htmlFrame.getWidth()) / 2;
+            int y = location.y + (outerSize.height - htmlFrame.getHeight()) / 2;
 
-    Rectangle rect =
-        new Rectangle(Math.max(x, 0), Math.max(y, 0), frame.getWidth(), frame.getHeight());
-    MapTool.getFrame().getDockingManager().floatFrame(frame.getKey(), rect, true);
+            Rectangle rect =
+                new Rectangle(Math.max(x, 0), Math.max(y, 0), htmlFrame.getWidth(), htmlFrame.getHeight());
+            dm.floatFrame(htmlFrame.getKey(), rect, true);
+        }
+    }
   }
 
   /**
@@ -405,14 +426,20 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
   @Override
   public void closeRequest() {
-    MapTool.getFrame().getDockingManager().hideFrame(getKey());
-    setVisible(false);
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    DockingManager dm = frameIF.getDockingManager();
+    if (dm != null) { // Handle headless case
+        dm.hideFrame(getKey());
+        if (getTemporary()) {
+            dm.removeFrame(this.name, false);
+        }
+    }
+    setVisible(false); // This is on DockableFrame itself
     panel.flush();
 
     if (getTemporary()) {
-      MapTool.getFrame().getDockingManager().removeFrame(this.name, false);
       frames.remove(this.name);
-      dispose();
+      dispose(); // This is on DockableFrame itself
     }
   }
 

@@ -21,8 +21,9 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.MapToolFrameIF;
+import net.rptools.maptool.client.ui.MapToolSwingFrame; // Added for MTFrame and casting
+import net.rptools.maptool.client.ui.MapToolSwingFrame.MTFrame; // Changed to MapToolSwingFrame.MTFrame
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.SelectionModel;
@@ -59,7 +60,7 @@ public class SelectionPanel extends AbstractMacroPanel {
   }
 
   public void init() {
-    MapToolFrame f = MapTool.getFrame();
+    MapToolFrameIF f = MapTool.getFrame(); // Changed to interface
     ZoneRenderer zr = f.getCurrentZoneRenderer();
     if (zr != null) init(zr.getSelectedTokensList());
   }
@@ -70,22 +71,28 @@ public class SelectionPanel extends AbstractMacroPanel {
         "selectionpanel",
         timer -> {
           timer.setThreshold(10);
+          MapToolFrameIF frameIF = MapTool.getFrame();
+        if (frameIF == null) {
+            super.clear(); // Clear the panel if frame is not available
+            return;
+        }
 
-          boolean panelVisible = true;
-          if (MapTool.getFrame() != null) {
-            DockableFrame selectionPanel =
-                MapTool.getFrame().getDockingManager().getFrame("SELECTION");
-            if (selectionPanel != null)
-              panelVisible =
-                  (selectionPanel.isVisible() && !selectionPanel.isAutohide())
-                      || selectionPanel.isAutohideShowing();
+        boolean panelVisible = false;
+        DockingManager dm = frameIF.getDockingManager(); // Call on IF
+        if (dm != null) { // Check for headless
+            DockableFrame selectionDockableFrame = dm.getFrame(MapToolSwingFrame.MTFrame.SELECTION.name());
+            if (selectionDockableFrame != null) {
+                panelVisible = (selectionDockableFrame.isVisible() && !selectionDockableFrame.isAutohide()) || selectionDockableFrame.isAutohideShowing();
+            }
           }
 
           timer.start("painting");
 
           // paint panel only when it's visible or active
-          if (panelVisible) {
-
+        if (panelVisible) {
+            // No need to check instanceof frameIF here again if dm was not null,
+            // but frameIF itself could be non-swing if dm is null (though headless would make panelVisible false)
+            // For safety, ensure UI ops are on SwingFrame context if needed, though getFrame is on IF
             // draw common group only when there is more than one token selected
             if (selectedTokenList.size() > 1) {
               populateCommonButtons(selectedTokenList);
@@ -100,9 +107,10 @@ public class SelectionPanel extends AbstractMacroPanel {
             }
             if (selectedTokenList.size() == 1 && AppUtil.playerOwns(selectedTokenList.get(0))) {
               // if only one token selected, show its image as tab icon
-              MapTool.getFrame()
-                  .getFrame(MTFrame.SELECTION)
-                  .setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
+              DockableFrame selDockFrame = swingFrame.getFrame(MTFrame.SELECTION);
+              if (selDockFrame != null) {
+                 selDockFrame.setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
+              }
             }
           }
           timer.stop("painting");
@@ -230,9 +238,13 @@ public class SelectionPanel extends AbstractMacroPanel {
   @Override
   protected void clear() {
     // reset the tab icon
-    MapTool.getFrame()
-        .getFrame(MTFrame.SELECTION)
-        .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_SELECTED_TOKEN));
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    if (frameIF != null) {
+        DockableFrame selDockFrame = frameIF.getFrame(MapToolSwingFrame.MTFrame.SELECTION); // Call on IF
+        if (selDockFrame != null) { // Check for headless
+            selDockFrame.setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_SELECTED_TOKEN));
+        }
+    }
     super.clear();
   }
 

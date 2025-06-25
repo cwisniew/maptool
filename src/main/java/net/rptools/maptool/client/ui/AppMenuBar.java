@@ -26,7 +26,7 @@ import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
-import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.MapToolSwingFrame.MTFrame; // Changed to MapToolSwingFrame.MTFrame
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -484,31 +484,46 @@ public class AppMenuBar extends JMenuBar {
           }
 
           public void actionPerformed(ActionEvent e) {
-            DockingManager dm = MapTool.getFrame().getDockingManager();
-            dm.resetToDefault();
+            MapToolFrameIF frameIF = MapTool.getFrame();
+            DockingManager dm = frameIF.getDockingManager(); // Call on interface
+            if (dm != null) { // Handle null for headless
+                dm.resetToDefault();
 
-            /* Issue #2485
-             * Calling resetToDefault() will expose all macro created frames and placeholders,
-             * so they need to hidden after
-             */
-            List<String> mtFrameNames =
-                Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
-            dm.getAllFrames().stream()
-                .filter(f -> !mtFrameNames.contains(f))
-                .forEach(dm::hideFrame);
+                /* Issue #2485
+                 * Calling resetToDefault() will expose all macro created frames and placeholders,
+                 * so they need to hidden after
+                 */
+                List<String> mtFrameNames =
+                    Stream.of(MapToolSwingFrame.MTFrame.values()).map(Enum::name).toList();
+                dm.getAllFrames().stream()
+                    .filter(f -> !mtFrameNames.contains(f))
+                    .forEach(dm::hideFrame);
+            }
             /* /Issue #2485 */
           }
         });
 
     menu.addSeparator();
 
-    for (MTFrame frame :
-        Stream.of(MTFrame.values())
-            .sorted(Comparator.comparing(MTFrame::toString))
-            .collect(Collectors.toList())) {
-      JCheckBoxMenuItem menuItem =
-          new RPCheckBoxMenuItem(new AppActions.ToggleWindowAction(frame), menu);
-      menu.add(menuItem);
+    MapToolFrameIF frameIF = MapTool.getFrame();
+    // MTFrame enum is specific to Swing, so this loop only makes sense for SwingFrame
+    if (frameIF instanceof MapToolSwingFrame) {
+        for (MTFrame frameEnum : // Iterate using MapToolSwingFrame.MTFrame
+            Stream.of(MapToolSwingFrame.MTFrame.values())
+                .sorted(Comparator.comparing(MTFrame::toString))
+                .collect(Collectors.toList())) {
+          JCheckBoxMenuItem menuItem =
+              new RPCheckBoxMenuItem(new AppActions.ToggleWindowAction(frameEnum), menu);
+          // Initialize selection state based on current visibility
+          DockableFrame dockableFrame = frameIF.getFrame(frameEnum); // Call on interface
+          if (dockableFrame != null) { // Headless returns null
+            menuItem.setSelected(!dockableFrame.isHidden());
+          } else {
+            menuItem.setSelected(false); // Default if no such frame (e.g. headless)
+            menuItem.setEnabled(false);
+          }
+          menu.add(menuItem);
+        }
     }
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
