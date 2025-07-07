@@ -27,5 +27,8 @@ public record LibraryInfo(
     String shortDescription,
     boolean allowsUrlAccess,
     String readMeFile,
-    String licenseFile) {}
+    String licenseFile,
+    String requestedSlug,
+    String webAppIndex,
+    boolean hasWebApp) {}
 ;

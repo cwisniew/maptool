@@ -10,6 +10,7 @@ jai-imageio = "1.4.0"
 graalvm-js = "21.2.0"
 pdfbox = "3.0.0"
 protoc = "4.29.1"
+javalin = "6.6.0"
 
 [libraries]
 findbugs-jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version = "3.0.2" }
@@ -158,6 +159,9 @@ rptools-parser = { group = "com.github.RPTools", name = "parser", version = "2.0
 rptools-maptool-addons = { group = "com.github.RPTools", name = "maptool-builtin-addons", version = "1.3" }
 # For advanced dice roller
 rptools-dice-roller = { group = "com.github.RPTools", name = "advanced-dice-roller", version = "1.0.3" }
+
+# Javalin for the embedded web server
+javalin = { group = "io.javalin", name = "javalin", version.ref = "javalin" }
 
 # Test only
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.11.4" }

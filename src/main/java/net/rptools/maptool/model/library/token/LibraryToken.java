@@ -297,7 +297,11 @@ class LibraryToken implements Library {
             shortDescription.isEmpty() ? notSet : shortDescription,
             allowsUriAccess,
             null,
-            null));
+            null,
+            null,
+            null,
+            false // LibraryToken does not support web apps
+            ));
   }
 
   @Override
@@ -518,5 +522,22 @@ class LibraryToken implements Library {
    */
   boolean hasMacro(String name) {
     return macroNames.contains(name);
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getRequestedSlug() {
+    return CompletableFuture.completedFuture(
+        Optional.empty()); // LibraryToken does not support web apps
+  }
+
+  @Override
+  public CompletableFuture<Boolean> exportsWebApp() {
+    return CompletableFuture.completedFuture(false); // LibraryToken does not support web apps
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getWebAppIndex() {
+    return CompletableFuture.completedFuture(
+        Optional.empty()); // LibraryToken does not support web apps
   }
 }

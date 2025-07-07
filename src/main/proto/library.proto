@@ -20,6 +20,8 @@ message AddOnLibraryDto {
   bool allowsUriAccess = 26;
   string license_file = 27;
   string read_me_file = 28;
+  string requested_slug = 29;
+  string web_app_index = 30;
 }
 
 message MTScriptPropertiesDto {

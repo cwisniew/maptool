@@ -418,6 +418,8 @@ dependencies {
     implementation(libs.rptools.dice.roller)
     implementation(libs.noiselib)
 
+    implementation(libs.javalin)
+
     // libgdx
     implementation 'com.github.thelsing:libgdx-jogl-backend:becdde406e'
     implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.13.1'

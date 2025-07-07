@@ -236,4 +236,28 @@ public interface Library {
    * @return the slash commands defined by for the library.
    */
   Set<MacroDetails> getSlashCommands();
+
+  /**
+   * Returns the preferred slug for the library. This is used to identify the library in a from the
+   * web application. There is no guarantee that the library will get this slug, but it is the
+   * preferred slug for the library.
+   *
+   * @return the preferred slug for the library.
+   */
+  CompletableFuture<Optional<String>> getRequestedSlug();
+
+  /**
+   * Returns if the library has an exported application for the web api.
+   *
+   * @return {@code true} if the library has an exported application for the web api, otherwise
+   *     {@code false}.
+   */
+  CompletableFuture<Boolean> exportsWebApp();
+
+  /**
+   * Returns the web index to the application for the library if it has one.
+   *
+   * @return the web application for the library if it has one.
+   */
+  CompletableFuture<Optional<String>> getWebAppIndex();
 }

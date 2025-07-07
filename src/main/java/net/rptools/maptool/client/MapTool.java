@@ -110,6 +110,7 @@ import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.*;
+import net.rptools.maptool.webapp.WebAppServer;
 import net.rptools.parser.ParserException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -1803,5 +1804,7 @@ public class MapTool {
                 EventQueue.invokeLater(MapTool::postInitialize);
               });
         });
+
+    new WebAppServer().start();
   }
 }

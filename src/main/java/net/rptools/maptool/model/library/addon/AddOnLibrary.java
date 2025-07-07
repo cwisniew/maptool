@@ -159,6 +159,15 @@ public class AddOnLibrary implements Library {
   /** The information about the add-on library. */
   private final LibraryInfo libraryInfo;
 
+  /** If the add-on library exports a web app. */
+  private final boolean exportesWebApp;
+
+  /** The requested slug for the add-on library. */
+  private final String requestedSlug;
+
+  /** The index file for the web app, if it exists. */
+  private final String webAppIndex;
+
   /**
    * Class used to represent Drop In Libraries.
    *
@@ -190,6 +199,15 @@ public class AddOnLibrary implements Library {
     this.pathAssetMap = Map.copyOf(pathAssetMap);
     allowsUriAccess = dto.getAllowsUriAccess();
     assetKey = libraryAssetKey;
+    requestedSlug = dto.getRequestedSlug();
+    webAppIndex = dto.getWebAppIndex();
+    boolean hasSlug = !requestedSlug.isEmpty() && requestedSlug.matches("^[a-z0-9-]+$");
+    boolean hasWebAppIndex = webAppIndex != null && !webAppIndex.isEmpty();
+    if (hasSlug && hasWebAppIndex) {
+      exportesWebApp = true;
+    } else {
+      exportesWebApp = false;
+    }
 
     var urlsMap = new HashMap<String, Pair<MD5Key, Type>>();
     var mtsMap = new HashMap<String, MTScript>();
@@ -271,7 +289,10 @@ public class AddOnLibrary implements Library {
             shortDescription,
             allowsUriAccess,
             readMeFile.isEmpty() ? null : readMeFile,
-            licenseFile.isEmpty() ? null : licenseFile);
+            licenseFile.isEmpty() ? null : licenseFile,
+            requestedSlug.isEmpty() ? null : requestedSlug,
+            webAppIndex.isEmpty() ? null : webAppIndex,
+            hasWebAppIndex);
 
     for (var s : slashCommandsDto.getSlashCommandsList()) {
       slashCommands.put(
@@ -689,6 +710,14 @@ public class AddOnLibrary implements Library {
         .join();
   }
 
+  /**
+   * Reads the file at the specified path and returns a {@link DataValue} representing the file's
+   * contents.
+   *
+   * @param path The path to the file.
+   * @return A CompletableFuture that completes with a {@link DataValue} containing the file's
+   *     contents, or undefined if the file does not exist.
+   */
   CompletableFuture<DataValue> readFile(String path) {
     return CompletableFuture.supplyAsync(
         () -> {
@@ -700,5 +729,20 @@ public class AddOnLibrary implements Library {
           Asset asset = AssetManager.getAsset(val.getValue0());
           return DataValueFactory.fromAsset(filePath, asset);
         });
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getRequestedSlug() {
+    return CompletableFuture.completedFuture(Optional.ofNullable(requestedSlug));
+  }
+
+  @Override
+  public CompletableFuture<Boolean> exportsWebApp() {
+    return CompletableFuture.completedFuture(exportesWebApp);
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getWebAppIndex() {
+    return CompletableFuture.completedFuture(Optional.ofNullable(webAppIndex));
   }
 }

@@ -39,8 +39,13 @@ import net.rptools.maptool.model.library.builtin.themecss.ThemeCssContext;
 import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.util.HandlebarsUtil;
 
+/** Represents the built-in library for MapTool, which includes resources like CSS themes. */
 public class MapToolBuiltInLibrary implements BuiltInLibrary {
 
+  /**
+   * Represents a resource in the built-in library, including its name, path, a supplier function
+   * for dynamic content, and whether it should be cached.
+   */
   private record ResourceDetails(
       String name, String path, Function<ResourceDetails, String> supplier, boolean cache) {
     public ResourceDetails(String name, String path) {
@@ -48,6 +53,7 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     }
   }
 
+  /** A map of resource paths to their details in the built-in library. */
   private final Map<String, ResourceDetails> resourcesMap =
       Map.of(
           "css/mt-theme.css",
@@ -63,6 +69,13 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
               rd -> processHandlebarsTemplate(rd),
               true));
 
+  /**
+   * Processes a Handlebars template for a given resource details, applying the template to the
+   * context and returning the resulting string.
+   *
+   * @param rd The resource details containing the path to the Handlebars template.
+   * @return The processed template as a string.
+   */
   private String processHandlebarsTemplate(ResourceDetails rd) {
     try (var cssTemplateIs = MapToolBuiltInLibrary.class.getResourceAsStream(rd.path())) {
       var cssTemplate = new String(cssTemplateIs.readAllBytes());
@@ -73,30 +86,46 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     }
   }
 
+  /** A cache for resource contents to avoid re-reading them multiple times. */
   private static final Map<String, String> cache = new ConcurrentHashMap<>();
 
+  /** The name of the built-in library. */
   private static final String name = "MapTool Built-In Library";
+
+  /** The namespace for the built-in library, which is a constant defined in AppConstants. */
   private static final String namespace = AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE;
+
+  /** The version of the built-in library. */
   private static final String version = "1.0.0";
 
+  /** The website for the built-in library, which is the main RPTools website. */
   private static final String website = "https://www.rptools.net";
 
+  /** The Git URL for the built-in library, pointing to the MapTool repository on GitHub. */
   private static final String gitUrl = "https://github.com/RPTools/maptool";
 
+  /** The authors of the built-in library, which is the RPTools Team. */
   private static final String[] authors = new String[] {"RPTools Team"};
 
+  /** The license for the built-in library, which is AGPLv3. */
   private static final String license = "AGPLv3";
 
+  /** A description of the built-in library. */
   private static final String description = "MapTool Built-In Library";
 
+  /** A short description of the built-in library. */
   private static final String shortDescription = "MapTool Built-In Library";
 
+  /** Indicates whether the built-in library allows URI access. */
   private static final boolean allowsUriAccess = true;
 
+  /** Placeholder for the README file content, currently empty. */
   private static final String readMeFile = "";
 
+  /** Placeholder for the license file content, currently empty. */
   private static final String licenseFile = "";
 
+  /** An empty array of tags, as the built-in library does not have specific tags. */
   private static final String[] tags = new String[] {};
 
   @Override
@@ -140,6 +169,14 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     }
   }
 
+  /**
+   * Reads the content of a resource as a string, either from a cached value or by reading it from
+   * the resource stream.
+   *
+   * @param details The details of the resource to read.
+   * @return The content of the resource as a string.
+   * @throws IOException If there is an error reading the resource.
+   */
   private String readAsString(ResourceDetails details) throws IOException {
     if (details.supplier != null) {
       if (details.cache) {
@@ -152,6 +189,14 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     }
   }
 
+  /**
+   * Reads the content of a resource as an InputStream, either from a cached value or by reading it
+   * from the resource stream.
+   *
+   * @param details The details of the resource to read.
+   * @return An InputStream for the resource.
+   * @throws IOException If there is an error reading the resource.
+   */
   public InputStream read(ResourceDetails details) throws IOException {
     if (details.supplier != null) {
       return new ByteArrayInputStream(readAsString(details).getBytes());
@@ -220,7 +265,10 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
             shortDescription,
             allowsUriAccess,
             readMeFile.isEmpty() ? null : readMeFile,
-            licenseFile.isEmpty() ? null : licenseFile));
+            licenseFile.isEmpty() ? null : licenseFile,
+            getRequestedSlug().join().orElse(null),
+            getWebAppIndex().join().orElse(null),
+            exportsWebApp().join()));
   }
 
   @Override
@@ -274,5 +322,20 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
   @Override
   public Set<MacroDetails> getSlashCommands() {
     return Set.of();
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getRequestedSlug() {
+    return CompletableFuture.completedFuture(Optional.empty());
+  }
+
+  @Override
+  public CompletableFuture<Boolean> exportsWebApp() {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getWebAppIndex() {
+    return CompletableFuture.completedFuture(Optional.empty());
   }
 }

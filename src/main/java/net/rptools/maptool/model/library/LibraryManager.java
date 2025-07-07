@@ -35,6 +35,8 @@ import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.library.builtin.BuiltInLibraryManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.library.token.LibraryTokenManager;
+import net.rptools.maptool.model.library.webapp.LibraryWebAppManager;
+import net.rptools.maptool.model.library.webapp.WebAppLibraryInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,6 +77,13 @@ public class LibraryManager {
   private static final AddOnSlashCommandManager addOnSlashCommandManager =
       new AddOnSlashCommandManager();
 
+  /** Web application manager for libraries. */
+  private static final LibraryWebAppManager libraryWebAppManager = new LibraryWebAppManager();
+
+  /**
+   * Initializes the library manager. This method should be called once at application startup to
+   * set up the library manager and load built-in libraries.
+   */
   public static void init() {
     libraryTokenManager.init();
     builtInLibraryManager.loadBuiltIns();
@@ -167,6 +176,23 @@ public class LibraryManager {
   public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
       addOnLibraryManager.registerLibrary(addOn);
+      addOn
+          .exportsWebApp()
+          .thenAccept(
+              exportsWebApp -> {
+                if (exportsWebApp) {
+                  // If the add-on exports a web app, register it in the library web app manager.
+                  var waebAppInfo =
+                      new WebAppLibraryInfo(
+                          addOn.getNamespace().get(),
+                          addOn.getRequestedSlug().get().orElse(null),
+                          addOn.getWebAppIndex().get().orElse(null),
+                          true,
+                          addOn.getLibraryInfo().get(),
+                          true);
+                  libraryWebAppManager.putWebApp(addOn.getWebAppLibraryInfo());
+                }
+              });
       if (MapTool.isHostingServer()) {
         MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
       }
@@ -382,5 +408,14 @@ public class LibraryManager {
           }
           return new ArrayList<>(libs);
         });
+  }
+
+  /**
+   * Returns the library web app manager.
+   *
+   * @return the library web app manager.
+   */
+  public LibraryWebAppManager getLibraryWebAppManager() {
+    return libraryWebAppManager;
   }
 }

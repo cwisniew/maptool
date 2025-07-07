@@ -31,10 +31,16 @@ import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.data.LibraryData;
 
+/**
+ * Represents a built-in add-on library that is loaded from the classpath. This class wraps an
+ * {@link AddOnLibrary} and provides additional functionality specific to built-in libraries.
+ */
 public class ClassPathAddOnLibrary implements BuiltInLibrary {
 
+  /** The resource path for the library. */
   private final String resourceFilePath;
 
+  /** The add-on library that was loaded. */
   private final AddOnLibrary addOnLibrary;
 
   /**
@@ -192,5 +198,20 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
 
   void initialize() {
     addOnLibrary.registerSheets();
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getRequestedSlug() {
+    return addOnLibrary.getRequestedSlug();
+  }
+
+  @Override
+  public CompletableFuture<Boolean> exportsWebApp() {
+    return addOnLibrary.exportsWebApp();
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getWebAppIndex() {
+    return addOnLibrary.getWebAppIndex();
   }
 }
