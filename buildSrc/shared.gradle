@@ -21,7 +21,7 @@ spotless {
         licenseHeaderFile rootProject.file('spotless.license.java')
         toggleOffOn()
         // Now using the Google Java style guide
-        googleJavaFormat("1.24.0")
+        googleJavaFormat("1.34.0")
     }
 
     format 'misc', {
@@ -34,21 +34,15 @@ spotless {
     }
 }
 
-configurations {
-    mockitoAgent
-}
-
 dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
     testRuntimeOnly(libs.junit.engine)
     testImplementation(libs.bundles.junit)
     testImplementation(libs.mockito.core)
-    mockitoAgent(libs.mockito.core) {
-        transitive = false
-    }
+    testImplementation(libs.byte.buddy)
+    testImplementation(libs.byte.buddy.agent)
 }
 
 test {
     useJUnitPlatform()
-    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 }

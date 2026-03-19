@@ -7,10 +7,12 @@ jide = "3.7.9"
 flatlaf = "3.6.1"
 handlebars = "4.4.0"
 jai-imageio = "1.4.0"
-graalvm-js = "21.2.0"
+graalvm-js = "25.0.2"
 pdfbox = "3.0.0"
 protoc = "4.31.1"
 gdx = "1.13.5"
+bytebuddy = "1.18.7"
+bytebuddy-agent = "1.18.7"
 
 [libraries]
 findbugs-jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version = "3.0.2" }
@@ -54,8 +56,8 @@ imageio-tga = { group = "com.twelvemonkeys.imageio", name = "imageio-tga", versi
 imageio-bmp = { group = "com.twelvemonkeys.imageio", name = "imageio-bmp", version.ref = "imageio" }
 
 batik-all = { group = "org.apache.xmlgraphics", name = "batik-all", version = "1.19" }
-batik-awt = { group = "org.apache.xmlgraphics", name="batik-awt-util", version = "1.19" }
-batik-transcoder = { group = "org.apache.xmlgraphics", name="batik-transcoder", version = "1.19" }
+batik-awt = { group = "org.apache.xmlgraphics", name = "batik-awt-util", version = "1.19" }
+batik-transcoder = { group = "org.apache.xmlgraphics", name = "batik-transcoder", version = "1.19" }
 
 # PDF image extraction
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version.ref = "pdfbox" }
@@ -180,7 +182,9 @@ junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", ver
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
 # For mocking features during unit tests
-mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.18.0" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.23.0" }
+byte-buddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "bytebuddy" }
+byte-buddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.ref = "bytebuddy-agent" }
 
 
 [bundles]
@@ -217,13 +221,22 @@ handlebars = ["handlebars", "handlebars-helpers"]
 junit = ["junit-api", "junit-engine", "junit-params"]
 jai-imageio = ["jai-imageio-core", "jai-imageio-jpeg"]
 graalvm-js = ["graalvm-js", "graalvm-js-scriptengine"]
-gdx = ["gdx", "gdx-backend-lwjgl", "gdx-platform", "gdx-freetype", "gdx-freetype-platform",
-       "gdx-video", "gdx-video-lwjgl3", "libgdx-jogl-backend", "earlygrey-shapedrawer"]
+gdx = [
+  "gdx",
+  "gdx-backend-lwjgl",
+  "gdx-platform",
+  "gdx-freetype",
+  "gdx-freetype-platform",
+  "gdx-video",
+  "gdx-video-lwjgl3",
+  "libgdx-jogl-backend",
+  "earlygrey-shapedrawer",
+]
 
 [plugins]
 git-version = { id = "com.palantir.git-version", version = "4.0.0" }
 javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
 jpackage-runtime = { id = "org.beryx.runtime", version = "1.13.1" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
-shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
+shadow = { id = "com.gradleup.shadow", version = "9.4.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
