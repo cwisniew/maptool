@@ -306,7 +306,7 @@ public class AssetPanel extends JComponent {
           I18N.getString("panel.Asset.ImageModel.slider.toolTip"));
 
       thumbnailPreviewSlider.setUI(
-          new BasicSliderUI() {
+          new BasicSliderUI(thumbnailPreviewSlider) {
             @Override
             protected void scrollDueToClickInTrack(int direction) {
               int value = thumbnailPreviewSlider.getValue();

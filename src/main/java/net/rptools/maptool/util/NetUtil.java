@@ -213,7 +213,11 @@ public class NetUtil {
               }
             }
           }
-          ForkJoinPool.commonPool().invokeAll(tasks);
+          try {
+            ForkJoinPool.commonPool().invokeAll(tasks);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          }
 
           // Return addresses most reachable first
           v4Infos.sort(null);
