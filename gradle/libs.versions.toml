@@ -155,13 +155,12 @@ intellij-forms-runtime = { group = "com.jetbrains.intellij.java", name = "java-g
 miglayout-swing = { group = "com.miglayout", name = "miglayout-swing", version = "11.4.2" }
 
 gdx = { group = "com.badlogicgames.gdx", name = "gdx", version.ref = "gdx" }
-gdx-backend-lwjgl = { group = "com.badlogicgames.gdx", name = "gdx-backend-lwjgl", version.ref = "gdx" }
+gdx-backend-lwjgl3 = { group = "com.badlogicgames.gdx", name = "gdx-backend-lwjgl3", version.ref = "gdx" }
 gdx-platform = { group = "com.badlogicgames.gdx", name = "gdx-platform", version.ref = "gdx" }
 gdx-freetype = { group = "com.badlogicgames.gdx", name = "gdx-freetype", version.ref = "gdx" }
 gdx-freetype-platform = { group = "com.badlogicgames.gdx", name = "gdx-freetype-platform", version.ref = "gdx" }
 gdx-video = { group = "com.badlogicgames.gdx-video", name = "gdx-video", version = "1.3.3" }
 gdx-video-lwjgl3 = { group = "com.badlogicgames.gdx-video", name = "gdx-video-lwjgl3", version = "1.3.3" }
-libgdx-jogl-backend = { group = "com.github.thelsing", name = "libgdx-jogl-backend", version = "becdde406e" }
 earlygrey-shapedrawer = { group = "space.earlygrey", name = "shapedrawer", version = "2.6.0" }
 
 # RPTools libs
@@ -217,8 +216,8 @@ handlebars = ["handlebars", "handlebars-helpers"]
 junit = ["junit-api", "junit-engine", "junit-params"]
 jai-imageio = ["jai-imageio-core", "jai-imageio-jpeg"]
 graalvm-js = ["graalvm-js", "graalvm-js-scriptengine"]
-gdx = ["gdx", "gdx-backend-lwjgl", "gdx-platform", "gdx-freetype", "gdx-freetype-platform",
-       "gdx-video", "gdx-video-lwjgl3", "libgdx-jogl-backend", "earlygrey-shapedrawer"]
+gdx = ["gdx", "gdx-backend-lwjgl3", "gdx-platform", "gdx-freetype", "gdx-freetype-platform",
+       "gdx-video", "gdx-video-lwjgl3", "earlygrey-shapedrawer"]
 
 [plugins]
 git-version = { id = "com.palantir.git-version", version = "4.0.0" }
