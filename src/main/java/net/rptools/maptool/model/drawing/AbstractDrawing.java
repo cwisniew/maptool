@@ -15,6 +15,8 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.awt.*;
 import java.awt.image.ImageObserver;
 import net.rptools.maptool.client.MapTool;
@@ -46,8 +48,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
   }
 
   protected AbstractDrawing(AbstractDrawing other) {
-    // The only thing we don't preserve is the ID.
-    this.id = new GUID();
+    this.id = other.id;
     this.layer = other.layer;
     this.name = other.name;
   }
@@ -145,11 +146,20 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("name=").append(getName()).append(";");
-    sb.append("layer=").append(getLayer()).append(";");
-    sb.append("id=").append(getId()).append(";");
-    return sb.toString();
+    return "name=" + getName() + ";" + "layer=" + getLayer() + ";" + "id=" + getId() + ";";
+  }
+
+  public String toNonLocalisedString() {
+    return "name=" + getName() + ";" + "layer=" + getLayer().name() + ";" + "id=" + getId() + ";";
+  }
+
+  public JsonObject toJson() {
+    JsonObject jo = new JsonObject();
+    String nm = getName();
+    jo.add("name", new JsonPrimitive(nm == null ? "" : nm));
+    jo.add("layer", new JsonPrimitive(getLayer().name()));
+    jo.add("id", new JsonPrimitive(getId().toString()));
+    return jo;
   }
 
   ////

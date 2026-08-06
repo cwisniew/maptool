@@ -43,7 +43,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
@@ -611,11 +610,6 @@ public class Token implements Cloneable {
     } else {
       return height;
     }
-  }
-
-  public boolean isMarker() {
-    return getLayer().isMarkerLayer()
-        && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 
   public String getPropertyType() {

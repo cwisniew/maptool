@@ -191,6 +191,7 @@ public class AppMenuBar extends JMenuBar {
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LINK_PLAYER_VIEW, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_MOVEMENT_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_TOKEN_EDITOR_LOCK, menu));
+    menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_TOKEN_CONTEXT_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ZOOM_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ENFORCE_NOTIFICATION, menu));
 

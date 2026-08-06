@@ -58,9 +58,9 @@ public class StatSheetListener {
         var token = event.token();
         if (MapTool.getPlayer().isGM()
             || AppUtil.playerOwns(token)
-            || token.getType() != Type.NPC) {
+            || token.getType() == Type.NPC) {
           statSheet.setContent(
-              event.token(),
+              event,
               ssManager.getStatSheetContent(ssId),
               ssRecord.entry(),
               ssProperties.location());

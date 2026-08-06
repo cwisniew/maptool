@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
@@ -48,7 +47,7 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  *
  * @formatter:on
  */
-public class HexGridHorizontal extends HexGrid {
+public final class HexGridHorizontal extends HexGrid {
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       (originPoint, offsetPoint) -> {
         if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
@@ -245,11 +244,6 @@ public class HexGridHorizontal extends HexGrid {
     at.rotate(Math.toRadians(90.0));
     at.scale(1, -1);
     hex.transform(at);
-  }
-
-  @Override
-  protected void setGridDrawTranslation(Graphics2D g, double U, double V) {
-    g.translate(V, U);
   }
 
   @Override

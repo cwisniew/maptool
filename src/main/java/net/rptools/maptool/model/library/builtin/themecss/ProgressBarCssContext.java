@@ -14,17 +14,19 @@
  */
 package net.rptools.maptool.model.library.builtin.themecss;
 
-import java.awt.Color;
 import java.util.function.Function;
 import javax.swing.UIDefaults;
 
-public class ProgressBarCSSContext {
+public class ProgressBarCssContext {
 
   /** The progress bar arc. */
   private final int arc;
 
   /** The progress bar background color. */
   private final String backgroundColor;
+
+  /** The progress bar foreground color. */
+  private final String foregroundColor;
 
   /** The progress bar font family. */
   private final String fontFamily;
@@ -33,14 +35,15 @@ public class ProgressBarCSSContext {
   private final String fontSize;
 
   /**
-   * Creates a new instance of the theme CSS context.
+   * Creates a new instance of the progress bar CSS context.
    *
-   * @param uiDef the UI defaults to use.
-   * @param formatColor the function to use to format colors.
+   * @param uiDef The UI defaults to use.
+   * @param getColorOrBlank The function to use to convert the color key into a string color format
    */
-  public ProgressBarCSSContext(UIDefaults uiDef, Function<Color, String> formatColor) {
+  public ProgressBarCssContext(UIDefaults uiDef, Function<String, String> getColorOrBlank) {
     arc = uiDef.getInt("ProgressBar.arc");
-    backgroundColor = formatColor.apply(uiDef.getColor("ProgressBar.background"));
+    backgroundColor = getColorOrBlank.apply("ProgressBar.background");
+    foregroundColor = getColorOrBlank.apply("ProgressBar.foreground");
     fontFamily = uiDef.getFont("ProgressBar.font").getFamily();
     fontSize = uiDef.getFont("ProgressBar.font").getSize() + "px";
   }
@@ -54,17 +57,38 @@ public class ProgressBarCSSContext {
     return arc;
   }
 
-  /** Gets the progress bar background color. */
+  /**
+   * Gets the progress bar background color.
+   *
+   * @return The progress bar background color.
+   */
   public String getBackgroundColor() {
     return backgroundColor;
   }
 
-  /** Gets the progress bar font family. */
+  /**
+   * Gets the progress bar foreground color.
+   *
+   * @return The progress bar foreground color.
+   */
+  public String getForegroundColor() {
+    return foregroundColor;
+  }
+
+  /**
+   * Gets the progress bar font family.
+   *
+   * @return The progress bar font family.
+   */
   public String getFontFamily() {
     return fontFamily;
   }
 
-  /** Gets the progress bar font size. */
+  /**
+   * Gets the progress bar font size.
+   *
+   * @return The progress bar font size.
+   */
   public String getFontSize() {
     return fontSize;
   }

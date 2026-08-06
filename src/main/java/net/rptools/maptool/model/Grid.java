@@ -30,7 +30,6 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -197,10 +196,6 @@ public abstract class Grid implements Cloneable {
           "gridShape {} is not singular, this is unexpected and could affect performance.",
           gridRadius);
     }
-  }
-
-  public void drawCoordinatesOverlay(Graphics2D g, ZoneRenderer renderer) {
-    // Do nothing -- my default
   }
 
   /**
@@ -376,10 +371,6 @@ public abstract class Grid implements Cloneable {
   }
 
   public abstract GridCapabilities getCapabilities();
-
-  public int getTokenSpace() {
-    return getSize();
-  }
 
   public double getCellWidth() {
     return 0;
@@ -714,17 +705,6 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
-   * Draws the grid scaled to the renderer's scale and within the renderer's boundaries.
-   *
-   * @param renderer the {@link ZoneRenderer} that represents the screen view.
-   * @param g the {@link Graphics2D} class used for drawing.
-   * @param bounds the bounds of the drawing area.
-   */
-  public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    // Do nothing
-  }
-
-  /**
    * Returns a rectangle of pixels bounding the CellPoint, taking into account the grid offset.
    *
    * @param cp the CellPoint to bound.
@@ -1041,18 +1021,6 @@ public abstract class Grid implements Cloneable {
     }
 
     return gridArea;
-  }
-
-  /**
-   * Generates a set of {@link Point} used to create a grid area that only includes the outer most
-   * edge of cells
-   *
-   * @param radius The maximum radius to generate the ring of cell points for this range
-   * @return a {@link HashSet} that includes all cells that only equal in distance to the given
-   *     radius
-   */
-  protected Set<Point> generateRing(int radius) {
-    return generateRadius(radius, radius);
   }
 
   /**

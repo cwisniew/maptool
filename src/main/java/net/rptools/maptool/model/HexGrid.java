@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -28,13 +24,9 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.HexGridDto;
 
@@ -233,17 +225,6 @@ public abstract class HexGrid extends Grid {
     // edgeProjection = (diameter - edgeLength) / 2
   }
 
-  public GeneralPath createHalfShape(double minorRadius, double edgeProjection, double edgeLength) {
-    GeneralPath hex = new GeneralPath();
-    hex.moveTo(0, minorRadius);
-    hex.lineTo(edgeProjection, 0);
-    hex.lineTo(edgeProjection + edgeLength, 0);
-    hex.lineTo(edgeProjection + edgeLength + edgeProjection, minorRadius);
-
-    orientHex(hex);
-    return hex;
-  }
-
   @Override
   public boolean validateMove(
       Token token, Rectangle areaToCheck, int dirx, int diry, Area exposedFog) {
@@ -331,13 +312,6 @@ public abstract class HexGrid extends Grid {
     return GRID_CAPABILITIES;
   }
 
-  @Override
-  public int getTokenSpace() {
-    return (int) (getVRadius() * 2);
-  }
-
-  protected abstract void setGridDrawTranslation(Graphics2D g, double u, double v);
-
   public abstract double getSizeU(Dimension2D size);
 
   public abstract double getSizeV(Dimension2D size);
@@ -345,43 +319,6 @@ public abstract class HexGrid extends Grid {
   public abstract int getOffV(Scale scale);
 
   public abstract int getOffU(Scale scale);
-
-  @Override
-  public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    var zoneScale = renderer.getViewModel().getZoneScale();
-    var scale = zoneScale.getScale();
-    var scaledMinorRadius = minorRadius * scale;
-    var scaledEdgeLength = edgeLength * scale;
-    var scaledEdgeProjection = edgeProjection * scale;
-    var scaledHex = createHalfShape(scaledMinorRadius, scaledEdgeProjection, scaledEdgeLength);
-
-    int offU = getOffU(zoneScale);
-    int offV = getOffV(zoneScale);
-    int count = 0;
-
-    Object oldAntiAlias = SwingUtil.useAntiAliasing(g);
-    g.setColor(new Color(getZone().getGridColor()));
-    g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
-
-    for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
-        v < getSizeV(renderer.getSize());
-        v += scaledMinorRadius) {
-      double offsetU = (int) ((count & 1) == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
-      count++;
-
-      double start =
-          offU % (2 * scaledEdgeLength + 2 * scaledEdgeProjection)
-              - (2 * scaledEdgeLength + 2 * scaledEdgeProjection);
-      double end = getSizeU(renderer.getSize()) + 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
-      double incr = 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
-      for (double u = start; u < end; u += incr) {
-        setGridDrawTranslation(g, u + offsetU, v);
-        GridRenderer.drawGridShape(g, scaledHex);
-        setGridDrawTranslation(g, -(u + offsetU), -v);
-      }
-    }
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntiAlias);
-  }
 
   /**
    * Generic form of getOffsetX for ease of transforming to other grid orientations.

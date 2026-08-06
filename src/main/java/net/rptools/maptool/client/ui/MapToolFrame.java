@@ -411,7 +411,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     currentRenderPanel = zoneRendererPanel;
 
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
-    zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
     commandPanel = new CommandPanel();
 
@@ -422,6 +421,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
     overlayPanel.setVisible(false); // disabled by default
+
+    // chat action label should be above overlays, otherwise unclickable when overlays visible
+    zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW, 0);
 
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
@@ -1399,6 +1401,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
                       }
                     }
                     if (!selectedTokenSet.isEmpty()) {
+                      if (!MapTool.getPlayer().isGM()
+                          && MapTool.getServerPolicy().isTokenContextLocked()) {
+                        return;
+                      }
                       try {
                         if (firstToken.getLayer().isStampLayer()) {
                           new StampPopupMenu(
@@ -1699,8 +1705,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       zoneRendererPanel.remove(currentRenderer);
     }
     if (renderer != null) {
-      zoneRendererPanel.add(
-          renderer, PositionalLayout.Position.CENTER, zoneRendererPanel.getComponentCount() - 2);
+      zoneRendererPanel.add(renderer, PositionalLayout.Position.CENTER);
       zoneRendererPanel.doLayout();
     }
     currentRenderer = renderer;
@@ -1975,6 +1980,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     setJMenuBar(menuBar);
     menuBar.setVisible(true);
     this.setVisible(true);
+
+    // hide the chat action label if the chat window is already visible in windowed mode
+    if (chatActionLabel.isShowing() && isCommandPanelVisible()) {
+      chatActionLabel.setVisible(false);
+    }
 
     fullScreenFrame.dispose();
     fullScreenFrame = null;

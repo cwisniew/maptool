@@ -31,6 +31,7 @@ message ServerPolicyDto {
   bool vbl_blocks_move = 15;
   bool hide_map_select_ui = 16;
   bool lock_player_library = 17;
+  bool is_token_context_locked = 18;
 }
 
 message CampaignDto {

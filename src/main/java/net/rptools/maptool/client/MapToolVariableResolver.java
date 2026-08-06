@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.JOptionPane;
 import net.rptools.CaseInsensitiveHashMap;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
@@ -272,12 +273,12 @@ public class MapToolVariableResolver implements VariableResolver {
     if ((result == null && autoPrompt) || mods == VariableModifiers.Prompt) {
       String DialogTitle = I18N.getText("lineParser.dialogTitleNoToken");
       if (tokenInContext != null
-          && tokenInContext.getGMName() != null
+          && !StringUtil.isEmpty(tokenInContext.getGMName())
           && MapTool.getPlayer().isGM()) {
         DialogTitle = I18N.getText("lineParser.dialogTitle", tokenInContext.getGMName());
       }
       if (tokenInContext != null
-          && (tokenInContext.getGMName() == null || !MapTool.getPlayer().isGM())) {
+          && (StringUtil.isEmpty(tokenInContext.getGMName()) || !MapTool.getPlayer().isGM())) {
         DialogTitle = I18N.getText("lineParser.dialogTitle", tokenInContext.getName());
       }
       result =

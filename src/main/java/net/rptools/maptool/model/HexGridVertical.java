@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -49,7 +48,7 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  *
  * @formatter:on
  */
-public class HexGridVertical extends HexGrid {
+public final class HexGridVertical extends HexGrid {
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       (originPoint, offsetPoint) -> {
         if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
@@ -231,11 +230,6 @@ public class HexGridVertical extends HexGrid {
   @Override
   public ZoneWalker createZoneWalker() {
     return new AStarVertHexEuclideanWalker(getZone());
-  }
-
-  @Override
-  protected void setGridDrawTranslation(Graphics2D g, double U, double V) {
-    g.translate(U, V);
   }
 
   @Override
